@@ -1,0 +1,36 @@
+- platform: tautulli
+  api_key: 9e60cd23dbdd4918907de3c62b4a6b87
+  host: 10.0.0.200
+  port: 8181
+- platform: template
+  sensors:
+    trafficmeter:
+      friendly_name: "Monthly Internet Usage"
+      unit_of_measurement: "GB"
+      value_template: '{{ states("input_number.trafficmeter_usage")|float}}'
+      icon_template: hass:cable-data
+    trafficmeter_pct:
+      friendly_name: "Monthly Internet Usage %"
+      unit_of_measurement: "%"
+      value_template: '{{ states("input_number.trafficmeter_percent")|float}}'
+      icon_template: hass:percent
+    trash_pickup:
+        friendly_name: Trash Pickup
+        value_template: >
+          {% set pickup = states.input_text.trash_pickup_date.state %}
+          {{ pickup }}
+        attribute_templates:
+          proximity: >
+            {{ states.input_number.trash_daystil.state }}
+          type: >
+            {% if states.input_boolean.trash_recycling.state == 'on' %}
+              Trash & Recycling
+            {% else %}
+              Trash Only
+            {% endif %}
+        icon_template: >
+          {% if states.input_boolean.trash_recycling.state == 'on' %}
+            mdi:recycle
+          {% else %}
+            mdi:delete
+          {% endif %}

@@ -1,0 +1,418 @@
+title: Home
+button_card_templates:
+  shortcut:
+    style: 'ha-card { height: 100%; }'
+    show_state: false
+    size: 40%
+    styles:
+      card:
+        - background-color: '#4b4f52'
+      name:
+        - font-size: small
+      icon:
+        - margin-bottom: 10px
+  sensor:
+    style: 'ha-card { height: 100%; }'
+    layout: icon_name_state2nd
+    styles:
+      grid:
+        - grid-template-columns: 30% 1fr
+      name:
+        - font-size: medium
+        - text-align: left
+        - width: 100%
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: small
+        - text-align: left
+        - width: 100%
+      label:
+        - font-size: small
+        - text-align: left
+        - width: 100%
+  sensoralert:
+    template: sensor
+    state:
+      - value: 'on'
+        id: sensoralert_active
+        styles:
+          card:
+            - background-color: var(--label-badge-red)
+          icon:
+            - color: white
+  lights_main:
+    style: 'ha-card { height: 100%; }'
+    show_state: false
+    size: 40%
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+    state:
+      - value: 'on'
+        id: light_on
+        styles:
+          card:
+            - background-color: var(--accent-color)
+          icon:
+            - color: var(--primary-text-color)
+      - value: 'off'
+        id: light_off
+        styles:
+          card:
+            - background-color: '#4b4f52'
+          icon:
+            - opacity: 0.5
+    styles:
+      name:
+        - font-size: small
+      icon:
+        - margin-bottom: 10px
+  lights:
+    template: lights_main
+    state:
+      - value: 'on'
+        id: light_on
+        icon: 'mdi:dots-horizontal-circle'
+      - value: 'off'
+        id: light_off
+        icon: 'mdi:dots-horizontal-circle-outline'
+  lights_onoff:
+    template: lights_main
+    hold_action:
+      action: none
+    state:
+      - value: 'on'
+        id: light_on
+        icon: 'mdi:circle'
+      - value: 'off'
+        id: light_off
+        icon: 'mdi:circle-outline'
+views:
+  - title: Home
+    path: tablet
+    icon: 'hass:home'
+    theme: dawson
+    panel: true
+    badges: []
+    cards:
+      - type: 'custom:layout-card'
+        layout: grid
+        gridrows: auto
+        gridcols: 100%
+        gridgap: 4px
+        cards:
+          - type: 'custom:layout-card'
+            layout: grid
+            gridrows: auto
+            gridcols: 55% 20% 25%
+            gridgap: 0
+            cards:
+              - type: weather-forecast
+                entity: weather.ecobee3
+                show_forecast: false
+                name: 'Aurora, CO'
+                style: '.icon-image {min-width: unset; max-width: 40px;}'
+              - type: sensor
+                entity: sensor.ecobee3_temperature
+                name: Inside
+              - type: vertical-stack
+                cards:
+                  - type: 'custom:button-card'
+                    entity: sensor.u_s_air_pollution_level
+                    template: sensor
+                    name: Air Quality
+                    show_state: true
+                    styles:
+                      name:
+                        - font-size: medium
+                        - text-align: left
+                        - width: 100%
+                        - color: var(--secondary-text-color)
+                        - font-weight: 500
+                        - white-space: normal
+                      state:
+                        - font-size: small
+                        - text-align: left
+                        - width: 100%
+                    state:
+                      - value: Good
+                        styles:
+                          icon:
+                            - color: var(--label-badge-green)
+                      - value: Moderate
+                        icon: 'mdi:emoticon-neutral'
+                        styles:
+                          icon:
+                            - color: '#fdd64b'
+                      - value: Unhealthy
+                        icon: 'mdi:emoticon-sad'
+                        styles:
+                          icon:
+                            - color: '#eb0c27'
+                      - value: Very Unhealthy
+                        icon: 'mdi:emoticon-frown'
+                        styles:
+                          icon:
+                            - color: '#a070b6'
+                      - value: Hazardous
+                        icon: 'mdi:emoticon-dead'
+                        styles:
+                          icon:
+                            - color: '#860f30'
+                  - type: 'custom:button-card'
+                    template: sensor
+                    show_state: false
+                    show_label: true
+                    entity: climate.ecobee3
+                    name: Heat
+                    styles:
+                      icon:
+                        - opacity: 0.5
+                    state:
+                      - value: heat
+                        icon: 'mdi:fire'
+                        label: 'On'
+                        styles:
+                          icon:
+                            - color: var(--label-badge-red)
+                            - opacity: 1
+                          label:
+                            - color: var(--label-badge-red)
+                            - font-weight: 500
+          - type: 'custom:layout-card'
+            layout: grid
+            gridrows: auto auto auto
+            gridcols: 'repeat(8, 12.5%)'
+            gridgap: 0
+            cards:
+              - type: 'custom:button-card'
+                entity: switch.bar_light
+                template: lights_onoff
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: group.den_lights
+                template: lights
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: light.den_light_1
+                template: lights
+              - type: 'custom:button-card'
+                entity: light.den_light_2
+                template: lights
+              - type: 'custom:button-card'
+                entity: light.living_room_light
+                template: lights
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: light.dining_room_light
+                template: lights
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: switch.entryway_light
+                template: lights_onoff
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: switch.porch_light
+                template: lights_onoff
+                gridcol: span 2
+              - type: 'custom:button-card'
+                entity: switch.deck_light
+                template: lights_onoff
+                gridcol: span 2
+          - type: 'custom:layout-card'
+            layout: grid
+            gridrows: min-content min-content auto auto
+            gridcols: 'repeat(5, 20%)'
+            gridgap: 0
+            cards:
+              - type: 'custom:button-card'
+                gridcol: span 2
+                entity: input_boolean.washing_machine
+                template: sensor
+                show_state: false
+                show_label: true
+                name: Washing Machine
+                tap_action:
+                  action: more-info
+                  entity: sensor.washing_machine_outlet_power
+                state:
+                  - value: 'on'
+                    label: Running
+                    styles:
+                      card:
+                        - background-color: var(--accent-color)
+                      name:
+                        - color: white
+                      icon:
+                        - color: white
+                  - value: 'off'
+                    label: Inactive
+              - type: 'custom:button-card'
+                entity: binary_sensor.washer_leak_sensor
+                name: Leak
+                template: sensoralert
+                show_state: true
+                state:
+                  - value: 'on'
+                    id: sensoralert_active
+                    icon: 'mdi:alert'
+                    styles:
+                      card:
+                        - animation: blink 2s ease-in-out infinite
+                  - value: 'off'
+                    styles:
+                      icon:
+                        - opacity: 0.5
+              - type: 'custom:button-card'
+                entity: binary_sensor.chest_freezer
+                name: Freezer
+                template: sensoralert
+                show_state: true
+                state:
+                  - value: 'on'
+                    icon: 'mdi:snowflake-alert'
+                    styles:
+                      card:
+                        - background-color: var(--accent-color)
+                      name:
+                        - color: white
+                      icon:
+                        - color: white
+                  - value: 'off'
+              - type: 'custom:button-card'
+                entity: binary_sensor.garage_door_sensor
+                name: Garage
+                template: sensor
+                show_state: true
+                state:
+                  - value: 'on'
+                    icon: 'mdi:garage-open'
+                    styles:
+                      card:
+                        - background-color: var(--accent-color)
+                      name:
+                        - color: white
+                      icon:
+                        - color: white
+                  - value: 'off'
+                    icon: 'mdi:garage'
+              - type: 'custom:button-card'
+                gridcol: span 2
+                entity: sensor.trash_pickup
+                template: sensor
+                name: '[[[ return entity.attributes.type ]]]'
+                icon: '[[[ return entity.attributes.icon ]]]'
+                show_state: true
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - border: 2px solid transparent
+                  name:
+                    - font-size: medium
+                    - text-align: left
+                    - width: 100%
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: small
+                    - text-align: left
+                    - width: 100%
+                state:
+                  - value: Today
+                    styles:
+                      icon:
+                        - filter: opacity(1.0)
+                        - color: var(--label-badge-red)
+                      card:
+                        - border-color: var(--label-badge-red)
+                      state:
+                        - color: var(--label-badge-red)
+                        - font-weight: 500
+                  - value: Tomorrow
+                    styles:
+                      icon:
+                        - filter: opacity(1.0)
+                        - color: var(--accent-color)
+                      card:
+                        - border-color: var(--accent-color)
+                      state:
+                        - color: var(--accent-color)
+                        - font-weight: 500
+              - type: 'custom:swipe-card'
+                style: 'ha-card { height: 100%; }'
+                parameters:
+                  effect: coverflow
+                  coverflowEffect:
+                    rotate: 50
+                    stretch: 0
+                    depth: 100
+                    modifier: 1
+                    slideShadows: true
+                  grabCursor: true
+                  centeredSlides: true
+                  slidesPerView: auto
+                cards:
+                  - type: sensor
+                    entity: sensor.trafficmeter_pct
+                    style: >-
+                      .name {overflow: unset !important; min-width: min-content;
+                      line-height: unset !important;} .icon {display: none;}
+                      .value { font-size: small !important; } .measurement
+                      {font-size: x-small !important;} .info {padding-bottom:
+                      8px !important;}
+                    name: Data Cap
+                  - type: sensor
+                    entity: sensor.trafficmeter
+                    style: >-
+                      .name {overflow: unset !important; min-width: min-content;
+                      line-height: unset !important;} .icon {display: none;}
+                      .value { font-size: small !important; } .measurement
+                      {font-size: x-small !important;} .info {padding-bottom:
+                      8px !important;}
+                    name: Data Used
+              - type: 'custom:swipe-card'
+                style: 'ha-card { height: 100%; }'
+                parameters:
+                  effect: coverflow
+                  coverflowEffect:
+                    rotate: 50
+                    stretch: 0
+                    depth: 100
+                    modifier: 1
+                    slideShadows: true
+                  grabCursor: true
+                  centeredSlides: true
+                  slidesPerView: auto
+                cards:
+                  - type: sensor
+                    entity: sensor.speedtest_download
+                    style: >-
+                      ha-card{height: 100%;} .name {overflow: unset !important;
+                      min-width: min-content; line-height: unset !important;}
+                      .icon {display: none;} .value { font-size: small
+                      !important; } .measurement {font-size: x-small
+                      !important;} .info {padding-bottom: 8px !important;}
+                    name: Down
+                    unit: MB/s
+                  - type: sensor
+                    entity: sensor.speedtest_upload
+                    style: >-
+                      .name {overflow: unset !important; min-width: min-content;
+                      line-height: unset !important;} .icon {display: none;}
+                      .value { font-size: small !important; } .measurement
+                      {font-size: x-small !important;} .info {padding-bottom:
+                      8px !important;}
+                    name: Up
+                    unit: MB/s
+  - title: test
+    path: test
+    theme: dawson
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    badges: []
+    cards:
+      - type: entity
+        entity: sensor.fibaro_motion_luminance
+      - type: entity
+        entity: sensor.fibaro_motion_general

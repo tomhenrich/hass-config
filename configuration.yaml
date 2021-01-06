@@ -1,0 +1,53 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+homeassistant:
+  customize: !include customize.yaml
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+device_tracker: !include device_tracker.yaml
+sensor: !include sensors.yaml
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+panel_custom:
+  - name: zwave-graph-panel
+    url_path: zwave-graph
+    sidebar_title: Z-Wave Graph
+    sidebar_icon: mdi:z-wave
+    module_url: /local/zwavegraph3.js
+    config:
+      # ranker - pick one: network-simplex, tight-tree, longest-path
+      ranker: network-simplex
+      # edge_visibility - pick one: relevant, all
+      edge_visibility: relevant
+      # grouping - pick one: z-wave, ungrouped
+      grouping: z-wave
+
+
+binary_sensor:
+- platform: bayesian
+  device_class: 'presence'
+  prior: 0.5
+  name: 'Tom Presence'
+  probability_threshold: 0.6
+  observations:
+    - entity_id: 'device_tracker.chasm'
+      prob_given_true: 0.9
+      prob_given_false: 0.1
+      platform: 'state'
+      to_state: 'home'
+    - entity_id: 'device_tracker.keys'
+      prob_given_true: 0.6
+      prob_given_false: 0.2
+      platform: 'state'
+      to_state: 'home'
