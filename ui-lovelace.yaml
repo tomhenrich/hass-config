@@ -119,67 +119,84 @@ views:
               - type: vertical-stack
                 cards:
                   - type: 'custom:button-card'
-                    entity: sensor.u_s_air_pollution_level
                     template: sensor
-                    name: Air Quality
-                    show_state: true
+                    show_state: false
+                    show_label: true
+                    show_icon: false
+                    entity: climate.ecobee3
+                    name: Heat
+                    label: |
+                      [[[
+                        if( entity.state == "off" )
+                          return "Off";
+                        else
+                          if( entity.attributes.hvac_action == "heating" )
+                            return "Running";
+                          else
+                            return "On, Idle"
+                      ]]]
                     styles:
-                      name:
-                        - font-size: medium
-                        - text-align: left
-                        - width: 100%
-                        - color: var(--secondary-text-color)
-                        - font-weight: 500
-                        - white-space: normal
-                      state:
-                        - font-size: small
-                        - text-align: left
-                        - width: 100%
+                      grid:
+                        - grid-template-columns: 10px 1fr
+                      card:
+                        - border-bottom: 2px solid transparent
                     state:
-                      - value: Good
+                      - operator: template
+                        value: >
+                          [[[ return entity.attributes.hvac_action === "idle"
+                          ]]]
                         styles:
-                          icon:
-                            - color: var(--label-badge-green)
-                      - value: Moderate
-                        icon: 'mdi:emoticon-neutral'
+                          card:
+                            - border-color: var(--disabled-text-color)
+                      - operator: template
+                        value: >
+                          [[[ return entity.attributes.hvac_action === "heating"
+                          ]]]
                         styles:
-                          icon:
-                            - color: '#fdd64b'
-                      - value: Unhealthy
-                        icon: 'mdi:emoticon-sad'
-                        styles:
-                          icon:
-                            - color: '#eb0c27'
-                      - value: Very Unhealthy
-                        icon: 'mdi:emoticon-frown'
-                        styles:
-                          icon:
-                            - color: '#a070b6'
-                      - value: Hazardous
-                        icon: 'mdi:emoticon-dead'
-                        styles:
-                          icon:
-                            - color: '#860f30'
+                          card:
+                            - border-color: var(--label-badge-red)
                   - type: 'custom:button-card'
                     template: sensor
                     show_state: false
                     show_label: true
-                    entity: climate.ecobee3
-                    name: Heat
+                    show_icon: false
+                    entity: sensor.airquality
+                    tap_action: none
+                    name: Air Quality
+                    label: |
+                      [[[
+                        return entity.state + ' <span class="aqi">' + entity.attributes.AQI + '</span>';
+                      ]]]
+                    style: >-
+                      .aqi { display: inline-block; padding: 4px; background:
+                      grey; font-size: x-small; line-height: 1; border-radius:
+                      6px; }
                     styles:
-                      icon:
-                        - opacity: 0.5
+                      grid:
+                        - grid-template-columns: 10px 1fr
+                      card:
+                        - border-bottom: 2px solid transparent
                     state:
-                      - value: heat
-                        icon: 'mdi:fire'
-                        label: 'On'
+                      - value: Good
                         styles:
-                          icon:
-                            - color: var(--label-badge-red)
-                            - opacity: 1
-                          label:
-                            - color: var(--label-badge-red)
-                            - font-weight: 500
+                          card:
+                            - border-color: var(--label-badge-green)
+                      - value: Moderate
+                        styles:
+                          card:
+                            - border-color: '#fdd64b'
+                      - value: Unhealthy
+                        styles:
+                          card:
+                            - border-color: '#eb0c27'
+                      - value: Very Unhealthy
+                        styles:
+                          card:
+                            - border-color: '#a070b6'
+                      - value: Hazardous
+                        styles:
+                          card:
+                            - background: '#860f30'
           - type: 'custom:layout-card'
             layout: grid
             gridrows: auto auto auto
@@ -308,7 +325,7 @@ views:
                   action: none
                 styles:
                   card:
-                    - border: 2px solid transparent
+                    - border-bottom: 2px solid transparent
                   name:
                     - font-size: medium
                     - text-align: left
@@ -355,12 +372,11 @@ views:
                 cards:
                   - type: sensor
                     entity: sensor.trafficmeter_pct
-                    style: >-
+                    style: |-
                       .name {overflow: unset !important; min-width: min-content;
-                      line-height: unset !important;} .icon {display: none;}
-                      .value { font-size: small !important; } .measurement
-                      {font-size: x-small !important;} .info {padding-bottom:
-                      8px !important;}
+                       line-height: unset !important;} .icon {display: none;} .value {
+                       font-size: small !important; } .measurement {font-size: x-small
+                      !important;} .info {padding-bottom: 8px !important;}
                     name: Data Cap
                   - type: sensor
                     entity: sensor.trafficmeter
@@ -371,40 +387,6 @@ views:
                       {font-size: x-small !important;} .info {padding-bottom:
                       8px !important;}
                     name: Data Used
-              - type: 'custom:swipe-card'
-                style: 'ha-card { height: 100%; }'
-                parameters:
-                  effect: coverflow
-                  coverflowEffect:
-                    rotate: 50
-                    stretch: 0
-                    depth: 100
-                    modifier: 1
-                    slideShadows: true
-                  grabCursor: true
-                  centeredSlides: true
-                  slidesPerView: auto
-                cards:
-                  - type: sensor
-                    entity: sensor.speedtest_download
-                    style: >-
-                      ha-card{height: 100%;} .name {overflow: unset !important;
-                      min-width: min-content; line-height: unset !important;}
-                      .icon {display: none;} .value { font-size: small
-                      !important; } .measurement {font-size: x-small
-                      !important;} .info {padding-bottom: 8px !important;}
-                    name: Down
-                    unit: MB/s
-                  - type: sensor
-                    entity: sensor.speedtest_upload
-                    style: >-
-                      .name {overflow: unset !important; min-width: min-content;
-                      line-height: unset !important;} .icon {display: none;}
-                      .value { font-size: small !important; } .measurement
-                      {font-size: x-small !important;} .info {padding-bottom:
-                      8px !important;}
-                    name: Up
-                    unit: MB/s
   - title: test
     path: test
     theme: dawson
@@ -412,7 +394,8 @@ views:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
     badges: []
     cards:
-      - type: entity
-        entity: sensor.fibaro_motion_luminance
-      - type: entity
-        entity: sensor.fibaro_motion_general
+      - type: entities
+        entities:
+          - entity: sensor.fibaro_motion_temperature
+          - entity: sensor.fibaro_motion_luminance
+          - entity: binary_sensor.fibaro_motion_sensor
