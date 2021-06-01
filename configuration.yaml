@@ -5,6 +5,8 @@ default_config:
 homeassistant:
   customize: !include customize.yaml
 
+cloud:
+
 # Text to speech
 tts:
   - platform: google_translate
