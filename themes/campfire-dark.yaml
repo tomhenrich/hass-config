@@ -1,0 +1,63 @@
+Campfire - Dark:
+  ### CAMPFIRE ###
+  color-midnight: "#0A0A0A"
+  color-coal: "#1F1F1E"
+  color-charcoal: "#484747"
+  color-cinder: "#868583"
+  color-ash: "#C2C2C1"
+  color-smoke: "#F5F5F5"
+  color-marshmallow: "#FFF"
+  color-water: "#015aff"
+  color-blaze: "#BF0404"
+  color-safety: "#F2D43D"
+  color-success: "#53a653"
+  color-alert: "#eab700"
+  color-error: "#931621"
+  color-info: "#46237a"
+  color-dusk: "#043a5a"
+  color-pumpkin: "#f08800"
+  ### Main Interface Colors ###
+  primary-color: var(--color-ash)
+  light-primary-color: var(--color-marshmallow)
+  primary-background-color: var(--color-midnight)
+  secondary-background-color: var(--color-charcoal)
+  accent-color: var(--color-water)
+  divider-color: var(--color-cinder)
+  card-background-color: var(--color-coal)
+  ha-card-background: var(--card-background-color)
+  ### Text ###
+  primary-text-color: var(--color-smoke)
+  secondary-text-color: var(--color-ash)
+  text-primary-color: var(--color-ash)
+  disabled-text-color: var(--color-cinder)
+  ### Sidebar Menu ###
+  sidebar-icon-color: var(--color-pumpkin)
+  sidebar-text-color: var(--color-pumpkin)
+  sidebar-selected-background-color: var(--color-blaze)
+  sidebar-selected-icon-color: var(--color-marshmallow)
+  sidebar-selected-text-color: var(--color-marshmallow)
+  ### States and Badges ###
+  state-icon-color: var(--color-smoke)
+  state-icon-active-color: var(--color-water)
+  state-icon-unavailable-color: var(--disabled-text-color)
+  ### Sliders ###
+  paper-slider-knob-color: var(--color-water)
+  paper-slider-knob-start-color: var(--paper-slider-knob-color)
+  paper-slider-pin-color: var(--paper-slider-knob-color)
+  paper-slider-active-color: var(--paper-slider-knob-color)
+  paper-slider-secondary-color: var(--light-primary-color)
+  ### Labels ###
+  label-badge-background-color: var(--color-charcoal)
+  label-badge-text-color: var(--color-marshmallow)
+  label-badge-red: var(--color-blaze)
+  ### Cards ###
+  paper-card-background-color: var(--color-midnight)
+  paper-listbox-background-color: var(--color-midnight)
+  ### Toggles ###
+  paper-toggle-button-checked-button-color: var(--color-water)
+  paper-toggle-button-checked-bar-color: var(--color-water)
+  paper-toggle-button-unchecked-button-color: var(--color-water)
+  paper-toggle-button-unchecked-bar-color: var(--color-water)
+  ### Table row ###
+  table-row-background-color: var(--primary-background-color)
+  table-row-alternative-background-color: var(--secondary-background-color)
