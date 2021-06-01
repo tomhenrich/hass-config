@@ -1,0 +1,18 @@
+- platform: template
+  sensors:
+    laundry_washer:
+      friendly_name: "Washing Machine"
+      icon_template: 'mdi:washing-machine'
+      delay_off:
+        minutes: 3
+      delay_on:
+        minutes: 2
+      value_template: >-
+        {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
+    laundry_dryer:
+      friendly_name: "Clothes Dryer"
+      icon_template: 'mdi:tumble-dryer'
+      delay_off:
+        minutes: 2
+      value_template: >-
+        {{ states('sensor.dryer_sensor_temperature')|float > 75 }}
