@@ -1,4 +1,27 @@
 - platform: rest
+  resource: !secret my_trashpickup_url
+  name: "Trash Service"
+  scan_interval: 3600
+  json_attributes:
+    - date
+    - desc
+    - type
+    - prox
+    - when
+  value_template: "{{ value_json.desc }}"
+
+- platform: rest
+  resource: !secret my_datausage_url
+  name: "Monthly Data Usage"
+  scan_interval: 3600
+  json_attributes:
+    - used
+    - per
+    - upd
+  value_template: "{{ value_json.used }}"
+  unit_of_measurement: "GB"
+
+- platform: rest
   resource: !secret my_airquality_url
   name: "AQI Report"
   scan_interval: 3600
@@ -7,19 +30,40 @@
     - desc
     - upd
     - fetched
-- platform: rest
-  name: owm_report
-  json_attributes:
-    - current
-    - tomorrow
-  value_template: '{{ value_json["current"]["cond"] }}'
-  resource: !secret my_weather_url
+
 - platform: tautulli
   api_key: !secret tautulli_token
   host: !secret tautulli_host
   port: 8181
+
 - platform: template
   sensors:
+    trashday:
+        friendly_name: Trash Pickup
+        value_template: >
+          {{ state_attr('sensor.trash_service','when') }}
+        attribute_templates:
+          type: >
+            {{ state_attr('sensor.trash_service','desc') }}
+          proximity: >
+            {{ state_attr('sensor.trash_service','prox') }}
+        icon_template: >
+          {% if state_attr('sensor.trash_service','type') == 'both' %}
+            mdi:recycle
+          {% else %}
+            mdi:delete
+          {% endif %}
+
+    monthly_data_cap:
+        friendly_name: Data Cap Usage
+        value_template: >
+          {{ state_attr('sensor.monthly_data_usage','used') }}
+        unit_of_measurement: "%"
+        attribute_templates:
+          updated: >
+            {{ state_attr('sensor.monthly_data_usage','upd') }}
+        icon_template: 'mdi:label-percent'
+
     airquality:
         friendly_name: Air Quality
         unique_id: airquality
@@ -30,6 +74,7 @@
             {{ state_attr('sensor.aqi_report','aqi') }}
           upd: >
             {{ state_attr('sensor.aqi_report','fetched') }}
+
     trafficmeter:
         friendly_name: Traffic Meter
         unique_id: trafficmeter
@@ -37,6 +82,7 @@
         unit_of_measurement: 'GB'
         value_template: >
           {{ states.input_number.trafficmeter_usage.state }}
+
     trafficmeter_pct:
         friendly_name: 'Traffic Meter: Percent of Cap'
         unique_id: trafficmeterpct
@@ -44,33 +90,3 @@
         unit_of_measurement: '%'
         value_template: >
           {{ states.input_number.trafficmeter_percent.state }}
-    trash_pickup:
-        friendly_name: Trash Pickup
-        value_template: >
-          {{ states.input_text.trash_pickup_date.state }}
-        attribute_templates:
-          proximity: >
-            {{ states.input_number.trash_daystil.state }}
-          type: >
-            {% if states.input_boolean.trash_recycling.state == 'on' %}
-              Trash & Recycling
-            {% else %}
-              Trash Pickup
-            {% endif %}
-        icon_template: >
-          {% if states.input_boolean.trash_recycling.state == 'on' %}
-            mdi:recycle
-          {% else %}
-            mdi:delete
-          {% endif %}
-- platform: nut
-  name: APC UPS
-  host: !secret nas_host
-  resources:
-    - ups.status.display
-    - battery.charge
-    - battery.charge.warning
-    - battery.charge.low
-    - battery.runtime
-    - ups.timer.reboot
-    - ups.timer.shutdown
