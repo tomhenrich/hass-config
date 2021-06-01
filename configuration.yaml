@@ -9,11 +9,14 @@ homeassistant:
 tts:
   - platform: google_translate
 
-group: !include groups.yaml
 automation: !include automations.yaml
+binary_sensor: !include binary_sensors.yaml
+device_tracker: !include device_tracker.yaml
+group: !include groups.yaml
+media_player: !include media_player.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-device_tracker: !include device_tracker.yaml
+recorder: !include recorder.yaml
 sensor: !include sensors.yaml
 
 frontend:
@@ -33,21 +36,3 @@ panel_custom:
       # grouping - pick one: z-wave, ungrouped
       grouping: z-wave
 
-
-binary_sensor:
-- platform: bayesian
-  device_class: 'presence'
-  prior: 0.5
-  name: 'Tom Presence'
-  probability_threshold: 0.6
-  observations:
-    - entity_id: 'device_tracker.chasm'
-      prob_given_true: 0.9
-      prob_given_false: 0.1
-      platform: 'state'
-      to_state: 'home'
-    - entity_id: 'device_tracker.keys'
-      prob_given_true: 0.6
-      prob_given_false: 0.2
-      platform: 'state'
-      to_state: 'home'
