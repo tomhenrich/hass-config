@@ -292,10 +292,9 @@ views:
               - type: 'custom:button-card'
                 view_layout:
                   grid-column: span 2
-                entity: sensor.trash_pickup
+                entity: sensor.trashday
                 template: sensor
                 name: '[[[ return entity.attributes.type ]]]'
-                icon: '[[[ return entity.attributes.icon ]]]'
                 show_state: true
                 tap_action: none
                 styles:
@@ -317,14 +316,14 @@ views:
                       card:
                         - border-left-color: var(--accent-color)
               - type: 'custom:button-card'
-                entity: sensor.trafficmeter_pct
+                entity: sensor.monthly_data_cap
                 name: Data Cap
                 template:
                   - sensornoicon
                 show_state: true
                 show_label: false
                 show_icon: false
-                tap_action: none
+                tap_action: more-info
                 state:
                   - operator: template
                     value: |
@@ -343,7 +342,7 @@ views:
                       card:
                         - background-color: var(--label-badge-red)
               - type: 'custom:button-card'
-                entity: sensor.trafficmeter
+                entity: sensor.monthly_data_usage
                 name: Data Used
                 template:
                   - sensoralert
@@ -351,7 +350,7 @@ views:
                 show_state: true
                 show_label: true
                 show_icon: false
-                tap_action: none
+                tap_action: more-info
               - type: markdown
                 content: ' '
                 style: >-
@@ -639,7 +638,7 @@ views:
                 cards:
                   - type: 'custom:mini-graph-card'
                     entities:
-                      - entity: sensor.trafficmeter
+                      - entity: sensor.monthly_data_usage
                         name: Data Used This Month
                     hours_to_show: 336
                     group_by: hour
@@ -653,13 +652,12 @@ views:
                     lower_bound: 0
                   - type: 'custom:mini-graph-card'
                     entities:
-                      - entity: sensor.trafficmeter_pct
+                      - entity: sensor.monthly_data_cap
                         name: '% of Monthly Cap'
                     hours_to_show: 336
                     group_by: hour
                     font_size: 50
                     height: 50
-                    icon: 'mdi:label-percent'
                     style: '.state__value {font-weight: 400;}'
                     show:
                       legend: false
