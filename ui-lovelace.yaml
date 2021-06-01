@@ -89,7 +89,7 @@ button_card_templates:
         id: light_off
         styles:
           card:
-            - background-color: '#4b4f52'
+            - background-color: var(--label-badge-background-color)
           icon:
             - opacity: 0.5
     styles:
