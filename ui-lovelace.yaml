@@ -37,8 +37,11 @@ button_card_templates:
     styles:
       grid:
         - grid-template-columns: 30% 1fr
+      card:
+        - border-left: 4px solid transparent
       name:
         - font-size: medium
+        - font-weight: 'var(--mcg-title-font-weight, 500)'
         - text-align: left
         - width: 100%
         - color: var(--secondary-text-color)
@@ -125,7 +128,7 @@ views:
         layout:
           grid-template-columns: 40% 60%
           grid-template-rows: auto
-          grid-gap: 0 0
+          grid-gap: 0
           grid-template-areas: |
             "header header"
             "side main"
@@ -136,6 +139,7 @@ views:
               grid-area: header
             layout:
               grid-template-columns: 60% 40%
+              grid-gap: 0
             cards:
               - type: markdown
                 content: '### {{ now().strftime("%A, %-m/%-d | %-I:%M %p") }}'
@@ -160,6 +164,7 @@ views:
               grid-area: side
             layout:
               grid-template-columns: 50% 50%
+              grid-gap: 0
             cards:
               - type: 'custom:button-card'
                 view_layout:
@@ -174,29 +179,32 @@ views:
                   [[[
                     return entity.state;
                   ]]]
-                styles:
-                  card:
-                    - border-left: 4px solid transparent
                 state:
                   - value: Good
                     styles:
+                      card:
+                        - border-left-color: var(--label-badge-green)
                       icon:
                         - color: var(--label-badge-green)
                     icon: 'mdi:emoticon-happy-outline'
                   - value: Moderate
                     styles:
+                      card:
+                        - border-left-color: '#fdd64b'
                       icon:
                         - color: '#fdd64b'
                     icon: 'mdi:emoticon-neutral-outline'
                   - value: Unhealthy
                     styles:
+                      card:
+                        - border-left-color: '#eb0c27'
                       icon:
                         - color: '#eb0c27'
                     icon: 'mdi:emoticon-frown-outline'
                   - value: Very Unhealthy
                     styles:
                       card:
-                        - background: '#a070b6'
+                        - border-left-color: '#a070b6'
                       name:
                         - color: '#fff'
                       label:
@@ -221,9 +229,6 @@ views:
                 name: Washing Machine
                 tap_action:
                   action: none
-                styles:
-                  card:
-                    - border-left: 4px solid transparent
                 state:
                   - value: 'on'
                     label: Running
@@ -234,6 +239,9 @@ views:
                         - color: var(--accent-color)
                   - value: 'off'
                     label: Inactive
+                    styles:
+                      icon:
+                        - opacity: 0.5
               - type: 'custom:button-card'
                 view_layout:
                   grid-column: span 2
@@ -243,9 +251,6 @@ views:
                 show_label: true
                 name: Dryer
                 tap_action: none
-                styles:
-                  card:
-                    - border-left: 4px solid transparent
                 state:
                   - value: 'on'
                     label: Running
@@ -256,6 +261,9 @@ views:
                         - color: var(--accent-color)
                   - value: 'off'
                     label: Inactive
+                    styles:
+                      icon:
+                        - opacity: 0.5
               - type: 'custom:button-card'
                 view_layout:
                   grid-column: span 2
@@ -265,9 +273,6 @@ views:
                   - sensoralert
                 tap_action: none
                 show_state: true
-                styles:
-                  card:
-                    - border-left: 4px solid transparent
                 state:
                   - value: 'on'
                     icon: 'mdi:alert-circle'
@@ -280,6 +285,10 @@ views:
                         - color: white
                       icon:
                         - color: white
+                  - value: 'off'
+                    styles:
+                      icon:
+                        - opacity: 0.5
               - type: 'custom:button-card'
                 view_layout:
                   grid-column: span 2
@@ -290,8 +299,8 @@ views:
                 show_state: true
                 tap_action: none
                 styles:
-                  card:
-                    - border-left: 4px solid transparent
+                  icon:
+                    - opacity: 0.5
                 state:
                   - value: Today
                     styles:
@@ -299,9 +308,7 @@ views:
                         - filter: opacity(1.0)
                         - color: var(--label-badge-red)
                       card:
-                        - border--left-color: var(--label-badge-red)
-                      state:
-                        - color: var(--label-badge-red)
+                        - border-left-color: var(--label-badge-red)
                   - value: Tomorrow
                     styles:
                       icon:
@@ -317,19 +324,7 @@ views:
                 show_state: true
                 show_label: false
                 show_icon: false
-                tap_action:
-                  action: call-service
-                  service: browser_mod.popup
-                  service_data:
-                    deviceID:
-                      - this
-                      - dashboard
-                    card:
-                      type: entities
-                      title: Comcast Data Cap
-                      entities:
-                        - sensor.trafficmeter_pct
-                        - sensor.trafficmeter
+                tap_action: none
                 state:
                   - operator: template
                     value: |
@@ -356,6 +351,7 @@ views:
                 show_state: true
                 show_label: true
                 show_icon: false
+                tap_action: none
               - type: markdown
                 content: ' '
                 style: >-
@@ -393,6 +389,7 @@ views:
               grid-area: main
             layout:
               grid-template-columns: 'repeat(6, 16.6666%)'
+              grid-gap: 0
             cards:
               - type: 'custom:button-card'
                 view_layout:
@@ -531,3 +528,206 @@ views:
                   - value: 'off'
                     id: opening_closed
                     icon: 'mdi:door-closed'
+  - icon: 'hass:lightbulb'
+    panel: true
+    path: lights
+    theme: Campfire - Dark
+    badges: []
+    cards:
+      - type: 'custom:layout-card'
+        layout_type: 'custom:grid-layout'
+        layout:
+          grid-template-columns: 'repeat(8, 1fr)'
+          grid-template-rows: auto
+          grid-gap: 0 0
+        cards:
+          - type: markdown
+            content: '### Lights'
+            view_layout:
+              grid-column: span 8
+              style: >-
+                ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+                !important;}
+          - type: 'custom:button-card'
+            entity: switch.bar_light
+            name: Bar
+            template: lights_onoff
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: group.den_lights
+            template: lights
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: light.den_light_1
+            name: Den 1
+            template: lights
+          - type: 'custom:button-card'
+            entity: light.den_light_2
+            name: Den 2
+            template: lights
+          - type: 'custom:button-card'
+            entity: light.living_room_light
+            name: Living Room
+            template: lights
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: light.dining_room_light
+            name: Dining Room
+            template: lights
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: switch.entryway_light
+            name: Entryway
+            template: lights_onoff
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: switch.porch_light
+            name: Porch
+            template: lights_onoff
+            view_layout:
+              grid-column: span 2
+          - type: markdown
+            content: '### Timers'
+            view_layout:
+              grid-column: span 8
+              style: >-
+                ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+                !important;}
+          - type: 'custom:button-card'
+            entity: input_boolean.timer_porch
+            name: Porch Light
+            template: lights_onoff
+            view_layout:
+              grid-column: span 2
+          - type: 'custom:button-card'
+            entity: input_boolean.night_light_living_room_switch
+            name: Living Room
+            template: lights_onoff
+            view_layout:
+              grid-column: span 2
+  - path: netmonitor
+    icon: 'hass:database'
+    panel: true
+    theme: Campfire - Dark
+    badges: []
+    cards:
+      - type: 'custom:layout-card'
+        layout_type: 'custom:grid-layout'
+        layout:
+          grid-template-columns: 1fr
+          grid-template-rows: auto
+          grid-gap: 0 0
+        cards:
+          - type: markdown
+            content: '### Network'
+            style: >-
+              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+              !important;}
+          - type: 'custom:layout-card'
+            layout_type: 'custom:grid-layout'
+            layout:
+              grid-template-columns: 40% 60%
+            cards:
+              - type: vertical-stack
+                view_layout:
+                  - grid-column: span 2
+                cards:
+                  - type: 'custom:mini-graph-card'
+                    entities:
+                      - entity: sensor.trafficmeter
+                        name: Data Used This Month
+                    hours_to_show: 336
+                    group_by: hour
+                    font_size: 50
+                    height: 50
+                    icon: 'mdi:compare-vertical'
+                    style: '.state__value {font-weight: 400;}'
+                    show:
+                      legend: false
+                      labels: false
+                    lower_bound: 0
+                  - type: 'custom:mini-graph-card'
+                    entities:
+                      - entity: sensor.trafficmeter_pct
+                        name: '% of Monthly Cap'
+                    hours_to_show: 336
+                    group_by: hour
+                    font_size: 50
+                    height: 50
+                    icon: 'mdi:label-percent'
+                    style: '.state__value {font-weight: 400;}'
+                    show:
+                      legend: false
+                      labels: false
+                    lower_bound: 0
+                    upper_bound: 100
+              - type: vertical-stack
+                view_layout:
+                  - grid-column: span 2
+                cards:
+                  - type: 'custom:button-card'
+                    entity: switch.adguard_protection
+                    name: AdBlock
+                    template: sensor
+                    show_state: true
+                    size: 25%
+                    state:
+                      - value: 'on'
+                        icon: 'mdi:shield-check'
+                        styles:
+                          icon:
+                            - color: var(--label-badge-green)
+                      - value: 'off'
+                        icon: 'mdi:shield-off-outline'
+                        styles:
+                          icon:
+                            - color: var(--label-badge-red)
+                  - type: 'custom:mini-graph-card'
+                    entities:
+                      - entity: sensor.adguard_dns_queries
+                        name: DNS Queries
+                      - entity: sensor.adguard_dns_queries_blocked
+                        name: Blocked Queries
+                        color: var(--label-badge-red)
+                    hours_to_show: 168
+                    group_by: date
+                    font_size: 50
+                    height: 50
+                    bar_spacing: 2
+                    icon: 'mdi:card-search'
+                    style: '.state__value {font-weight: 400;}'
+                    show:
+                      state: false
+                      graph: bar
+                      legend: true
+                  - type: horizontal-stack
+                    view_layout:
+                      - grid-column: span 2
+                    cards:
+                      - type: 'custom:button-card'
+                        entity: sensor.adguard_dns_queries_blocked_ratio
+                        name: Avg Block Ratio
+                        template: sensornoicon
+                        show_state: true
+                        tap_action: none
+                      - type: 'custom:button-card'
+                        entity: sensor.adguard_average_processing_speed
+                        name: Avg Response
+                        template: sensornoicon
+                        show_state: true
+                        tap_action: none
+          - type: markdown
+            content: '### NAS'
+            style: >-
+              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+              !important;}
+          - type: markdown
+            content: Data Pending
+            style: >-
+              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+              !important;}
