@@ -1,0 +1,12 @@
+den_lights:
+  name: Den Lights
+  entities:
+  - light.den_light_1
+  - light.den_light_2
+
+exterior:
+  name: Exterior Openings
+  entities:
+    - binary_sensor.front_door
+    - binary_sensor.back_door_ias_zone
+    - binary_sensor.master_bath_window
