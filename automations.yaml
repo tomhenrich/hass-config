@@ -1,0 +1,209 @@
+- id: '1608753473958'
+  alias: 'Porch Light: On'
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: +01:00:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.timer_porch
+    state: 'on'
+  action:
+  - type: turn_on
+    device_id: 15371c839a088f15441a41146da480b9
+    entity_id: switch.porch_light
+    domain: switch
+  mode: single
+- id: '1609212332962'
+  alias: 'Porch Light: Off'
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:00:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.timer_porch
+    state: 'on'
+  action:
+  - type: turn_off
+    device_id: 15371c839a088f15441a41146da480b9
+    entity_id: switch.porch_light
+    domain: switch
+  mode: single
+- id: '1609516471011'
+  alias: 'Master Bath: 1 Low'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7680
+      scene_id: 3
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 59ed4f9e1e0bf67641b76364515495aa
+    entity_id: light.master_bath_light
+    domain: light
+    brightness_pct: 50
+  mode: single
+- id: '1609516804056'
+  alias: Good Night
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    event_data:
+      entity_id: zwave.master_bedroom_light
+      node_id: 14
+      scene_data: 3
+      scene_id: 1
+  condition: []
+  action:
+  - scene: scene.good_night
+  mode: single
+- id: '1609525222269'
+  alias: 'Master Bath: 2 Medium'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7860
+      scene_id: 2
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 59ed4f9e1e0bf67641b76364515495aa
+    entity_id: light.master_bath_light
+    domain: light
+    brightness_pct: 80
+  mode: single
+- id: '1609525247708'
+  alias: 'Master Bath: 3 High'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7920
+      scene_id: 2
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 59ed4f9e1e0bf67641b76364515495aa
+    entity_id: light.master_bath_light
+    domain: light
+    brightness_pct: 100
+  mode: single
+- id: '1609726220058'
+  alias: 'Barn Door Protocol: Activate'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: group.exterior
+    to: 'on'
+    for: 00:10:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.barn_door_protocol
+    state: 'off'
+  - condition: device
+    device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+    domain: climate
+    entity_id: climate.ecobee3
+    type: is_hvac_mode
+    hvac_mode: heat
+  action:
+  - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+    domain: climate
+    entity_id: climate.ecobee3
+    type: set_hvac_mode
+    hvac_mode: 'off'
+  - service: input_boolean.turn_on
+    data: {}
+    entity_id: input_boolean.barn_door_protocol
+  mode: single
+- id: '1609726335791'
+  alias: 'Barn Door Protocol: Deactivate 1'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: group.exterior
+    to: 'on'
+    for: 00:05:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.barn_door_protocol
+    state: 'on'
+  action:
+  - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+    domain: climate
+    entity_id: climate.ecobee3
+    type: set_hvac_mode
+    hvac_mode: heat
+  - service: input_boolean.turn_off
+    data: {}
+    entity_id: input_boolean.barn_door_protocol
+  mode: single
+- id: '1618699479074'
+  alias: 'Den Tablet: Outlet Off'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.den_switch_1
+    from: 'on'
+    for: 03:00:00
+  condition: []
+  action:
+  - type: turn_off
+    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
+    entity_id: switch.den_switch_1
+    domain: switch
+  mode: single
+- id: '1618699514747'
+  alias: 'Den Tablet: Outlet On'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.den_switch_1
+    from: 'off'
+    for: 01:00:00
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
+    entity_id: switch.den_switch_1
+    domain: switch
+  mode: single
+- id: '1618699516452'
+  alias: 'Den Tablet: Outlet On'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.den_switch_1
+    from: 'off'
+    for: 01:00:00
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
+    entity_id: switch.den_switch_1
+    domain: switch
+  mode: single
+- id: '1619836876276'
+  alias: Run Speed Test
+  description: ''
+  trigger:
+  - platform: time
+    at: 02:00:00
+  condition: []
+  action:
+  - service: speedtestdotnet.speedtest
+  mode: single
