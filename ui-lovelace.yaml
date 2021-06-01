@@ -1,16 +1,36 @@
-title: Home
 button_card_templates:
-  shortcut:
+  opening:
     style: 'ha-card { height: 100%; }'
-    show_state: false
+    show_state: true
     size: 40%
     styles:
       card:
-        - background-color: '#4b4f52'
+        - background-color: card-background-color
       name:
         - font-size: small
+      state:
+        - font-size: x-small
       icon:
         - margin-bottom: 10px
+    state:
+      - value: 'on'
+        id: opening_open
+        styles:
+          name:
+            - color: var(--light-primary-color)
+          state:
+            - color: var(--light-primary-color)
+          icon:
+            - color: var(--light-primary-color)
+      - value: 'off'
+        id: opening_closed
+        styles:
+          name:
+            - color: var(--primary-color)
+          state:
+            - color: var(--primary-color)
+          icon:
+            - color: var(--primary-color)
   sensor:
     style: 'ha-card { height: 100%; }'
     layout: icon_name_state2nd
@@ -30,6 +50,12 @@ button_card_templates:
         - font-size: small
         - text-align: left
         - width: 100%
+  sensornoicon:
+    template: sensor
+    show_icon: false
+    styles:
+      grid:
+        - grid-template-columns: 16px 1fr
   sensoralert:
     template: sensor
     state:
@@ -89,252 +115,183 @@ button_card_templates:
         id: light_off
         icon: 'mdi:circle-outline'
 views:
-  - title: Home
-    path: tablet
-    icon: 'hass:home'
-    theme: dawson
+  - icon: 'hass:home'
     panel: true
+    theme: Campfire - Dark
     badges: []
     cards:
       - type: 'custom:layout-card'
-        layout: grid
-        gridrows: auto
-        gridcols: 100%
-        gridgap: 4px
+        layout_type: 'custom:grid-layout'
+        layout:
+          grid-template-columns: 40% 60%
+          grid-template-rows: auto
+          grid-gap: 0 0
+          grid-template-areas: |
+            "header header"
+            "side main"
         cards:
           - type: 'custom:layout-card'
-            layout: grid
-            gridrows: auto
-            gridcols: 55% 20% 25%
-            gridgap: 0
+            layout_type: 'custom:grid-layout'
+            view_layout:
+              grid-area: header
+            layout:
+              grid-template-columns: 60% 40%
             cards:
+              - type: markdown
+                content: '### {{ now().strftime("%A, %-m/%-d | %-I:%M %p") }}'
+                view_layout:
+                  grid-column: span 2
               - type: weather-forecast
-                entity: weather.ecobee3
+                entity: weather.openweathermap
                 show_forecast: false
-                name: 'Aurora, CO'
-                style: '.icon-image {min-width: unset; max-width: 40px;}'
-              - type: sensor
-                entity: sensor.ecobee3_temperature
+                name: Currently
+              - type: 'custom:mini-graph-card'
+                entities:
+                  - entity: sensor.ecobee3_temperature
                 name: Inside
-              - type: vertical-stack
-                cards:
-                  - type: 'custom:button-card'
-                    template: sensor
-                    show_state: false
-                    show_label: true
-                    show_icon: false
-                    entity: climate.ecobee3
-                    name: Heat
-                    label: |
-                      [[[
-                        if( entity.state == "off" )
-                          return "Off";
-                        else
-                          if( entity.attributes.hvac_action == "heating" )
-                            return "Running";
-                          else
-                            return "On, Idle"
-                      ]]]
-                    styles:
-                      grid:
-                        - grid-template-columns: 10px 1fr
-                      card:
-                        - border-bottom: 2px solid transparent
-                    state:
-                      - operator: template
-                        value: >
-                          [[[ return entity.attributes.hvac_action === "idle"
-                          ]]]
-                        styles:
-                          card:
-                            - border-color: var(--disabled-text-color)
-                      - operator: template
-                        value: >
-                          [[[ return entity.attributes.hvac_action === "heating"
-                          ]]]
-                        styles:
-                          card:
-                            - border-color: var(--label-badge-red)
-                  - type: 'custom:button-card'
-                    template: sensor
-                    show_state: false
-                    show_label: true
-                    show_icon: false
-                    entity: sensor.airquality
-                    tap_action: none
-                    name: Air Quality
-                    label: |
-                      [[[
-                        return entity.state + ' <span class="aqi">' + entity.attributes.AQI + '</span>';
-                      ]]]
-                    style: >-
-                      .aqi { display: inline-block; padding: 4px; background:
-                      grey; font-size: x-small; line-height: 1; border-radius:
-                      6px; }
-                    styles:
-                      grid:
-                        - grid-template-columns: 10px 1fr
-                      card:
-                        - border-bottom: 2px solid transparent
-                    state:
-                      - value: Good
-                        styles:
-                          card:
-                            - border-color: var(--label-badge-green)
-                      - value: Moderate
-                        styles:
-                          card:
-                            - border-color: '#fdd64b'
-                      - value: Unhealthy
-                        styles:
-                          card:
-                            - border-color: '#eb0c27'
-                      - value: Very Unhealthy
-                        styles:
-                          card:
-                            - border-color: '#a070b6'
-                      - value: Hazardous
-                        styles:
-                          card:
-                            - background: '#860f30'
+                hours_to_show: 48
+                font_size: 68
+                height: 50
+                icon: 'mdi:home-thermometer-outline'
+                style: '.state__value {font-weight: 400;}'
           - type: 'custom:layout-card'
-            layout: grid
-            gridrows: auto auto auto
-            gridcols: 'repeat(8, 12.5%)'
-            gridgap: 0
+            layout_type: 'custom:grid-layout'
+            view_layout:
+              grid-area: side
+            layout:
+              grid-template-columns: 50% 50%
             cards:
               - type: 'custom:button-card'
-                entity: switch.bar_light
-                template: lights_onoff
-                gridcol: span 2
+                view_layout:
+                  grid-column: span 2
+                template: sensor
+                show_state: false
+                show_label: true
+                entity: sensor.airquality
+                tap_action: none
+                name: Air Quality
+                label: |
+                  [[[
+                    return entity.state;
+                  ]]]
+                styles:
+                  card:
+                    - border-left: 4px solid transparent
+                state:
+                  - value: Good
+                    styles:
+                      icon:
+                        - color: var(--label-badge-green)
+                    icon: 'mdi:emoticon-happy-outline'
+                  - value: Moderate
+                    styles:
+                      icon:
+                        - color: '#fdd64b'
+                    icon: 'mdi:emoticon-neutral-outline'
+                  - value: Unhealthy
+                    styles:
+                      icon:
+                        - color: '#eb0c27'
+                    icon: 'mdi:emoticon-frown-outline'
+                  - value: Very Unhealthy
+                    styles:
+                      card:
+                        - background: '#a070b6'
+                      name:
+                        - color: '#fff'
+                      label:
+                        - color: '#fff'
+                    icon: 'mdi:emoticon-frown'
+                  - value: Hazardous
+                    styles:
+                      card:
+                        - background: var(--label-badge-red)
+                      name:
+                        - color: '#fff'
+                      label:
+                        - color: '#fff'
+                    icon: 'mdi:emoticon-dead'
               - type: 'custom:button-card'
-                entity: group.den_lights
-                template: lights
-                gridcol: span 2
-              - type: 'custom:button-card'
-                entity: light.den_light_1
-                template: lights
-              - type: 'custom:button-card'
-                entity: light.den_light_2
-                template: lights
-              - type: 'custom:button-card'
-                entity: light.living_room_light
-                template: lights
-                gridcol: span 2
-              - type: 'custom:button-card'
-                entity: light.dining_room_light
-                template: lights
-                gridcol: span 2
-              - type: 'custom:button-card'
-                entity: switch.entryway_light
-                template: lights_onoff
-                gridcol: span 2
-              - type: 'custom:button-card'
-                entity: switch.porch_light
-                template: lights_onoff
-                gridcol: span 2
-              - type: 'custom:button-card'
-                entity: switch.deck_light
-                template: lights_onoff
-                gridcol: span 2
-          - type: 'custom:layout-card'
-            layout: grid
-            gridrows: min-content min-content auto auto
-            gridcols: 'repeat(5, 20%)'
-            gridgap: 0
-            cards:
-              - type: 'custom:button-card'
-                gridcol: span 2
-                entity: input_boolean.washing_machine
+                view_layout:
+                  grid-column: span 2
+                entity: binary_sensor.laundry_washer
                 template: sensor
                 show_state: false
                 show_label: true
                 name: Washing Machine
                 tap_action:
-                  action: more-info
-                  entity: sensor.washing_machine_outlet_power
+                  action: none
+                styles:
+                  card:
+                    - border-left: 4px solid transparent
                 state:
                   - value: 'on'
                     label: Running
                     styles:
                       card:
-                        - background-color: var(--accent-color)
-                      name:
-                        - color: white
+                        - border-left-color: var(--accent-color)
                       icon:
-                        - color: white
+                        - color: var(--accent-color)
                   - value: 'off'
                     label: Inactive
               - type: 'custom:button-card'
-                entity: binary_sensor.washer_leak_sensor
-                name: Leak
-                template: sensoralert
-                show_state: true
-                state:
-                  - value: 'on'
-                    id: sensoralert_active
-                    icon: 'mdi:alert'
-                    styles:
-                      card:
-                        - animation: blink 2s ease-in-out infinite
-                  - value: 'off'
-                    styles:
-                      icon:
-                        - opacity: 0.5
-              - type: 'custom:button-card'
-                entity: binary_sensor.chest_freezer
-                name: Freezer
-                template: sensoralert
-                show_state: true
-                state:
-                  - value: 'on'
-                    icon: 'mdi:snowflake-alert'
-                    styles:
-                      card:
-                        - background-color: var(--accent-color)
-                      name:
-                        - color: white
-                      icon:
-                        - color: white
-                  - value: 'off'
-              - type: 'custom:button-card'
-                entity: binary_sensor.garage_door_sensor
-                name: Garage
+                view_layout:
+                  grid-column: span 2
+                entity: binary_sensor.laundry_dryer
                 template: sensor
-                show_state: true
+                show_state: false
+                show_label: true
+                name: Dryer
+                tap_action: none
+                styles:
+                  card:
+                    - border-left: 4px solid transparent
                 state:
                   - value: 'on'
-                    icon: 'mdi:garage-open'
+                    label: Running
+                    styles:
+                      card:
+                        - border-left-color: var(--accent-color)
+                      icon:
+                        - color: var(--accent-color)
+                  - value: 'off'
+                    label: Inactive
+              - type: 'custom:button-card'
+                view_layout:
+                  grid-column: span 2
+                entity: binary_sensor.chest_freezer
+                name: Chest Freezer
+                template:
+                  - sensoralert
+                tap_action: none
+                show_state: true
+                styles:
+                  card:
+                    - border-left: 4px solid transparent
+                state:
+                  - value: 'on'
+                    icon: 'mdi:alert-circle'
                     styles:
                       card:
                         - background-color: var(--accent-color)
                       name:
                         - color: white
+                      state:
+                        - color: white
                       icon:
                         - color: white
-                  - value: 'off'
-                    icon: 'mdi:garage'
               - type: 'custom:button-card'
-                gridcol: span 2
+                view_layout:
+                  grid-column: span 2
                 entity: sensor.trash_pickup
                 template: sensor
                 name: '[[[ return entity.attributes.type ]]]'
                 icon: '[[[ return entity.attributes.icon ]]]'
                 show_state: true
-                tap_action:
-                  action: none
+                tap_action: none
                 styles:
                   card:
-                    - border-bottom: 2px solid transparent
-                  name:
-                    - font-size: medium
-                    - text-align: left
-                    - width: 100%
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: small
-                    - text-align: left
-                    - width: 100%
+                    - border-left: 4px solid transparent
                 state:
                   - value: Today
                     styles:
@@ -342,60 +299,235 @@ views:
                         - filter: opacity(1.0)
                         - color: var(--label-badge-red)
                       card:
-                        - border-color: var(--label-badge-red)
+                        - border--left-color: var(--label-badge-red)
                       state:
                         - color: var(--label-badge-red)
-                        - font-weight: 500
                   - value: Tomorrow
                     styles:
                       icon:
                         - filter: opacity(1.0)
                         - color: var(--accent-color)
                       card:
-                        - border-color: var(--accent-color)
+                        - border-left-color: var(--accent-color)
+              - type: 'custom:button-card'
+                entity: sensor.trafficmeter_pct
+                name: Data Cap
+                template:
+                  - sensornoicon
+                show_state: true
+                show_label: false
+                show_icon: false
+                tap_action:
+                  action: call-service
+                  service: browser_mod.popup
+                  service_data:
+                    deviceID:
+                      - this
+                      - dashboard
+                    card:
+                      type: entities
+                      title: Comcast Data Cap
+                      entities:
+                        - sensor.trafficmeter_pct
+                        - sensor.trafficmeter
+                state:
+                  - operator: template
+                    value: |
+                      [[[
+                        return (entity.state >= 75) && (entity.state < 80)
+                      ]]]
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-yellow)
+                  - operator: template
+                    value: |
+                      [[[
+                        return (entity.state >= 90)
+                      ]]]
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-red)
+              - type: 'custom:button-card'
+                entity: sensor.trafficmeter
+                name: Data Used
+                template:
+                  - sensoralert
+                  - sensornoicon
+                show_state: true
+                show_label: true
+                show_icon: false
+              - type: markdown
+                content: ' '
+                style: >-
+                  ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+                  !important;}
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:mini-graph-card'
+                name: Small Freezer Power
+                icon: 'hass:chart-line'
+                view_layout:
+                  grid-column: span 2
+                entities:
+                  - entity: sensor.monoprice_energy_outlet_energy
+                    line_width: 5
+                    color: '#99cc33'
+                    name: kWh
+                    aggregate_func: max
+                  - entity: sensor.monoprice_energy_outlet_power
+                    line_width: 1
+                    name: Watts
+                    y_axis: secondary
+                graph: line
+                height: 50
+                hours_to_show: 48
+                font_size: 50
+                show:
+                  legend: true
+                  points: false
+                  labels: true
+                  labels_secondary: true
+          - type: 'custom:layout-card'
+            layout_type: 'custom:grid-layout'
+            view_layout:
+              grid-area: main
+            layout:
+              grid-template-columns: 'repeat(6, 16.6666%)'
+            cards:
+              - type: 'custom:button-card'
+                view_layout:
+                  grid-column: span 6
+                entity: climate.ecobee3
+                template: sensor
+                show_state: true
+                name: Furnace
+                state:
+                  - value: 'off'
+                    icon: 'mdi:fire-off'
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-background-color)
+                  - value: heat
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-red)
+                    icon: 'mdi:fire'
+              - type: 'custom:button-card'
+                entity: cover.garage_door
+                name: Garage
+                view_layout:
+                  grid-column: span 6
+                template:
+                  - sensoralert
+                show_state: true
+                hold_action:
+                  action: call-service
+                  service: cover.toggle
+                  service_data:
+                    entity_id: cover.garage_door
+                state:
+                  - value: open
+                    icon: 'mdi:garage-open'
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-red)
+                      name:
+                        - color: white
                       state:
-                        - color: var(--accent-color)
-                        - font-weight: 500
-              - type: 'custom:swipe-card'
-                style: 'ha-card { height: 100%; }'
-                parameters:
-                  effect: coverflow
-                  coverflowEffect:
-                    rotate: 50
-                    stretch: 0
-                    depth: 100
-                    modifier: 1
-                    slideShadows: true
-                  grabCursor: true
-                  centeredSlides: true
-                  slidesPerView: auto
-                cards:
-                  - type: sensor
-                    entity: sensor.trafficmeter_pct
-                    style: |-
-                      .name {overflow: unset !important; min-width: min-content;
-                       line-height: unset !important;} .icon {display: none;} .value {
-                       font-size: small !important; } .measurement {font-size: x-small
-                      !important;} .info {padding-bottom: 8px !important;}
-                    name: Data Cap
-                  - type: sensor
-                    entity: sensor.trafficmeter
-                    style: >-
-                      .name {overflow: unset !important; min-width: min-content;
-                      line-height: unset !important;} .icon {display: none;}
-                      .value { font-size: small !important; } .measurement
-                      {font-size: x-small !important;} .info {padding-bottom:
-                      8px !important;}
-                    name: Data Used
-  - title: test
-    path: test
-    theme: dawson
-    visible:
-      - user: 1adcbfbd5637444bacb8239bc794bb4a
-    badges: []
-    cards:
-      - type: entities
-        entities:
-          - entity: sensor.fibaro_motion_temperature
-          - entity: sensor.fibaro_motion_luminance
-          - entity: binary_sensor.fibaro_motion_sensor
+                        - color: white
+                  - value: closed
+                    icon: 'mdi:garage'
+                    styles:
+                      card:
+                        - background-color: var(--label-badge-background-color)
+              - type: markdown
+                content: '#### Lights'
+                style: >-
+                  ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+                  !important;}
+                view_layout:
+                  grid-column: span 6
+              - type: 'custom:button-card'
+                entity: switch.bar_light
+                name: Bar
+                template: lights_onoff
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:button-card'
+                entity: group.den_lights
+                template: lights
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:button-card'
+                entity: light.living_room_light
+                name: Living Room
+                template: lights
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:button-card'
+                entity: light.dining_room_light
+                name: Dining Room
+                template: lights
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:button-card'
+                entity: switch.entryway_light
+                name: Entryway
+                template: lights_onoff
+                view_layout:
+                  grid-column: span 2
+              - type: 'custom:button-card'
+                entity: switch.porch_light
+                name: Porch
+                template: lights_onoff
+                view_layout:
+                  grid-column: span 2
+              - type: markdown
+                content: ' '
+                style: >-
+                  ha-markdown {padding-top: 4px !important; padding-bottom: 4px
+                  !important;}
+                view_layout:
+                  grid-column: span 6
+              - type: 'custom:button-card'
+                entity: binary_sensor.front_door
+                name: Front
+                view_layout:
+                  grid-column: span 1
+                tap_action: none
+                template: opening
+                state:
+                  - value: 'on'
+                    id: opening_open
+                    icon: 'mdi:door'
+                  - value: 'off'
+                    id: opening_closed
+                    icon: 'mdi:door-closed'
+              - type: 'custom:button-card'
+                entity: binary_sensor.back_door_ias_zone
+                name: Back
+                view_layout:
+                  grid-column: span 1
+                tap_action: none
+                template: opening
+                state:
+                  - value: 'on'
+                    id: opening_open
+                    icon: 'mdi:door'
+                  - value: 'off'
+                    id: opening_closed
+                    icon: 'mdi:door-closed'
+              - type: 'custom:button-card'
+                entity: binary_sensor.aqara2
+                name: Aqara
+                view_layout:
+                  grid-column: span 1
+                tap_action: none
+                template: opening
+                state:
+                  - value: 'on'
+                    id: opening_open
+                    icon: 'mdi:door'
+                  - value: 'off'
+                    id: opening_closed
+                    icon: 'mdi:door-closed'
