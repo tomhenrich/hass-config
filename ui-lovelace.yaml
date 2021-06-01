@@ -6,6 +6,7 @@ button_card_templates:
     styles:
       card:
         - background-color: card-background-color
+        - border: 2px solid transparent
       name:
         - font-size: small
       state:
@@ -16,12 +17,14 @@ button_card_templates:
       - value: 'on'
         id: opening_open
         styles:
+          card:
+            - border-color: var(--accent-color)
           name:
             - color: var(--light-primary-color)
           state:
             - color: var(--light-primary-color)
           icon:
-            - color: var(--light-primary-color)
+            - color: var(--accent-color)
       - value: 'off'
         id: opening_closed
         styles:
