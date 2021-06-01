@@ -74,19 +74,3 @@
             {{ state_attr('sensor.aqi_report','aqi') }}
           upd: >
             {{ state_attr('sensor.aqi_report','fetched') }}
-
-    trafficmeter:
-        friendly_name: Traffic Meter
-        unique_id: trafficmeter
-        icon_template: 'mdi:gauge'
-        unit_of_measurement: 'GB'
-        value_template: >
-          {{ states.input_number.trafficmeter_usage.state }}
-
-    trafficmeter_pct:
-        friendly_name: 'Traffic Meter: Percent of Cap'
-        unique_id: trafficmeterpct
-        icon_template: 'mdi:gauge'
-        unit_of_measurement: '%'
-        value_template: >
-          {{ states.input_number.trafficmeter_percent.state }}
