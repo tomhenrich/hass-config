@@ -36,9 +36,9 @@
   workdays: [mon, tue, wed, thu, fri]
 
 - platform: ping
-  host: !secret syn_ds420j_ip
+  host: !secret nas_host
   name: DS420j Online
 
 - platform: ping
-  host: !secret pizero_ip
+  host: !secret pizero_host
   name: Raspberry Pi Zero Online
