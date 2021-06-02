@@ -2,7 +2,6 @@
   sensors:
     laundry_washer:
       friendly_name: "Washing Machine"
-      icon_template: 'mdi:washing-machine'
       # delay_on: Value condition must be true for this long before the sensor switches ON
       delay_on:
         minutes: 2
@@ -11,11 +10,35 @@
         minutes: 3
       value_template: >-
         {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
+      icon_template: >
+        {% if is_state("binary_sensor.washing_machine", "on") %}
+          mdi:washing-machine
+        {% else %}
+          mdi:washing-machine-off
+        {% endif %}
     laundry_dryer:
       friendly_name: "Clothes Dryer"
-      icon_template: 'mdi:tumble-dryer'
       # delay_off: Value condition must be false for this long before the sensor switches OFF
       delay_off:
         minutes: 2
       value_template: >-
         {{ states('sensor.dryer_sensor_temperature')|float > 75 }}
+      icon_template: >
+        {% if is_state("binary_sensor.laundry_dryer", "on") %}
+          mdi:tumble-dryer
+        {% else %}
+          mdi:tumble-dryer-off
+        {% endif %}
+
+- platform: workday
+  country: US
+  province: CO
+  workdays: [mon, tue, wed, thu, fri]
+
+- platform: ping
+  host: !secret syn_ds420j_ip
+  name: DS420j Online
+
+- platform: ping
+  host: !secret pizero_ip
+  name: Raspberry Pi Zero Online
