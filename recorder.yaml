@@ -11,16 +11,17 @@ exclude:
     - device_tracker
     - fan
     - plex
+    - scene
     - script
     - speedtestdotnet
     - stream
     - sun
     - updater
     - weather
+    - zone
+    - zwave
   entity_globs:
-    - input_number.plex_count*
-    - input_number.trash*
-    - input_text.trash*
+    - input_number.plex*
     - sensor.ds420j_memory*
     - sensor.ds420j_cpu*
     - sensor.ds420j_network*
@@ -29,17 +30,20 @@ exclude:
     - binary_sensor.ds420j_*exceeded
     - binary_sensor.ds420j_*remaining
     - binary_sensor.ecobee*occupancy
+    - sensor.iphone*
+    - sensor.openweathermap_*
     - sensor.ups*
   entities:
-    - input_number.aqi
-    - input_text.aqi_status
-    - sensor.airquality
-    - sensor.data_report
-    - sensor.owm_report
-    - sensor.plex_shieldtv
+    - sensor.airquality*
+    - sensor.aqi_report
     - sensor.tautulli
-    - binary_sensor.washing_machine
+    - binary_sensor.laundry_washer
+    - binary_sensor.laundry_dryer
     - binary_sensor.fibaro_motion_sensor
+    - binary_sensory.garage_myq_gateway
+    - input_datetime.time_night_start
+    - input_select.presence_mode
+    - sensor.hacs
   event_types:
     - service_removed
     - service_executed
