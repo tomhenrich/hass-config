@@ -22,6 +22,7 @@ exclude:
     - zwave
   entity_globs:
     - input_number.plex*
+    - sensor.airquality*
     - sensor.ds420j_memory*
     - sensor.ds420j_cpu*
     - sensor.ds420j_network*
@@ -34,7 +35,6 @@ exclude:
     - sensor.openweathermap_*
     - sensor.ups*
   entities:
-    - sensor.airquality*
     - sensor.aqi_report
     - sensor.tautulli
     - binary_sensor.laundry_washer
