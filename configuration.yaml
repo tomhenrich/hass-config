@@ -5,11 +5,11 @@ default_config:
 homeassistant:
   customize: !include customize.yaml
 
-cloud:
-
 # Text to speech
 tts:
   - platform: google_translate
+
+cloud:
 
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
@@ -23,6 +23,18 @@ sensor: !include sensors.yaml
 
 frontend:
   themes: !include_dir_merge_named themes
+
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_bot_token
+    allowed_chat_ids:
+      - !secret telegram_chatid_tom
+
+# Example configuration.yaml entry for the notifier
+notify:
+  - name: telegram_tom
+    platform: telegram
+    chat_id: !secret telegram_chatid_tom
 
 panel_custom:
   - name: zwave-graph-panel
