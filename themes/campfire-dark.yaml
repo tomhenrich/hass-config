@@ -1,7 +1,7 @@
 Campfire - Dark:
   ### CAMPFIRE ###
   color-midnight: "#0A0A0A"
-  color-coal: "#1F1F1E"
+  color-coal: "#1a1a1a"
   color-charcoal: "#484747"
   color-cinder: "#868583"
   color-ash: "#C2C2C1"
@@ -23,7 +23,7 @@ Campfire - Dark:
   secondary-background-color: var(--color-charcoal)
   accent-color: var(--color-water)
   divider-color: var(--color-cinder)
-  card-background-color: var(--color-coal)
+  card-background-color: '#111111'
   ha-card-background: var(--card-background-color)
   ### Text ###
   primary-text-color: var(--color-smoke)
