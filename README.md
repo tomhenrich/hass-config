@@ -2,13 +2,21 @@
 
 ## Controls
 * Living Room Light
-    * Turn on by 
+    * Turn on/off: tap Entryway Light Switch up/down 2x, or tap Dining Room Light Switch up/down 2x
+    * Make brighter: tap Entryway Light Switch up/down 3x, or tap Dining Room Light Switch up/down 3x
+* Den Lights
+    * Controlled solely from the Den Tablet dashboard
+* "Good Night"
+    * Double-tap the Main Bedroom Light Switch down 2x to turn off the interior lights, plus the Porch Light and Deck Light
 
 ## Automations
 
 ### Barn Door Protocol
 If any of the exterior openings (Front or Back Door) are left open for 10 minutes while the heat is on, the heat will turn off.
 Once all the exterior openings are closed for 5 minutes, the heat will resume.
+
+### Garage Door
+Garage Door is set to automatically close every night at 11pm. Controlled directly through the MyQ app.
 
 ### Timers
 * If Porch Light Timer is on:
