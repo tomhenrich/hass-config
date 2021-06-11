@@ -1,7 +1,6 @@
 purge_keep_days: 7
 exclude:
   domains:
-    - adguard
     - automation
     - cover
     - calendar
@@ -31,19 +30,23 @@ exclude:
     - binary_sensor.ds420j_*exceeded
     - binary_sensor.ds420j_*remaining
     - binary_sensor.ecobee*occupancy
+    - binary_sensor.trashday
+    - binary_sensor.home_assistant_operating*
+    - sensor.home_assistant_operating*
     - sensor.iphone*
     - sensor.openweathermap_*
     - sensor.ups*
   entities:
     - sensor.aqi_report
     - sensor.tautulli
-    - binary_sensor.laundry_washer
-    - binary_sensor.laundry_dryer
+    - sensor.trash_service
     - binary_sensor.fibaro_motion_sensor
-    - binary_sensory.garage_myq_gateway
+    - binary_sensor.garage_myq_gateway
     - input_datetime.time_night_start
     - input_select.presence_mode
     - sensor.hacs
+    - sensor.date
+    - sensor.time
   event_types:
     - service_removed
     - service_executed
