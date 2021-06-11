@@ -36,6 +36,7 @@ notify:
     platform: telegram
     chat_id: !secret telegram_chatid_tom
 
+
 panel_custom:
   - name: zwave-graph-panel
     url_path: zwave-graph
