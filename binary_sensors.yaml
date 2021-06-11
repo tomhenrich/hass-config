@@ -1,5 +1,24 @@
 - platform: template
   sensors:
+
+    trashday:
+        friendly_name: Trash Pickup
+        value_template: >
+          {{ state_attr('sensor.trash_service','prox')|float == 0 }}
+        attribute_templates:
+          type: >
+            {{ state_attr('sensor.trash_service','desc') }}
+          proximity: >
+            {{ state_attr('sensor.trash_service','prox') }}
+          date: >
+            {{ state_attr('sensor.trash_service','when') }}
+        icon_template: >
+          {% if state_attr('sensor.trash_service','type') == 'both' %}
+            mdi:recycle
+          {% else %}
+            mdi:delete
+          {% endif %}
+
     laundry_washer:
       friendly_name: "Washing Machine"
       # delay_on: Value condition must be true for this long before the sensor switches ON
@@ -11,11 +30,7 @@
       value_template: >-
         {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
       icon_template: >
-        {% if is_state("binary_sensor.washing_machine", "on") %}
-          mdi:washing-machine
-        {% else %}
-          mdi:washing-machine-off
-        {% endif %}
+        mdi:washing-machine
     laundry_dryer:
       friendly_name: "Clothes Dryer"
       # delay_off: Value condition must be false for this long before the sensor switches OFF
@@ -24,16 +39,7 @@
       value_template: >-
         {{ states('sensor.dryer_sensor_temperature')|float > 75 }}
       icon_template: >
-        {% if is_state("binary_sensor.laundry_dryer", "on") %}
-          mdi:tumble-dryer
-        {% else %}
-          mdi:tumble-dryer-off
-        {% endif %}
-
-- platform: workday
-  country: US
-  province: CO
-  workdays: [mon, tue, wed, thu, fri]
+        mdi:tumble-dryer
 
 - platform: ping
   host: !secret nas_host
