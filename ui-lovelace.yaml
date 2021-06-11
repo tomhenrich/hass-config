@@ -42,6 +42,8 @@ button_card_templates:
         - grid-template-columns: 30% 1fr
       card:
         - border-left: 4px solid transparent
+      icon:
+        - color: var(--secondary-text-color)
       name:
         - font-size: medium
         - font-weight: var(--mcg-title-font-weight, 500)
@@ -156,20 +158,16 @@ views:
                 entities:
                   - entity: sensor.ecobee3_temperature
                     name: Thermostat
-                    smoothing: true
+                    show_points: false
+                    smoothing: false
                 name: Inside
-                hours_to_show: 48
+                hours_to_show: 72
                 font_size: 68
-                height: 50
+                height: 100
                 lower_bound_secondary: 0
                 upper_bound_secondary: 1
                 icon: mdi:home-thermometer-outline
                 style: '.state__value {font-weight: 400;}'
-                state_map:
-                  - value: 'off'
-                    label: 0
-                  - value: 'on'
-                    label: 1
                 show:
                   legend: false
           - type: custom:layout-card
@@ -251,9 +249,6 @@ views:
                             - color: var(--accent-color)
                       - value: 'off'
                         label: Inactive
-                        styles:
-                          icon:
-                            - opacity: 0.5
                   - type: conditional
                     conditions:
                       - entity: binary_sensor.washer_leak_sensor
@@ -271,13 +266,13 @@ views:
                         - value: 'on'
                           styles:
                             card:
-                              - background-color: var(--accent-color)
+                              - background-color: var(--label-badge-red)
                             name:
-                              - color: white
+                              - color: var(--light-primary-color)
                             state:
-                              - color: white
+                              - color: var(--light-primary-color)
                             icon:
-                              - color: white
+                              - color: var(--light-primary-color)
                   - type: custom:button-card
                     entity: binary_sensor.chest_freezer
                     name: Chest Freezer
@@ -293,15 +288,15 @@ views:
                           card:
                             - background-color: var(--accent-color)
                           name:
-                            - color: white
+                            - color: var(--light-primary-color)
                           state:
-                            - color: white
+                            - color: var(--light-primary-color)
                           icon:
-                            - color: white
+                            - color: var(--light-primary-color)
                       - value: 'off'
                         styles:
                           icon:
-                            - opacity: 0.5
+                            - color: var(--primary-color)
                   - type: custom:button-card
                     entity: binary_sensor.trashday
                     template: sensor
@@ -313,15 +308,14 @@ views:
                       action: none
                     styles:
                       icon:
-                        - opacity: 0.5
+                        - color: var(--primary-color)
                     state:
                       - value: 'on'
                         styles:
                           icon:
-                            - color: var(--label-badge-red)
-                            - opacity: 1
+                            - color: var(--accent-color)
                           card:
-                            - border-left-color: var(--label-badge-red)
+                            - border-left-color: var(--accent-color)
                       - operator: template
                         value: |
                           [[[
@@ -329,10 +323,9 @@ views:
                           ]]]
                         styles:
                           icon:
-                            - filter: opacity(1.0)
-                            - color: var(--accent-color)
+                            - color: var(--light-primary-color)
                           card:
-                            - border-left-color: var(--accent-color)
+                            - border-left-color: var(--light-primary-color)
                   - type: custom:button-card
                     entity: sensor.monthly_data_cap
                     name: Data Cap
@@ -827,3 +820,44 @@ views:
                 - domain: media_player
             sort:
               method: name
+  - title: Lights2
+    path: lights2
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    theme: Campfire - Dark
+    badges: []
+    cards:
+      - type: entities
+        show_header_toggle: false
+        entities:
+          - entity: light.living_room_light
+          - type: custom:rgb-light-card
+            entity: light.example_light
+            colors:
+              - rgb_color:
+                  - 234
+                  - 136
+                  - 140
+                brightness: 255
+                transition: 1
+              - rgb_color:
+                  - 251
+                  - 180
+                  - 139
+                brightness: 200
+                transition: 1
+              - rgb_color:
+                  - 136
+                  - 198
+                  - 237
+                brightness: 150
+                transition: 1
+              - rgb_color:
+                  - 140
+                  - 231
+                  - 185
+                brightness: 100
+                transition: 1
+        title: rgb selector
+      - type: entity
+        entity: input_boolean.timer_porch
