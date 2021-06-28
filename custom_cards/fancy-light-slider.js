@@ -1,4 +1,5 @@
-import "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/10.0.0/nouislider.min.js";
+//import "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/10.0.0/nouislider.min.js";
+import "https://raw.githubusercontent.com/tomhenrich/hass-config/main/custom_cards/nouislider.min.js";
 
 const minRange = 0;
 const maxRange = 255;
