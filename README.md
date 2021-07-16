@@ -7,7 +7,20 @@
 * **Den Lights**
     * Controlled solely from the Den Tablet dashboard.
 * **Good Night**
-    * Double-tap the Main Bedroom Light Switch down to turn off the interior lights, plus the Porch Light and Deck Light
+    * Double-tap the Main Bedroom Light Switch down
+        * Turn off:
+            * Kitchen Overhead Light
+            * Bar Light
+            * Living Room Light
+            * Entryway Light
+            * Den Lights
+            * Main Bathroom Light
+            * Main Bedroom Light
+         * Turn on:
+            * Outlet for Wyze camera in Living Room
+            * Outlet for Wyze camera in Basement
+         * Close:
+            * Garage Door
 
 ## Automations
 * **Barn Door Protocol**
