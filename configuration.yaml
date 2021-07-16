@@ -18,11 +18,17 @@ group: !include groups.yaml
 media_player: !include media_player.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+switch: !include switches.yaml
 recorder: !include recorder.yaml
 sensor: !include sensors.yaml
 
 frontend:
   themes: !include_dir_merge_named themes
+          
+logger:
+  default: error
+  logs:
+    homeassistant.components.zha: debug
 
 telegram_bot:
   - platform: polling
@@ -36,6 +42,9 @@ notify:
     platform: telegram
     chat_id: !secret telegram_chatid_tom
 
+neato:
+  client_id: !secret neato_client_id
+  client_secret: !secret neato_client_secret
 
 panel_custom:
   - name: zwave-graph-panel
