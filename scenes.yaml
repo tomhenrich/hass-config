@@ -1,0 +1,430 @@
+- id: '1626148652316'
+  name: Good Night
+  entities:
+    zwave.kitchen_light:
+      node_id: 19
+      node_name: 'Inovelli Unknown: type=0004, id=0001'
+      manufacturer_name: Inovelli
+      product_name: 'Unknown: type=0004, id=0001'
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 1
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 9
+      - 12
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      sentCnt: 10
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 8
+      receivedDups: 0
+      receivedUnsolicited: 3
+      sentTS: '2021-07-21 12:48:17:712 '
+      receivedTS: '2021-07-22 14:34:18:810 '
+      lastRequestRTT: 21
+      averageRequestRTT: 25
+      lastResponseRTT: 35
+      averageResponseRTT: 39
+      application_version: '1.11'
+      friendly_name: Kitchen Light Switch
+      state: ready
+    switch.kitchen_light:
+      node_id: 19
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594361495552'
+      friendly_name: Kitchen Light Switch
+      icon: hass:lightbulb
+      state: 'off'
+    zwave.deck_switch:
+      node_id: 9
+      node_name: Inovelli NZW30 Smart Switch
+      manufacturer_name: Inovelli
+      product_name: NZW30 Smart Switch
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 4
+      - 5
+      - 6
+      - 12
+      - 17
+      - 19
+      sentCnt: 10
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 10
+      receivedDups: 0
+      receivedUnsolicited: 4
+      sentTS: '2021-07-21 12:47:53:334 '
+      receivedTS: '2021-07-21 21:54:15:879 '
+      lastRequestRTT: 107
+      averageRequestRTT: 110
+      lastResponseRTT: 181
+      averageResponseRTT: 179
+      application_version: '1.03'
+      friendly_name: Deck Switch
+      state: ready
+    switch.deck_switch:
+      node_id: 9
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594193723392'
+      friendly_name: Deck Light
+      state: 'off'
+    light.living_room_light:
+      supported_color_modes:
+      - brightness
+      off_brightness:
+      friendly_name: Living Room Light
+      supported_features: 41
+      state: 'off'
+    light.den_light_1:
+      supported_color_modes:
+      - brightness
+      off_brightness:
+      friendly_name: Den Light 1
+      supported_features: 41
+      state: 'off'
+    light.den_light_2:
+      supported_color_modes:
+      - brightness
+      off_brightness:
+      friendly_name: Den Light 2
+      supported_features: 41
+      state: 'off'
+    light.master_bath_light:
+      supported_color_modes:
+      - brightness
+      node_id: 15
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594294403073'
+      power_consumption: 0
+      friendly_name: Master Bathroom Light
+      supported_features: 33
+      state: 'off'
+    zwave.master_bath_light:
+      node_id: 15
+      node_name: Inovelli LZW31-SN Dimmer
+      manufacturer_name: Inovelli
+      product_name: LZW31-SN Dimmer
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 1
+      - 4
+      - 5
+      - 14
+      - 16
+      - 17
+      - 19
+      sentCnt: 28
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 67
+      receivedDups: 4
+      receivedUnsolicited: 45
+      sentTS: '2021-07-22 19:36:19:463 '
+      receivedTS: '2021-07-22 19:36:21:602 '
+      lastRequestRTT: 22
+      averageRequestRTT: 22
+      lastResponseRTT: 41
+      averageResponseRTT: 41
+      application_version: '1.35'
+      friendly_name: Master Bathroom Light
+      state: ready
+    switch.master_bedroom_light:
+      node_id: 14
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594277609472'
+      friendly_name: Master Bedroom Light
+      icon: hass:lightbulb
+      state: 'off'
+    zwave.master_bedroom_light:
+      node_id: 14
+      node_name: Inovelli NZW30 Smart Switch (w/Scene)
+      manufacturer_name: Inovelli
+      product_name: NZW30 Smart Switch (w/Scene)
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 1
+      - 4
+      - 5
+      - 6
+      - 7
+      - 15
+      - 16
+      - 19
+      sentCnt: 12
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 24
+      receivedDups: 1
+      receivedUnsolicited: 17
+      sentTS: '2021-07-22 21:02:42:189 '
+      receivedTS: '2021-07-22 21:02:42:375 '
+      lastRequestRTT: 71
+      averageRequestRTT: 82
+      lastResponseRTT: 141
+      averageResponseRTT: 156
+      application_version: '1.03'
+      friendly_name: Master Bedroom Light
+      state: ready
+    zwave.dining_room_light:
+      node_id: 18
+      node_name: Inovelli NZW31 Smart Dimmer (w/Scene)
+      manufacturer_name: Inovelli
+      product_name: NZW31 Smart Dimmer (w/Scene)
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 4
+      - 6
+      - 7
+      - 12
+      - 16
+      - 17
+      - 19
+      sentCnt: 15
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 25
+      receivedDups: 2
+      receivedUnsolicited: 4
+      sentTS: '2021-07-22 19:34:13:191 '
+      receivedTS: '2021-07-22 19:34:13:522 '
+      lastRequestRTT: 257
+      averageRequestRTT: 299
+      lastResponseRTT: 330
+      averageResponseRTT: 233
+      application_version: '1.03'
+      friendly_name: Dining Room Light
+      state: ready
+    light.dining_room_light:
+      supported_color_modes:
+      - brightness
+      node_id: 18
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594344734721'
+      friendly_name: Dining Room Light
+      supported_features: 1
+      state: 'off'
+    zwave.bar_light:
+      node_id: 5
+      node_name: Jasco Products 45603 Plugin Appliance Module
+      manufacturer_name: Jasco Products
+      product_name: 45603 Plugin Appliance Module
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: false
+      capabilities:
+      - routing
+      - beaming
+      - listening
+      neighbors:
+      - 1
+      - 3
+      - 4
+      - 6
+      - 7
+      - 9
+      - 10
+      - 14
+      - 15
+      - 16
+      - 17
+      - 19
+      sentCnt: 8
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 6
+      receivedDups: 0
+      receivedUnsolicited: 0
+      sentTS: '2021-07-21 12:47:40:336 '
+      receivedTS: '2021-07-21 12:47:40:367 '
+      lastRequestRTT: 21
+      averageRequestRTT: 21
+      lastResponseRTT: 30
+      averageResponseRTT: 30
+      application_version: '3.30'
+      friendly_name: Bar Light
+      state: ready
+    switch.bar_light:
+      node_id: 5
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594126614528'
+      friendly_name: Bar Light
+      icon: hass:lightbulb
+      state: 'off'
+    zwave.wyze_basement_switch_2:
+      node_id: 17
+      node_name: Vision Security Plug-in Switch
+      manufacturer_name: Vision Security
+      product_name: Plug-in Switch
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: false
+      capabilities:
+      - routing
+      - beaming
+      - listening
+      neighbors:
+      - 1
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 9
+      - 10
+      - 12
+      - 15
+      - 16
+      - 18
+      - 19
+      sentCnt: 5
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 3
+      receivedDups: 0
+      receivedUnsolicited: 0
+      sentTS: '2021-07-21 12:47:40:768 '
+      receivedTS: '2021-07-21 12:47:40:932 '
+      lastRequestRTT: 114
+      averageRequestRTT: 98
+      lastResponseRTT: 163
+      averageResponseRTT: 147
+      application_version: '1.10'
+      friendly_name: Wyze Basement Switch
+      state: ready
+    switch.wyze_basement_outlet:
+      node_id: 17
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594327941120'
+      friendly_name: Wyze Basement Outlet
+      state: 'on'
+    switch.wyze_ilium_outlet:
+      friendly_name: Wyze Ilium Outlet
+      state: 'on'
+    zwave.entryway_light:
+      node_id: 12
+      node_name: Inovelli NZW30 Smart Switch (w/Scene)
+      manufacturer_name: Inovelli
+      product_name: NZW30 Smart Switch (w/Scene)
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - routing
+      - zwave_plus
+      - beaming
+      - listening
+      neighbors:
+      - 4
+      - 6
+      - 9
+      - 10
+      - 16
+      - 17
+      - 18
+      - 19
+      sentCnt: 12
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 12
+      receivedDups: 1
+      receivedUnsolicited: 5
+      sentTS: '2021-07-22 21:05:02:468 '
+      receivedTS: '2021-07-22 21:05:02:668 '
+      lastRequestRTT: 73
+      averageRequestRTT: 78
+      lastResponseRTT: 152
+      averageResponseRTT: 166
+      application_version: '1.03'
+      friendly_name: Entryway Light
+      state: ready
+    switch.entryway_light:
+      node_id: 12
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594244055040'
+      friendly_name: Entryway Light
+      icon: hass:lightbulb
+      state: 'off'
