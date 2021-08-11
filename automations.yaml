@@ -3,7 +3,6 @@
   trigger:
   - platform: sun
     event: sunset
-    offset: +01:00:00
   condition:
   - condition: state
     entity_id: input_boolean.timer_porch
@@ -131,8 +130,8 @@
     entity_id: input_boolean.barn_door_protocol
   mode: single
 - id: '1609726335791'
-  alias: 'Barn Door Protocol: Deactivate 1'
-  description: ''
+  alias: 'Barn Door Protocol: Deactivate'
+  description: Turn furnace heat back on when doors have all closed
   trigger:
   - platform: state
     entity_id: group.exterior
@@ -153,57 +152,134 @@
     entity_id: input_boolean.barn_door_protocol
   mode: single
 - id: '1618699479074'
-  alias: 'Den Tablet: Outlet Off'
-  description: ''
+  alias: 'Den Tablet: Outlet Power Off'
+  description: Turn the outlet off if its been on long enough
   trigger:
   - platform: state
-    entity_id: switch.den_switch_1
-    from: 'on'
+    to: 'on'
     for: 03:00:00
+    entity_id: switch.dlink_w110
   condition: []
   action:
-  - type: turn_off
-    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
-    entity_id: switch.den_switch_1
-    domain: switch
+  - service: switch.turn_off
+    target:
+      entity_id: switch.dlink_w110
   mode: single
 - id: '1618699514747'
-  alias: 'Den Tablet: Outlet On'
+  alias: 'Den Tablet: Outlet Power On'
+  description: Turn the outlet back on if it's been off too long
+  trigger:
+  - platform: state
+    to: 'off'
+    for: 01:00:00
+    entity_id: switch.dlink_w110
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.dlink_w110
+  mode: single
+- id: '1618931305830'
+  alias: Heartworm Meds Due
+  description: ''
+  trigger:
+  - platform: template
+    value_template: '{{ now().day == 15 }}'
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.heartworm_needed
+  mode: single
+- id: '1622671166530'
+  alias: Unexpected Entry
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: b3d3b805c7fd15e7c38179aeb21df064
+    entity_id: binary_sensor.front_door
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: d235c5737493c72d37c4a73db6d15629
+    entity_id: binary_sensor.garage_door_sensor
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: b62d5ca6541f93ae5a5d8bcc9f870873
+    entity_id: binary_sensor.back_door
+    domain: binary_sensor
+  condition:
+  - condition: time
+    after: '22:00:00'
+    before: 06:00:00
+  action:
+  - service: notify.telegram_tom
+    data:
+      title: Unexpected Entry!
+      message: '{{trigger.to_state.attributes.friendly_name }} opened at night...'
+  mode: single
+- id: '1624219701132'
+  alias: Hass Shutdown Switch
   description: ''
   trigger:
   - platform: state
-    entity_id: switch.den_switch_1
-    from: 'off'
-    for: 01:00:00
+    entity_id: input_boolean.shutdown_confirm
+    to: 'on'
   condition: []
   action:
-  - type: turn_on
-    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
-    entity_id: switch.den_switch_1
-    domain: switch
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.shutdown_confirm
+      - input_boolean.shutdown_primer
+  - service: hassio.host_shutdown
   mode: single
-- id: '1618699516452'
-  alias: 'Den Tablet: Outlet On'
+- id: '1625264068184'
+  alias: Plex Button
   description: ''
   trigger:
-  - platform: state
-    entity_id: switch.den_switch_1
-    from: 'off'
-    for: 01:00:00
-  condition: []
+  - device_id: c41a7cabdaf68d062d0fa206dfe908cb
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+  condition:
+  - condition: template
+    value_template: '{{ state_attr(''media_player.fire_tv'', ''source'') != ''Plex''
+      }}'
   action:
-  - type: turn_on
-    device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
-    entity_id: switch.den_switch_1
-    domain: switch
+  - service: media_player.turn_on
+    target:
+      entity_id: media_player.fire_tv
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 0
+      milliseconds: 500
+  - service: androidtv.adb_command
+    data:
+      entity_id: media_player.fire_tv
+      command: ' am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity'
   mode: single
-- id: '1619836876276'
-  alias: Run Speed Test
+- id: '1626486666380'
+  alias: Den Light Dimmer
   description: ''
-  trigger:
-  - platform: time
-    at: 02:00:00
-  condition: []
-  action:
-  - service: speedtestdotnet.speedtest
-  mode: single
+  use_blueprint:
+    path: poolcactus/zha-ikea-tradfri-on-off-switch-incl-dimmer.yaml
+    input:
+      remote: 84350b6f41b7cad45266de52c9f7b34b
+      light:
+        entity_id:
+        - light.den_light_1
+        - light.den_light_2
+- id: '1628346244000'
+  alias: Living Room Light Button
+  description: ''
+  use_blueprint:
+    path: poolcactus/zha-ikea-tradfri-on-off-switch-incl-dimmer.yaml
+    input:
+      remote: 72b251a428277f7ce1b4de58b20344b5
+      light:
+        entity_id: light.living_room_light
