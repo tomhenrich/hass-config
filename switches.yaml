@@ -1,0 +1,6 @@
+- platform: dlink
+  host: !secret dlink_110_host
+  name: "DLink W110"
+  username: !secret dlink_user
+  password: !secret dlink_pass
+  use_legacy_protocol: true
