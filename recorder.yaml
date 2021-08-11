@@ -9,7 +9,9 @@ exclude:
     - climate
     - device_tracker
     - fan
+    - media_player
     - plex
+    - person
     - scene
     - script
     - speedtestdotnet
@@ -34,19 +36,27 @@ exclude:
     - binary_sensor.home_assistant_operating*
     - sensor.home_assistant_operating*
     - sensor.iphone*
-    - sensor.openweathermap_*
     - sensor.ups*
+    - sensor.owm_*
+    - sensor.plex_*
+    - sensor.sensor.openweathermap_*
   entities:
-    - sensor.aqi_report
-    - sensor.tautulli
-    - sensor.trash_service
     - binary_sensor.fibaro_motion_sensor
     - binary_sensor.garage_myq_gateway
     - input_datetime.time_night_start
     - input_select.presence_mode
-    - sensor.hacs
+    - sensor.aqi_report
     - sensor.date
+    - sensor.hacs
+    - sensor.month_days
+    - sensor.month_gone
+    - sensor.openweather_report
+    - sensor.tautulli
     - sensor.time
+    - sensor.trash_service
+    - sensor.weather_report
+    - switch.adguard_filtering
+    - switch.adguard_protection
   event_types:
     - service_removed
     - service_executed
