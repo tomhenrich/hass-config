@@ -9,7 +9,7 @@ button_card_templates:
         - border: 4px solid transparent
         - border-width: 0 0 0 4px
         - padding: 8px 0
-        - background-color: var(--color-coal)
+        - background-color: var(--label-badge-background-color)
         - height: 100%
       icon:
         - color: var(--secondary-text-color)
@@ -86,7 +86,7 @@ button_card_templates:
         id: pushbutton_off
         styles:
           card:
-            - background-color: var(--label-badge-background-color)
+            - background-color: var(--divider-color)
       - value: 'on'
         id: pushbutton_on
         styles:
@@ -112,7 +112,7 @@ button_card_templates:
         id: cf_lights_off
         styles:
           card:
-            - background-color: var(--label-badge-background-color)
+            - background-color: var(--divider-color)
           icon:
             - opacity: 0.5
     styles:
@@ -140,139 +140,20 @@ button_card_templates:
       - value: 'off'
         id: cf_lights_off
         icon: mdi:circle-outline
-  opening:
-    show_state: true
-    size: 40%
-    styles:
-      card:
-        - background-color: var(--card-background-color)
-        - border-bottom: 2px solid transparent
-      name:
-        - font-size: small
-      state:
-        - font-size: x-small
-      icon:
-        - margin-bottom: 10px
-    state:
-      - value: 'on'
-        id: opening_open
-        styles:
-          card:
-            - border-bottom-color: var(--accent-color)
-          name:
-            - color: var(--light-primary-color)
-          state:
-            - color: var(--light-primary-color)
-          icon:
-            - color: var(--accent-color)
-      - value: 'off'
-        id: opening_closed
-        styles:
-          name:
-            - color: var(--primary-color)
-          state:
-            - color: var(--primary-color)
-          icon:
-            - color: var(--primary-color)
-  sensor:
-    style: 'ha-card { height: 100%; }'
-    layout: icon_name_state2nd
-    styles:
-      grid:
-        - grid-template-columns: 30% 1fr
-      card:
-        - border-left: 4px solid transparent
-      icon:
-        - color: var(--secondary-text-color)
-      name:
-        - font-size: medium
-        - font-weight: var(--mcg-title-font-weight, 500)
-        - text-align: left
-        - width: 100%
-        - color: var(--secondary-text-color)
-      state:
-        - font-size: small
-        - text-align: left
-        - width: 100%
-      label:
-        - font-size: small
-        - text-align: left
-        - width: 100%
-  sensornoicon:
-    template: sensor
-    show_icon: false
-    styles:
-      grid:
-        - grid-template-columns: 16px 1fr
-  sensoralert:
-    template: sensor
-    state:
-      - value: 'on'
-        id: sensoralert_active
-        styles:
-          card:
-            - background-color: var(--label-badge-red)
-          icon:
-            - color: white
-  lights_main:
-    style: 'ha-card { height: 100%; }'
-    show_state: false
-    size: 40%
-    tap_action:
-      action: toggle
-    hold_action:
-      action: more-info
-    state:
-      - value: 'on'
-        id: light_on
-        styles:
-          card:
-            - background-color: var(--accent-color)
-          icon:
-            - color: var(--primary-text-color)
-      - value: 'off'
-        id: light_off
-        styles:
-          card:
-            - background-color: var(--label-badge-background-color)
-          icon:
-            - opacity: 0.5
-    styles:
-      name:
-        - font-size: small
-      icon:
-        - margin-bottom: 10px
-  lights:
-    template: lights_main
-    state:
-      - value: 'on'
-        id: light_on
-        icon: mdi:dots-horizontal-circle
-      - value: 'off'
-        id: light_off
-        icon: mdi:dots-horizontal-circle-outline
-  lights_onoff:
-    template: lights_main
-    hold_action:
-      action: none
-    state:
-      - value: 'on'
-        id: light_on
-        icon: mdi:circle
-      - value: 'off'
-        id: light_off
-        icon: mdi:circle-outline
 views:
-  - title: Main
-    path: main
-    theme: Campfire - Dark
-    panel: true
+  - icon: hass:home
+    path: fire7
+    theme: Dawson - Dark
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+      - user: 25121d6fff8247f5b3c8b55198ff4705
+    type: custom:grid-layout
     badges: []
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout
         layout:
-          grid-template-columns: repeat(10, 10%)
+          grid-template-columns: 35% 65%
           grid-template-rows: auto
           mediaquery:
             '(max-width: 600px)':
@@ -281,13 +162,10 @@ views:
           - type: custom:layout-card
             layout_type: custom:grid-layout
             layout:
-              grid-template-columns: repeat(10, 10%)
+              grid-template-columns: repeat(4, 25%)
               grid-template-rows: auto
-              mediaquery:
-                '(max-width: 600px)':
-                  grid-template-columns: repeat(6, 16.6666666%)
             view_layout:
-              grid-column: span 10
+              grid-column: 1
             cards:
               - type: markdown
                 content: >-
@@ -295,135 +173,12 @@ views:
                   now().strftime("%p").lower() + "</strong></div><div>" +
                   now().strftime("%A, %-m/%-d") + "</div>"}}
                 view_layout:
-                  grid-column: span 2
+                  grid-column: span 4
                 style: >-
-                  ha-card {background-color: var(--color-coal); display: flex;}
-                  ha-markdown {padding-left: 8px !important; font-size: large
-                  !important; align-self: center;} span {color:
-                  var(--secondary-text-color);}
-              - type: custom:button-card
-                name: Outside
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 1
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return
-                  Math.round(Number(entity.attributes.data.current.feel)) +
-                  "<span class='uom'>°F</span>"]]]
-                style: '#label {font-weight: bold;}'
-                state:
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.attributes.data.current.feel >= 90
-                      ]]]
-                    styles:
-                      card:
-                        - border-color: var(--label-badge-red)
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.attributes.data.current.feel <= 30
-                      ]]]
-                    styles:
-                      card:
-                        - border-color: blue
-              - type: custom:button-card
-                name: Currently
-                template:
-                  - cf_sensor
-                  - cf_sensor_noicon
-                  - cf_sensor_largevalue
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.attributes.data.current.condition ]]]'
-              - type: custom:button-card
-                name: Humidity
-                template:
-                  - cf_sensor
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 1
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return entity.attributes.data.current.humidity + "<span
-                  class='uom'>%</span>"]]]
-              - type: custom:button-card
-                name: High/Low
-                template:
-                  - cf_sensor
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 1
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return "<span class='hi'>" +
-                  entity.attributes.data.current.temphigh + "</span>/<span
-                  class='lo'>" + entity.attributes.data.current.templow +
-                  "</span><span class='uom'>°F</span>"]]]
-                state:
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.attributes.data.current.temphigh >= 90
-                      ]]]
-                    styles:
-                      card:
-                        - border-color: var(--label-badge-red)
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.attributes.data.current.templow <= 0
-                      ]]]
-                    styles:
-                      card:
-                        - border-color: blue
-              - type: custom:button-card
-                name: Precip
-                template:
-                  - cf_sensor
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 1
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.attributes.data.forecast.pop ]]]'
-              - type: custom:button-card
-                name: Coming Up
-                template:
-                  - cf_sensor
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.weather_report
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.attributes.data.forecast.condition ]]]'
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(3, 33.333333%)
-              grid-template-rows: auto
-              mediaquery:
-                '(max-width: 600px)':
-                  grid-template-columns: repeat(6, 16.666666%)
-            view_layout:
-              grid-column: span 3
-            cards:
+                  ha-card {background-color: transparent; display: flex;}
+                  ha-markdown {padding-left: 8px !important; font-size: large;
+                  align-self: center;} ha-markdown strong {font-size: xx-large
+                  !important;}
               - type: custom:button-card
                 name: Inside
                 template:
@@ -431,7 +186,7 @@ views:
                   - cf_sensor_largevalue
                   - cf_sensor_noicon
                 view_layout:
-                  grid-column: span 1
+                  grid-column: span 2
                 entity: sensor.ecobee3_temperature
                 show_state: false
                 show_label: true
@@ -439,7 +194,6 @@ views:
                   [[[ return Math.round(Number(entity.state)) + "<span
                   class='uom'>" + entity.attributes.unit_of_measurement +
                   "</span>"]]]
-                style: '#label {font-weight: bold;}'
               - type: custom:button-card
                 view_layout:
                   grid-column: span 2
@@ -462,11 +216,51 @@ views:
                 hold_action:
                   action: none
               - type: custom:button-card
+                name: Outside
+                template:
+                  - cf_sensor
+                  - cf_sensor_largevalue
+                  - cf_sensor_compact
+                  - cf_sensor_noicon
+                view_layout:
+                  grid-column: span 2
+                entity: sensor.owm_current_temp
+                show_state: false
+                show_label: true
+                label: >-
+                  [[[ return Math.round(Number(entity.state)) + "<span
+                  class='uom'>°F</span>"]]]
+              - type: custom:button-card
+                name: Humidity
+                template:
+                  - cf_sensor
+                  - cf_sensor_largevalue
+                  - cf_sensor_compact
+                  - cf_sensor_noicon
+                view_layout:
+                  grid-column: span 2
+                entity: sensor.owm_current_humidity
+                show_state: false
+                show_label: true
+                label: '[[[ return entity.state + "<span class=''uom''>%</span>"]]]'
+              - type: custom:button-card
+                name: Currently
+                template:
+                  - cf_sensor
+                  - cf_sensor_compact
+                  - cf_sensor_noicon
+                view_layout:
+                  grid-column: span 4
+                entity: sensor.owm_current_condition
+                show_state: false
+                show_label: true
+                label: '[[[ return entity.state ]]]'
+              - type: custom:button-card
                 name: Air Quality
                 template:
                   - cf_sensor
                 view_layout:
-                  grid-column: span 3
+                  grid-column: span 4
                 show_state: false
                 show_label: true
                 entity: sensor.airquality
@@ -477,12 +271,16 @@ views:
                 style: |
                   .badge {
                     background: var(--secondary-text-color);
-                    color: var(--color-coal);
+                    color: var(--label-badge-background-color);
                     padding: 2px 4px;
                     border-radius: 7px;
                     font-size: x-small;
+                    margin-left: 1em;
                     line-height: 1;
                     display: inline-block;
+                  }
+                  #label {
+                    display: flex;
                   }
                 state:
                   - value: Good
@@ -525,82 +323,9 @@ views:
                         - color: '#fff'
                     icon: mdi:emoticon-dead
               - type: custom:button-card
-                entity: binary_sensor.chest_freezer
-                name: Chest Freezer
-                view_layout:
-                  grid-column: span 3
-                template:
-                  - cf_sensor
-                tap_action:
-                  action: none
-                show_state: true
-                state:
-                  - value: 'on'
-                    icon: mdi:alert-circle
-                    styles:
-                      card:
-                        - background-color: var(--accent-color)
-                      name:
-                        - color: var(--light-primary-color)
-                      state:
-                        - color: var(--light-primary-color)
-                      icon:
-                        - color: var(--light-primary-color)
-                  - value: 'off'
-                    styles:
-                      icon:
-                        - color: var(--primary-color)
-              - type: custom:button-card
-                entity: binary_sensor.laundry_washer
-                view_layout:
-                  grid-column: span 3
-                template:
-                  - cf_sensor
-                show_state: false
-                show_label: true
-                name: Washing Machine
-                tap_action:
-                  action: none
-                state:
-                  - value: 'on'
-                    label: Running
-                    styles:
-                      card:
-                        - border-color: var(--accent-color)
-                      icon:
-                        - color: var(--accent-color)
-                  - value: 'off'
-                    label: Inactive
-              - type: conditional
-                conditions:
-                  - entity: binary_sensor.washer_leak_sensor
-                    state: 'on'
-                card:
-                  type: custom:button-card
-                  entity: binary_sensor.washer_leak_sensor
-                  name: Washer is Leaking
-                  view_layout:
-                    grid-column: span 3
-                  template:
-                    - cf_sensor
-                  tap_action:
-                    action: none
-                  show_state: true
-                  state:
-                    - value: 'on'
-                      styles:
-                        card:
-                          - background-color: var(--label-badge-red)
-                        name:
-                          - color: var(--light-primary-color)
-                        state:
-                          - color: var(--light-primary-color)
-                        icon:
-                          - color: var(--light-primary-color)
-              - type: custom:button-card
                 entity: binary_sensor.trashday
                 view_layout:
-                  grid-column: span 3
+                  grid-column: span 4
                 template:
                   - cf_sensor
                 name: '[[[ return entity.attributes.type ]]]'
@@ -629,451 +354,304 @@ views:
                         - color: var(--light-primary-color)
                       card:
                         - border-color: var(--light-primary-color)
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(6, 16.66666%)
-              column-gap: 0
-              row-gap: 0
-            view_layout:
-              grid-column: span 4
-            cards:
               - type: custom:button-card
-                entity: group.den_lights
-                template:
-                  - cf_lights
+                entity: binary_sensor.chest_freezer
+                name: Chest Freezer
                 view_layout:
                   grid-column: span 2
-              - type: custom:button-card
-                entity: light.den_light_1
-                template:
-                  - cf_lights
-                name: Den 1
-              - type: custom:button-card
-                entity: light.den_light_2
-                template:
-                  - cf_lights
-                name: Den 2
-              - type: custom:button-card
-                entity: switch.bar_light
-                name: Bar
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: light.living_room_light
-                name: Living Room
-                template:
-                  - cf_lights
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: light.dining_room_light
-                name: Dining Room
-                template:
-                  - cf_lights
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.entryway_light
-                name: Entryway
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.porch_light
-                name: Porch
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.deck_switch
-                name: Deck
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: binary_sensor.garage_door_sensor
-                name: Garage
-                view_layout:
-                  grid-column: span 6
                 template:
                   - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_pushbutton
-                show_state: true
-                tap_action:
-                  action: call-service
-                  service: cover.toggle
-                  service_data:
-                    entity_id: cover.garage_door
-                style: |
-                  ha-card {height: auto !important;}
-                state:
-                  - value: 'on'
-                    id: pushbutton_open
-                    icon: mdi:garage-open
-                  - value: 'off'
-                    id: pushbutton_closed
-                    icon: mdi:garage
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(2, 50%)
-              column-gap: 0
-              row-gap: 0
-            view_layout:
-              grid-column: span 3
-            cards:
-              - type: markdown
-                content: '#### Network'
-                view_layout:
-                  grid-column: span 2
-                style: 'ha-markdown {padding: 0 !important;}'
-              - type: custom:button-card
-                entity: switch.adguard_protection
-                name: AdBlock
-                template:
-                  - cf_sensor
-                view_layout:
-                  grid-column: span 1
-                show_state: true
-                tap_action:
-                  action: toggle
-                state:
-                  - value: 'on'
-                    icon: mdi:shield-check
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-green)
-                        - background-color: var(--label-badge-background-color)
-                  - value: 'off'
-                    icon: mdi:shield-off-outline
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-red)
-                        - background-color: var(--label-badge-background-color)
-                      icon:
-                        - color: var(--label-badge-red)
-              - type: custom:button-card
-                entity: sensor.adguard_dns_queries_blocked_ratio
-                name: Avg Block Rate
-                template:
-                  - cf_sensor
-                  - cf_sensor_small
+                  - cf_sensor_compact
                   - cf_sensor_noicon
-                show_state: true
-              - type: custom:button-card
-                entity: sensor.monthly_data_cap
-                name: Data Cap
-                view_layout:
-                  grid-column: span 2
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                show_state: false
-                show_label: true
-                label: |
-                  [[[
-                    return states['sensor.monthly_data_usage'].state + 
-                    '<span class="uom"> ' + states['sensor.monthly_data_usage'].attributes.unit_of_measurement + "</span> (" +
-                    entity.state + '<span class="uom">' + entity.attributes.unit_of_measurement + '</span>)'
-                  ]]]
-                icon: mdi:swap-vertical-bold
-                tap_action:
-                  action: more-info
-                  entity: sensor.monthly_data_usage
-                state:
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.state > 75
-                      ]]]
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-yellow)
-                      icon:
-                        - color: var(--label-badge-yellow)
-              - type: custom:button-card
-                entity: sensor.speedtest_download
-                name: Download
-                icon: mdi:cloud-download
-                view_layout:
-                  grid-column: span 1
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + " <span
-                  class='uom'>Mb/s</span>"]]]
-              - type: custom:button-card
-                entity: sensor.speedtest_upload
-                name: Upload
-                icon: mdi:cloud-upload
-                view_layout:
-                  grid-column: span 1
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + " <span
-                  class='uom'>Mb/s</span>"]]]
-              - type: markdown
-                content: '#### Media'
-                view_layout:
-                  grid-column: span 2
-                style: 'ha-markdown {padding: 0 !important;}'
-              - type: custom:button-card
-                entity: sensor.ds420j_volume_1_status
-                name: Status
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                view_layout:
-                  grid-column: span 1
-                show_state: true
-                tap_action:
-                  action: more-info
-                icon: mdi:nas
-                state:
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.state == "normal"
-                      ]]]
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-green)
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.state != "normal"
-                      ]]]
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-red)
-                      icon:
-                        - color: var(--label-badge-red)
-              - type: custom:button-card
-                entity: sensor.ds420j_volume_1_volume_used
-                name: Used
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                view_layout:
-                  grid-column: span 1
-                show_state: true
-                custom_fields:
-                  i: |
-                    [[[
-                      let fill_pct  = entity.state;
-                      let empty_pct = 100 - fill_pct;
-                      let donut_color = 'var(--secondary-text-color)';
-                      if(entity.state >= 50 && entity.state < 70) {
-                        donut_color = 'var(--label-badge-yellow)';
-                      } else if (entity.state > 70) {
-                        donut_color = 'var(--label-badge-red)';
-                      }
-                                            
-                      return `<svg width="100%" height="100%" viewBox="0 0 54 54" class="donut">
-                        <circle class="donut-outer" cx="50%" cy="50%" r="24" fill="transparent" stroke-width="3"></circle>
-                        <circle cx="50%" cy="50%" r="15.91549430918954" fill="transparent" stroke="${donut_color}" stroke-width="10" stroke-dasharray="${fill_pct} ${empty_pct}" stroke-dashoffset="25"></circle>
-                      </svg>`;
-                      return `<svg width="100%" height="100%" viewBox="0 0 54 54" class="donut">
-                        <circle class="donut-outer" cx="50%" cy="50%" r="24" fill="transparent" stroke-width="3"></circle>
-                        <circle cx="50%" cy="50%" r="15.91549430918954" fill="transparent" stroke="${donut_color}" stroke-width="10" stroke-dasharray="${fill_pct} ${empty_pct}" stroke-dashoffset="25"></circle>
-                      </svg>`;
-                    ]]]
-                style: >
-                  .donut-outer {stroke: var(--secondary-text-color); fill:
-                  var(--label-badge-background-color);}
-
-                  .donut-ring {stroke: var(--label-badge-background-color);}
-                styles:
-                  icon:
-                    - display: none
-              - type: markdown
-                content: '#### Vacuums'
-                view_layout:
-                  grid-column: span 2
-                style: 'ha-markdown {padding: 0 !important;}'
-              - type: custom:button-card
-                entity: vacuum.abhorred_by_nature
-                name: Main
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                view_layout:
-                  grid-column: span 1
-                show_state: true
-                style: '#label {text-transform: capitalize;}'
-                tap_action:
-                  action: more-info
-              - type: custom:button-card
-                entity: vacuum.abhorred_by_nature
-                name: Upstairs
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_small
-                view_layout:
-                  grid-column: span 1
-                show_state: true
-                style: '#card {opacity: 0.4;} #label {text-transform: capitalize;}'
                 tap_action:
                   action: none
-  - title: Lights
-    icon: ''
-    panel: true
-    path: lights
-    theme: Campfire - Dark
+                show_state: true
+                state:
+                  - value: 'on'
+                    icon: mdi:alert-circle
+                    styles:
+                      card:
+                        - background-color: var(--accent-color)
+                      name:
+                        - color: var(--light-primary-color)
+                      state:
+                        - color: var(--light-primary-color)
+                  - value: 'off'
+                    styles:
+                      icon:
+                        - color: var(--primary-color)
+              - type: custom:button-card
+                entity: binary_sensor.laundry_washer
+                view_layout:
+                  grid-column: span 2
+                template:
+                  - cf_sensor
+                  - cf_sensor_compact
+                show_state: false
+                show_label: true
+                name: Washer
+                tap_action:
+                  action: none
+                state:
+                  - value: 'on'
+                    label: Running
+                    styles:
+                      card:
+                        - border-color: var(--accent-color)
+                      icon:
+                        - color: var(--accent-color)
+                  - value: 'off'
+                    label: Inactive
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: '##### Lights'
+                style: >-
+                  ha-card {background-color: transparent;} ha-markdown {padding:
+                  0 !important;}
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: repeat(10, 10%)
+                  grid-template-rows: auto
+                view_layout:
+                  grid-column: 2
+                cards:
+                  - type: custom:button-card
+                    entity: group.den_lights
+                    template:
+                      - cf_lights
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: light.den_light_1
+                    template:
+                      - cf_lights
+                    name: Den 1
+                  - type: custom:button-card
+                    entity: light.den_light_2
+                    template:
+                      - cf_lights
+                    name: Den 2
+                  - type: custom:button-card
+                    entity: switch.bar_light
+                    name: Bar
+                    template:
+                      - cf_lights_onoff
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: light.living_room_light
+                    name: Living Room
+                    template:
+                      - cf_lights
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: light.dining_room_light
+                    name: Dining Room
+                    template:
+                      - cf_lights
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: switch.entryway_light
+                    name: Entryway
+                    template:
+                      - cf_lights_onoff
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: switch.porch_light
+                    name: Porch
+                    template:
+                      - cf_lights_onoff
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:button-card
+                    entity: switch.deck_switch
+                    name: Deck
+                    template:
+                      - cf_lights_onoff
+                    view_layout:
+                      grid-column: span 2
+              - type: markdown
+                content: '##### Garage'
+                style: >-
+                  ha-card {background-color: transparent;} ha-markdown {padding:
+                  0 !important;}
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: repeat(10, 10%)
+                  grid-template-rows: auto
+                cards:
+                  - type: custom:button-card
+                    entity: binary_sensor.garage_door_sensor
+                    name: Garage
+                    view_layout:
+                      grid-column: span 6
+                    template:
+                      - cf_sensor
+                      - cf_sensor_largevalue
+                      - cf_pushbutton
+                    show_state: true
+                    tap_action:
+                      action: call-service
+                      service: cover.toggle
+                      service_data:
+                        entity_id: cover.garage_door
+                    style: |
+                      ha-card {height: auto !important;}
+                    state:
+                      - value: 'on'
+                        id: pushbutton_open
+                        icon: mdi:garage-open
+                      - value: 'off'
+                        id: pushbutton_closed
+                        icon: mdi:garage
+                  - type: custom:button-card
+                    entity: input_boolean.fire_tv_reboot
+                    name: Fire TV
+                    label: Reboot
+                    template:
+                      - cf_sensor
+                      - cf_pushbutton
+                      - cf_sensor_smallicon
+                    view_layout:
+                      grid-column: 9 / span 2
+                    show_state: false
+                    show_label: true
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/tv
+              - type: markdown
+                content: '##### Network'
+                style: >-
+                  ha-card {background-color: transparent;} ha-markdown {padding:
+                  0 !important;}
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: 25% 35% 20% 20%
+                  grid-template-rows: auto
+                cards:
+                  - type: custom:button-card
+                    entity: switch.adguard_protection
+                    name: AdBlock
+                    template:
+                      - cf_sensor
+                      - cf_sensor_compact
+                      - cf_sensor_small
+                    view_layout:
+                      grid-column: span 1
+                    show_state: true
+                    tap_action:
+                      action: toggle
+                    state:
+                      - value: 'on'
+                        icon: mdi:shield-check
+                        styles:
+                          card:
+                            - border-left-color: var(--label-badge-green)
+                            - background-color: var(--label-badge-background-color)
+                      - value: 'off'
+                        icon: mdi:shield-off-outline
+                        styles:
+                          card:
+                            - border-left-color: var(--label-badge-red)
+                            - background-color: var(--label-badge-background-color)
+                          icon:
+                            - color: var(--label-badge-red)
+                  - type: custom:button-card
+                    entity: sensor.monthly_data_cap
+                    name: Comcast Data Usage
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - cf_sensor
+                      - cf_sensor_compact
+                      - cf_sensor_small
+                      - cf_sensor_noicon
+                    show_state: false
+                    show_label: true
+                    label: |
+                      [[[
+                        return states['sensor.monthly_data_usage'].state + 
+                        '<span class="uom"> ' + states['sensor.monthly_data_usage'].attributes.unit_of_measurement + "</span> (" +
+                        entity.state + '<span class="uom">' + entity.attributes.unit_of_measurement + '</span>)'
+                      ]]]
+                    icon: mdi:swap-vertical-bold
+                    tap_action:
+                      action: more-info
+                      entity: sensor.monthly_data_usage
+                    state:
+                      - operator: template
+                        value: |
+                          [[[
+                            return entity.state > 75
+                          ]]]
+                        styles:
+                          card:
+                            - border-left-color: var(--label-badge-yellow)
+                          icon:
+                            - color: var(--label-badge-yellow)
+                  - type: custom:button-card
+                    entity: sensor.speedtest_download
+                    name: Download
+                    icon: mdi:cloud-download
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - cf_sensor
+                      - cf_sensor_compact
+                      - cf_sensor_small
+                      - cf_sensor_noicon
+                    show_state: false
+                    show_label: true
+                    label: >-
+                      [[[ return Math.round(Number(entity.state)) + " <span
+                      class='uom'>Mb/s</span>"]]]
+                  - type: custom:button-card
+                    entity: sensor.speedtest_upload
+                    name: Upload
+                    icon: mdi:cloud-upload
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - cf_sensor
+                      - cf_sensor_compact
+                      - cf_sensor_small
+                      - cf_sensor_noicon
+                    show_label: true
+                    label: >-
+                      [[[ return Math.round(Number(entity.state)) + " <span
+                      class='uom'>Mb/s</span>"]]]
+  - path: shutdown
+    title: ''
+    icon: hass:power
+    theme: Dawson - Dark
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    type: panel
     badges: []
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout
         layout:
-          grid-template-columns: 75% 25%
+          grid-template-columns: 35% 65%
           grid-template-rows: auto
           mediaquery:
             '(max-width: 600px)':
               grid-template-columns: 100%
         cards:
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(10, 10%)
-              grid-template-rows: auto
-            cards:
-              - type: markdown
-                content: '### Lights'
-                view_layout:
-                  grid-column: span 10
-                  style: >-
-                    ha-markdown {padding-top: 4px !important; padding-bottom:
-                    4px !important;}
-              - type: custom:button-card
-                entity: group.den_lights
-                template:
-                  - cf_lights
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: light.den_light_1
-                template:
-                  - cf_lights
-                name: Den 1
-              - type: custom:button-card
-                entity: light.den_light_2
-                template:
-                  - cf_lights
-                name: Den 2
-              - type: custom:button-card
-                entity: switch.bar_light
-                name: Bar
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: light.living_room_light
-                name: Living Room
-                template:
-                  - cf_lights
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: light.dining_room_light
-                name: Dining Room
-                template:
-                  - cf_lights
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.entryway_light
-                name: Entryway
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.porch_light
-                name: Porch
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: switch.deck_switch
-                name: Deck
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(4, 25%)
-              grid-template-rows: auto
-            style: 'layout-card {background-color: green;}'
-            cards:
-              - type: markdown
-                content: '### Timers'
-                view_layout:
-                  grid-column: span 4
-                  style: >-
-                    ha-markdown {padding-top: 4px !important; padding-bottom:
-                    4px !important;}
-              - type: custom:button-card
-                entity: input_boolean.timer_porch
-                name: Porch Light
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-              - type: custom:button-card
-                entity: input_boolean.night_light_living_room_switch
-                name: Living Room
-                template:
-                  - cf_lights_onoff
-                view_layout:
-                  grid-column: span 2
-  - path: shutdown
-    title: ''
-    icon: hass:power
-    theme: Campfire - Dark
-    panel: true
-    visible:
-      - user: 1adcbfbd5637444bacb8239bc794bb4a
-    badges: []
-    cards:
-      - type: custom:layout-card
-        layout_type: custom:grid-layout
-        layout:
-          grid-template-columns: 1fr 3fr 1fr
-          grid-template-rows: auto
-          row-gap: 0
-          column-gap: 0
-        cards:
           - type: custom:button-card
             entity: input_boolean.shutdown_primer
             name: Shut Down Home Assistant
-            view_layout:
-              grid-column: 2
             template:
-              - sensor
+              - cf_sensor
+            tap_action:
+              action: toggle
             show_state: false
             show_label: true
             label: >-
@@ -1086,11 +664,11 @@ views:
                   card:
                     - background-color: var(--label-badge-red)
                   name:
-                    - color: var(--light-primary-color)
+                    - color: var(--primary-color)
                   state:
-                    - color: var(--light-primary-color)
+                    - color: var(--primary-color)
                   icon:
-                    - color: var(--light-primary-color)
+                    - color: var(--primary-color)
               - value: 'off'
                 styles:
                   icon:
@@ -1099,202 +677,173 @@ views:
             conditions:
               - entity: input_boolean.shutdown_primer
                 state: 'on'
-            view_layout:
-              grid-column: 2
             card:
               type: custom:button-card
               entity: input_boolean.shutdown_confirm
               name: Confirm Shutdown
               template:
-                - sensor
+                - cf_sensor
               show_state: false
               show_label: true
               label: >-
                 You will need to physically reconnect the Pi to power to
                 restart.
-  - path: netmonitor
-    icon: hass:database
-    panel: true
+  - path: batteries
+    icon: hass:battery-charging-70
     theme: Campfire - Dark
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    type: custom:horizontal-layout
     badges: []
     cards:
-      - type: custom:layout-card
-        layout_type: custom:grid-layout
-        layout:
-          grid-template-columns: 1fr
-          grid-template-rows: auto
-          grid-gap: 0 0
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Low Batteries
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: sensor.*battery*
+          exclude:
+            - entity_id: '*iphone*'
+            - entity_id: sensor.space_between*
+            - entity_id: sensor.abhorred*
+            - entity_id: sensor.neatfreak*
+            - state: unavailable
+            - state: '> 70'
+        show_empty: false
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Unavailable Sensors
+        filter:
+          include:
+            - state: unavailable
+          exclude:
+            - entity_id: camera.*
+            - entity_id: vacuum.*
+            - entity_id: '*speedtest*'
+            - entity_id: '*plex*'
+            - domain: media_player
+        show_empty: false
+  - title: Lights
+    path: lights
+    type: sidebar
+    theme: Dawson - Dark
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: input_boolean.timer_porch
+            name: Porch Light
+        title: Timers
+        show_header_toggle: false
+        state_color: true
+        view_layout:
+          position: sidebar
+      - type: vertical-stack
         cards:
-          - type: markdown
-            content: '### Network'
-            style: >-
-              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
-              !important;}
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: 40% 60%
-            cards:
-              - type: vertical-stack
-                view_layout:
-                  - grid-column: span 2
-                cards:
-                  - type: custom:mini-graph-card
-                    entities:
-                      - entity: sensor.monthly_data_usage
-                        name: Data Used This Month
-                    hours_to_show: 168
-                    group_by: date
-                    font_size: 50
-                    height: 50
-                    icon: mdi:swap-vertical-bold
-                    style: '.state__value {font-weight: 400;}'
-                    show:
-                      state: true
-                      graph: line
-                      legend: false
-                  - type: custom:mini-graph-card
-                    entities:
-                      - entity: sensor.monthly_data_cap
-                        name: Percent of Monthly Cap
-                    hours_to_show: 168
-                    group_by: date
-                    font_size: 50
-                    height: 50
-                    icon: mdi:label-percent
-                    style: '.state__value {font-weight: 400;}'
-                    show:
-                      state: true
-                      graph: line
-                      legend: false
-                  - type: custom:mini-graph-card
-                    name: Comcast Speeds
-                    entities:
-                      - entity: sensor.speedtest_download
-                        name: Download Speed
-                      - entity: sensor.speedtest_upload
-                        name: Upload Speed
-                        color: var(--label-badge-red)
-                    hours_to_show: 72
-                    group_by: date
-                    font_size: 50
-                    height: 50
-                    bar_spacing: 2
-                    icon: mdi:speedometer
-                    style: '.state__value {font-weight: 400;}'
-                    show:
-                      state: true
-                      graph: line
-                      legend: false
-              - type: vertical-stack
-                view_layout:
-                  - grid-column: span 2
-                cards:
-                  - type: custom:button-card
-                    entity: switch.adguard_protection
-                    name: AdBlock
-                    template: sensor
-                    show_state: true
-                    size: 25%
-                    state:
-                      - value: 'on'
-                        icon: mdi:shield-check
-                        styles:
-                          icon:
-                            - color: var(--label-badge-green)
-                      - value: 'off'
-                        icon: mdi:shield-off-outline
-                        styles:
-                          icon:
-                            - color: var(--label-badge-red)
-                  - type: custom:mini-graph-card
-                    entities:
-                      - entity: sensor.adguard_dns_queries
-                        name: DNS Queries
-                      - entity: sensor.adguard_dns_queries_blocked
-                        name: Blocked Queries
-                        color: var(--label-badge-red)
-                    hours_to_show: 168
-                    group_by: date
-                    font_size: 50
-                    height: 50
-                    bar_spacing: 2
-                    icon: mdi:card-search
-                    style: '.state__value {font-weight: 400;}'
-                    show:
-                      state: false
-                      graph: bar
-                      legend: true
-                  - type: horizontal-stack
-                    view_layout:
-                      - grid-column: span 2
-                    cards:
-                      - type: custom:button-card
-                        entity: sensor.adguard_dns_queries_blocked_ratio
-                        name: Avg Block Ratio
-                        template: sensornoicon
-                        show_state: true
-                        tap_action: none
-                      - type: custom:button-card
-                        entity: sensor.adguard_average_processing_speed
-                        name: Avg Response
-                        template: sensornoicon
-                        show_state: true
-                        tap_action: none
-          - type: markdown
-            content: '### NAS'
-            style: >-
-              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
-              !important;}
-          - type: markdown
-            content: >
-              Uptime: {{
-              relative_time(strptime(states("sensor.ds420j_last_boot"),"%Y-%m-%dT%H:%M:%S%z"))
-              }}
-            style: >-
-              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
-              !important;}
-          - type: glance
-            entities:
-              - entity: sensor.plex_movies
-                name: Movies on Plex
-                icon: mdi:movie
-              - entity: sensor.plex_shows
-                name: TV Shows on Plex
-                icon: mdi:television-classic
-          - type: markdown
-            content: '### Sensors'
-            style: >-
-              ha-markdown {padding-top: 4px !important; padding-bottom: 4px
-              !important;}
-          - type: custom:auto-entities
-            style: '.text-content {font-size: x-small !important;}'
-            view_layout:
-              grid-column: span 1
-            card:
-              type: entities
-            filter:
-              include:
-                - entity_id: sensor.*battery*
-              exclude:
-                - entity_id: '*iphone*'
-                - state: unavailable
-                - state: '> 70'
-            sort:
-              method: state
-              numeric: true
-          - type: custom:auto-entities
-            view_layout:
-              grid-column: span 1
-            card:
-              type: entities
-            filter:
-              include:
-                - state: unavailable
-              exclude:
-                - entity_id: '*speedtest*'
-                - entity_id: '*plex*'
-                - entity_id: switch.dlink_w110
-                - domain: media_player
-            sort:
-              method: name
+          - type: custom:light-entity-card
+            header: Den Light 1
+            entity: light.den_light_1
+            shorten_cards: true
+            consolidate_entities: false
+            hide_header: false
+            brightness: true
+            show_slider_percent: true
+            full_width_sliders: true
+            brightness_icon: weather-sunny
+          - type: custom:light-entity-card
+            header: Den Light 2
+            entity: light.den_light_2
+            shorten_cards: true
+            consolidate_entities: false
+            hide_header: false
+            brightness: true
+            show_slider_percent: true
+            full_width_sliders: true
+            brightness_icon: weather-sunny
+          - type: custom:light-entity-card
+            header: Bar Light
+            entity: switch.bar_light
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: false
+          - type: custom:light-entity-card
+            header: Living Room Light
+            entity: light.living_room_light
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: true
+            show_slider_percent: true
+            full_width_sliders: true
+            brightness_icon: weather-sunny
+          - type: custom:light-entity-card
+            header: Dining Room Light
+            entity: light.dining_room_light
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: true
+            show_slider_percent: true
+            full_width_sliders: true
+            brightness_icon: weather-sunny
+          - type: custom:light-entity-card
+            header: Entryway Light
+            entity: switch.entryway_light
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: false
+          - type: custom:light-entity-card
+            header: Porch Light
+            entity: switch.porch_light
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: false
+          - type: custom:light-entity-card
+            header: Deck Light
+            entity: switch.deck_switch
+            shorten_cards: true
+            consolidate_entities: false
+            child_card: false
+            hide_header: false
+            brightness: false
+  - icon: ''
+    type: sidebar
+    path: tv
+    theme: Campfire - Dark
+    title: TV
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: sensor.plex_movies
+            name: Movies
+          - entity: sensor.plex_shows
+            name: TV Shows
+        title: Plex Library
+        show_header_toggle: false
+        view_layout:
+          position: main
+      - type: button
+        tap_action:
+          action: toggle
+        entity: input_boolean.fire_tv_reboot
+        name: Reboot Fire TV
+        icon: mdi:restart-alert
+        show_icon: true
+        show_state: false
+        icon_height: 50px
+        hold_action:
+          action: none
+        view_layout:
+          position: sidebar
