@@ -152,30 +152,20 @@
     entity_id: input_boolean.barn_door_protocol
   mode: single
 - id: '1618699479074'
-  alias: 'Den Tablet: Outlet Power Off'
-  description: Turn the outlet off if its been on long enough
+  alias: 'Den Tablet: Outlet Power Toggle'
+  description: ''
   trigger:
   - platform: state
     to: 'on'
     for: 03:00:00
     entity_id: switch.dlink_w110
-  condition: []
-  action:
-  - service: switch.turn_off
-    target:
-      entity_id: switch.dlink_w110
-  mode: single
-- id: '1618699514747'
-  alias: 'Den Tablet: Outlet Power On'
-  description: Turn the outlet back on if it's been off too long
-  trigger:
   - platform: state
+    entity_id: switch.dlink_w110
     to: 'off'
     for: 01:00:00
-    entity_id: switch.dlink_w110
   condition: []
   action:
-  - service: switch.turn_on
+  - service: switch.toggle
     target:
       entity_id: switch.dlink_w110
   mode: single
@@ -214,6 +204,9 @@
   - condition: time
     after: '22:00:00'
     before: 06:00:00
+  - condition: state
+    entity_id: input_select.presence_mode
+    state: Away
   action:
   - service: notify.telegram_tom
     data:
@@ -253,11 +246,6 @@
   - service: media_player.turn_on
     target:
       entity_id: media_player.fire_tv
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 0
-      milliseconds: 500
   - service: androidtv.adb_command
     data:
       entity_id: media_player.fire_tv
@@ -283,3 +271,30 @@
       remote: 72b251a428277f7ce1b4de58b20344b5
       light:
         entity_id: light.living_room_light
+- id: '1629823138157'
+  alias: Speed Tests
+  description: ''
+  trigger:
+  - platform: time
+    at: '12:00:00'
+  condition: []
+  action:
+  - service: speedtestdotnet.speedtest
+  mode: single
+- id: '1632795665418'
+  alias: 'Living Room TV: Reboot'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.fire_tv_reboot
+    to: 'on'
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.fire_tv_reboot
+  - service: androidtv.adb_command
+    data:
+      entity_id: media_player.fire_tv
+      command: reboot
+  mode: single
