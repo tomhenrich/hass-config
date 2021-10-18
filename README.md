@@ -2,6 +2,7 @@
 
 ## Controls
 * **Living Room Light**
+    * Can be controlled by IKEA dimmer button mounted to the lamp, or:
     * Turn on/off: double-tap Entryway Light Switch up/down, or double-tap Dining Room Light Switch up/down
     * Make brighter: triple-tap Entryway Light Switch up/down, or triple-tap Dining Room Light Switch up/down
 * **Main Bathroom Light** - single tap up will turn light on at previous level
@@ -9,7 +10,7 @@
     * Turn on to Medium brightness: double-tap up
     * Turn on to Full brightness: triple-tap up
 * **Den Lights**
-    * Controlled solely from the Den Tablet dashboard.
+    * Controlled from the Den Tablet dashboard, or from the IKEA dimmer button mounted to Den Light 1
 * **Good Night**
     * Double-tap the Main Bedroom Light Switch down
         * Turn off:
@@ -40,6 +41,6 @@
 * If **Porch Light Timer** is on:
     * Porch Light will turn on 1 hour after sunset, and will turn off at 11pm
 * If **Living Room Light Timer** is on:
-    * If the upstairs hallway motion sensor detects motion from sunset to sunrise, and the living room light is off, then it will turn on
-    * If the upstairs hallway motion sensor doesn't detect motion for 2 minutes after being triggered, then the living room light will turn back off
-    * If the living room light is manually turned on or off (or made brighter or dimmer) in the meantime, then the motion sensor won't automatically turn it off
+    * If either hallway motion sensor detects motion from sunset to sunrise, and the living room light is off, then it will turn on
+    * If either hallway motion sensor doesn't detect motion for 2 minutes after being triggered, then the living room light will turn back off
+    * If the living room light is manually turned on or off (or made brighter or dimmer) in the meantime, then the motion sensors won't automatically turn it off
