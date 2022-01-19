@@ -46,7 +46,7 @@
 # scan every 1 hour
 - platform: rest
   resource: !secret my_airquality_url
-  name: "AQI Report"
+  name: airquality_report
   scan_interval: 3600
   json_attributes:
     - aqi
@@ -89,25 +89,37 @@
     owm_current_temp:
         friendly_name: Current Temperature
         value_template: >
-          {{ state_attr('sensor.weather_report','current_temp') }}
+          {{ state_attr('sensor.weather_report','current_temp')|int }}
+        unit_of_measurement: "°F"
+
+    owm_current_feel:
+        friendly_name: Feels Like
+        value_template: >
+          {{ state_attr('sensor.weather_report','current_feel')|int }}
         unit_of_measurement: "°F"
 
     owm_current_humidity:
         friendly_name: Current Humidity
         value_template: >
-          {{ state_attr('sensor.weather_report','current_humidity') }}
+          {{ state_attr('sensor.weather_report','current_humidity')|int }}
         unit_of_measurement: "%"
 
     owm_today_high:
         friendly_name: "Today's High Temperature"
         value_template: >
-          {{ state_attr('sensor.weather_report','today_temphigh') }}
+          {{ state_attr('sensor.weather_report','today_temphigh')|int }}
         unit_of_measurement: "°F"
 
     owm_today_low:
         friendly_name: "Today's Low Temperature"
         value_template: >
-          {{ state_attr('sensor.weather_report','today_templow') }}
+          {{ state_attr('sensor.weather_report','today_templow')|int }}
+        unit_of_measurement: "°F"
+
+    inside_temp:
+        friendly_name: "Inside Temperature"
+        value_template: >
+          {{ states('sensor.ecobee3_temperature')|int }}
         unit_of_measurement: "°F"
 
     plex_movies:
@@ -132,25 +144,58 @@
     monthly_data_cap:
         friendly_name: Data Cap Usage
         value_template: >
-          {{ state_attr('sensor.monthly_data_usage','per') }}
+          {{ state_attr('sensor.monthly_data_usage','per')|float }}
         unit_of_measurement: "%"
         attribute_templates:
           updated: >
             {{ state_attr('sensor.monthly_data_usage','upd') }}
           progress: >
-            {{ state_attr('sensor.monthly_data_usage','progress') }}
-        icon_template: 'mdi:label-percent'
+            {{ state_attr('sensor.monthly_data_usage','progress')|float }}
+        icon_template: >
+          {% set pct = state_attr('sensor.monthly_data_usage','per')|float %}
+          {% if pct < 12.5 %}
+            mdi:circle-outline
+          {% elif (pct >= 12.5 and pct < 25) %}
+            mdi:circle-slice-1
+          {% elif (pct >= 25 and pct < 37.5) %}
+            mdi:circle-slice-2
+          {% elif (pct >= 37.5 and pct < 50) %}
+            mdi:circle-slice-3
+          {% elif (pct >= 50 and pct < 62.5) %}
+            mdi:circle-slice-4
+          {% elif (pct >= 62.5 and pct < 75) %}
+            mdi:circle-slice-5
+          {% elif (pct >= 75 and pct < 87.5) %}
+            mdi:circle-slice-6
+          {% elif (pct >= 87.5 and pct < 100) %}
+            mdi:circle-slice-7
+          {% else %}
+            mdi:circle-slice-8
+          {% endif %}
 
     airquality:
         friendly_name: Air Quality
         unique_id: airquality
         value_template: >
-          {{ state_attr('sensor.aqi_report','desc') }}
+          {{ state_attr('sensor.airquality_report','desc') }}
         attribute_templates:
           AQI: >
-            {{ state_attr('sensor.aqi_report','aqi') }}
-          upd: >
-            {{ state_attr('sensor.aqi_report','fetched') }}
+            {{ state_attr('sensor.airquality_report','aqi')|float }}
+        icon_template: >
+          {% set aqi = state_attr('sensor.airquality_report','desc') %}
+          {% if aqi == "Good" %}
+            mdi:emoticon-happy-outline
+          {% elif aqi == "Moderate" %}
+            mdi:emoticon-neutral-outline
+          {% elif aqi == "Unhealthy" %}
+            mdi:emoticon-frown-outline
+          {% elif aqi == "Very Unhealthy" %}
+            mdi:emoticon-frown
+          {% elif aqi == "Hazardous" %}
+            mdi:emoticon-dead
+          {% else %}
+            mdi:help-circle-outline
+          {% endif %}
 
     month_days:
         friendly_name: Days This Month
@@ -177,10 +222,5 @@
     ds420j_last_boot_fmt:
         friendly_name: DS420j Last Boot
         value_template: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
-        icon_template: 'mdi:calendar-clock'
-
-    vac_abhorred_lastrun:
-        friendly_name: "Abhorred by Nature: Last Run"
-        value_template: "{{ as_timestamp(state_attr('vacuum.abhorred_by_nature','clean_stop')) | timestamp_custom('%b %-d, %H:%M') }}"
         icon_template: 'mdi:calendar-clock'
 
