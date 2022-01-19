@@ -1,53 +1,3 @@
-- id: '1608753473958'
-  alias: 'Porch Light: On'
-  trigger:
-  - platform: sun
-    event: sunset
-  condition:
-  - condition: state
-    entity_id: input_boolean.timer_porch
-    state: 'on'
-  action:
-  - type: turn_on
-    device_id: 15371c839a088f15441a41146da480b9
-    entity_id: switch.porch_light
-    domain: switch
-  mode: single
-- id: '1609212332962'
-  alias: 'Porch Light: Off'
-  description: ''
-  trigger:
-  - platform: time
-    at: '23:00:00'
-  condition:
-  - condition: state
-    entity_id: input_boolean.timer_porch
-    state: 'on'
-  action:
-  - type: turn_off
-    device_id: 15371c839a088f15441a41146da480b9
-    entity_id: switch.porch_light
-    domain: switch
-  mode: single
-- id: '1609516471011'
-  alias: 'Master Bath: 1 Low'
-  description: ''
-  trigger:
-  - platform: event
-    event_type: zwave.scene_activated
-    event_data:
-      entity_id: zwave.master_bath_light
-      node_id: 15
-      scene_data: 7680
-      scene_id: 3
-  condition: []
-  action:
-  - type: turn_on
-    device_id: 59ed4f9e1e0bf67641b76364515495aa
-    entity_id: light.master_bath_light
-    domain: light
-    brightness_pct: 50
-  mode: single
 - id: '1609516804056'
   alias: Good Night
   description: ''
@@ -57,129 +7,11 @@
     event_data:
       entity_id: zwave.master_bedroom_light
       node_id: 14
-      scene_data: 3
+      scene_data: 7860
       scene_id: 1
   condition: []
   action:
   - scene: scene.good_night
-  mode: single
-- id: '1609525222269'
-  alias: 'Master Bath: 2 Medium'
-  description: ''
-  trigger:
-  - platform: event
-    event_type: zwave.scene_activated
-    event_data:
-      entity_id: zwave.master_bath_light
-      node_id: 15
-      scene_data: 7860
-      scene_id: 2
-  condition: []
-  action:
-  - type: turn_on
-    device_id: 59ed4f9e1e0bf67641b76364515495aa
-    entity_id: light.master_bath_light
-    domain: light
-    brightness_pct: 80
-  mode: single
-- id: '1609525247708'
-  alias: 'Master Bath: 3 High'
-  description: ''
-  trigger:
-  - platform: event
-    event_type: zwave.scene_activated
-    event_data:
-      entity_id: zwave.master_bath_light
-      node_id: 15
-      scene_data: 7920
-      scene_id: 2
-  condition: []
-  action:
-  - type: turn_on
-    device_id: 59ed4f9e1e0bf67641b76364515495aa
-    entity_id: light.master_bath_light
-    domain: light
-    brightness_pct: 100
-  mode: single
-- id: '1609726220058'
-  alias: 'Barn Door Protocol: Activate'
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: group.exterior
-    to: 'on'
-    for: 00:10:00
-  condition:
-  - condition: state
-    entity_id: input_boolean.barn_door_protocol
-    state: 'off'
-  - condition: device
-    device_id: 3a4702e5f54b52ded08ab1b7002dcab0
-    domain: climate
-    entity_id: climate.ecobee3
-    type: is_hvac_mode
-    hvac_mode: heat
-  action:
-  - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
-    domain: climate
-    entity_id: climate.ecobee3
-    type: set_hvac_mode
-    hvac_mode: 'off'
-  - service: input_boolean.turn_on
-    data: {}
-    entity_id: input_boolean.barn_door_protocol
-  mode: single
-- id: '1609726335791'
-  alias: 'Barn Door Protocol: Deactivate'
-  description: Turn furnace heat back on when doors have all closed
-  trigger:
-  - platform: state
-    entity_id: group.exterior
-    to: 'on'
-    for: 00:05:00
-  condition:
-  - condition: state
-    entity_id: input_boolean.barn_door_protocol
-    state: 'on'
-  action:
-  - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
-    domain: climate
-    entity_id: climate.ecobee3
-    type: set_hvac_mode
-    hvac_mode: heat
-  - service: input_boolean.turn_off
-    data: {}
-    entity_id: input_boolean.barn_door_protocol
-  mode: single
-- id: '1618699479074'
-  alias: 'Den Tablet: Outlet Power Toggle'
-  description: ''
-  trigger:
-  - platform: state
-    to: 'on'
-    for: 03:00:00
-    entity_id: switch.dlink_w110
-  - platform: state
-    entity_id: switch.dlink_w110
-    to: 'off'
-    for: 01:00:00
-  condition: []
-  action:
-  - service: switch.toggle
-    target:
-      entity_id: switch.dlink_w110
-  mode: single
-- id: '1618931305830'
-  alias: Heartworm Meds Due
-  description: ''
-  trigger:
-  - platform: template
-    value_template: '{{ now().day == 15 }}'
-  condition: []
-  action:
-  - service: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.heartworm_needed
   mode: single
 - id: '1622671166530'
   alias: Unexpected Entry
@@ -238,39 +70,16 @@
     platform: device
     type: remote_button_short_press
     subtype: turn_on
-  condition:
-  - condition: template
-    value_template: '{{ state_attr(''media_player.fire_tv'', ''source'') != ''Plex''
-      }}'
+  condition: []
   action:
   - service: media_player.turn_on
     target:
-      entity_id: media_player.fire_tv
+      entity_id: media_player.den_tv
   - service: androidtv.adb_command
     data:
-      entity_id: media_player.fire_tv
       command: ' am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity'
-  mode: single
-- id: '1626486666380'
-  alias: Den Light Dimmer
-  description: ''
-  use_blueprint:
-    path: poolcactus/zha-ikea-tradfri-on-off-switch-incl-dimmer.yaml
-    input:
-      remote: 84350b6f41b7cad45266de52c9f7b34b
-      light:
-        entity_id:
-        - light.den_light_1
-        - light.den_light_2
-- id: '1628346244000'
-  alias: Living Room Light Button
-  description: ''
-  use_blueprint:
-    path: poolcactus/zha-ikea-tradfri-on-off-switch-incl-dimmer.yaml
-    input:
-      remote: 72b251a428277f7ce1b4de58b20344b5
-      light:
-        entity_id: light.living_room_light
+      entity_id: media_player.den_tv
+  mode: restart
 - id: '1629823138157'
   alias: Speed Tests
   description: ''
@@ -282,19 +91,502 @@
   - service: speedtestdotnet.speedtest
   mode: single
 - id: '1632795665418'
-  alias: 'Living Room TV: Reboot'
+  alias: 'Den: TV - Reboot'
   description: ''
   trigger:
   - platform: state
-    entity_id: input_boolean.fire_tv_reboot
+    entity_id: input_boolean.den_tv_reboot
     to: 'on'
   condition: []
   action:
   - service: input_boolean.turn_off
     target:
-      entity_id: input_boolean.fire_tv_reboot
+      entity_id:
+      - input_boolean.den_tv_reboot
   - service: androidtv.adb_command
     data:
-      entity_id: media_player.fire_tv
       command: reboot
+      entity_id: media_player.den_tv
+  mode: single
+- id: '1632860503837'
+  alias: 'Living Room: Light - Dimmer Button'
+  description: ''
+  use_blueprint:
+    path: shannon/ikea_tradfri_2button_dimmer.yaml
+    input:
+      button_device: 72b251a428277f7ce1b4de58b20344b5
+      light_target:
+        entity_id: light.living_room_light
+      light_step: 20
+      light_delay_ms: 250
+- id: '1632860568197'
+  alias: 'Den: Lights - Dimmer Button'
+  description: ''
+  use_blueprint:
+    path: shannon/ikea_tradfri_2button_dimmer.yaml
+    input:
+      button_device: 84350b6f41b7cad45266de52c9f7b34b
+      light_target:
+        entity_id:
+        - light.den_light_1
+        - light.den_light_2
+      light_step: 20
+      light_delay_ms: 250
+- id: '1634267597103'
+  alias: 'Main Bedroom: Light - Toggle'
+  description: ''
+  trigger:
+  - platform: webhook
+    webhook_id: mainbedroomlight
+  condition: []
+  action:
+  - type: toggle
+    device_id: 87af888ed4b8db3fe97b27e45725364e
+    entity_id: switch.master_bedroom_light
+    domain: switch
+  mode: single
+- id: '1635291448132'
+  alias: 'Porch: Light on Timer'
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    id: sunset
+  - platform: sun
+    event: sunrise
+    id: sunrise
+    offset: -00:30:00
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: sunset
+      sequence:
+      - type: turn_on
+        device_id: 15371c839a088f15441a41146da480b9
+        entity_id: switch.porch_light
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id: sunrise
+      sequence:
+      - type: turn_off
+        device_id: 15371c839a088f15441a41146da480b9
+        entity_id: switch.porch_light
+        domain: switch
+    default: []
+  mode: single
+- id: '1635291888215'
+  alias: Barn Door Protocol
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: group.exterior
+    to: 'on'
+    for: 00:10:00
+    id: doorsopened
+  - platform: state
+    entity_id: group.exterior
+    id: doorsclosed
+    to: 'off'
+    for: 00:05:00
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: doorsopened
+      - condition: state
+        state: 'off'
+        entity_id: input_boolean.barn_door_protocol
+      - condition: state
+        entity_id: climate.ecobee3
+        state: heat
+      sequence:
+      - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+        domain: climate
+        entity_id: climate.ecobee3
+        type: set_hvac_mode
+        hvac_mode: 'off'
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.barn_door_protocol
+      - service: notify.mobile_app_iphone
+        data:
+          message: Furnace has been turned off.
+          title: Barn Door Protocol Activated
+    - conditions:
+      - condition: trigger
+        id: doorsclosed
+      - condition: state
+        entity_id: input_boolean.barn_door_protocol
+        state: 'on'
+      sequence:
+      - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+        domain: climate
+        entity_id: climate.ecobee3
+        type: set_hvac_mode
+        hvac_mode: heat
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.barn_door_protocol
+      - service: notify.mobile_app_iphone
+        data:
+          message: Furnace has resumed heat.
+          title: Barn Door Protocol Deactivated
+    default: []
+  mode: restart
+- id: '1635292786302'
+  alias: 'Living Room: Nightlight'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.fibaro_motion_sensor
+    from: 'off'
+    to: 'on'
+    id: motion
+  - platform: state
+    entity_id: binary_sensor.hallway_motion
+    id: nomotion
+    from: 'on'
+    to: 'off'
+    for: 00:02:00
+  - platform: state
+    entity_id: light.living_room_light
+    id: lightsout
+    from: 'on'
+    to: 'off'
+  - platform: event
+    id: disable
+    event_type: zwave.scene_activated
+    event_data:
+      entity_id: zwave.master_bedroom_light
+      node_id: 18
+      scene_data: 4
+      scene_id: 1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: motion
+      - condition: state
+        state: 'on'
+        entity_id: input_boolean.livingroom_nightlight_enabled
+      - condition: state
+        entity_id: binary_sensor.sundown
+        state: 'on'
+      - condition: device
+        type: is_off
+        device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        entity_id: light.living_room_light
+        domain: light
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      sequence:
+      - type: turn_on
+        device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        entity_id: light.living_room_light
+        domain: light
+        brightness_pct: 30
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.livingroom_nightlight_status
+    - conditions:
+      - condition: trigger
+        id: nomotion
+      - condition: state
+        state: 'on'
+        entity_id: input_boolean.livingroom_nightlight_status
+      sequence:
+      - type: turn_off
+        device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        entity_id: light.living_room_light
+        domain: light
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.livingroom_nightlight_status
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: lightsout
+        - condition: trigger
+          id: disable
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.livingroom_nightlight_status
+    default: []
+  mode: restart
+- id: '1635376745271'
+  alias: 'Notify: Washing Machine Done'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.laundry_washer
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Washing machine has finished.
+      title: Wet Laundry
+  mode: single
+- id: '1635383409645'
+  alias: 'Master Bathroom: Light Buttons'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    id: low
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7680
+      scene_id: 3
+  - platform: event
+    event_type: zwave.scene_activated
+    id: medium
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7860
+      scene_id: 2
+  - platform: event
+    event_type: zwave.scene_activated
+    id: high
+    event_data:
+      entity_id: zwave.master_bath_light
+      node_id: 15
+      scene_data: 7920
+      scene_id: 2
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: low
+      sequence:
+      - type: turn_on
+        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        entity_id: light.master_bath_light
+        domain: light
+        brightness_pct: 50
+    - conditions:
+      - condition: trigger
+        id: medium
+      sequence:
+      - type: turn_on
+        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        entity_id: light.master_bath_light
+        domain: light
+        brightness_pct: 80
+    - conditions:
+      - condition: trigger
+        id: high
+      sequence:
+      - type: turn_on
+        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        entity_id: light.master_bath_light
+        domain: light
+        brightness_pct: 100
+    default: []
+  mode: single
+- id: '1635473249505'
+  alias: Doorbell Pressed
+  description: ''
+  trigger:
+  - device_id: 6cdda8e754024fedf106703f18c3f64b
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+    id: pressed
+  - platform: state
+    entity_id: input_boolean.doorbell
+    id: delay_off
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: pressed
+      - condition: state
+        entity_id: input_boolean.doorbell
+        state: 'off'
+      sequence:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.doorbell
+      - service: notify.mobile_app_iphone
+        data:
+          message: Doorbell pressed!
+    - conditions:
+      - condition: trigger
+        id: delay_off
+      sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.doorbell
+    default: []
+  mode: single
+- id: '1635605604406'
+  alias: 'Notify: Washer Leak'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.washer_leak_sensor
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      title: Leak Detected!
+      message: Water detected on laundry area floor!
+  - service: notify.telegram_tom
+    data:
+      message: Washing Machine Leak Detected!
+      title: Leak Detected!
+  mode: single
+- id: '1637943911802'
+  alias: 'Living Room: Christmas Tree Timer'
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.time_christmas_tree_on
+    id: tree_on
+  - platform: time
+    at: input_datetime.timer_christmas_tree_off
+    id: tree_off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: tree_on
+      sequence:
+      - type: turn_on
+        device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
+        entity_id: switch.monoprice_outlet_1
+        domain: switch
+    - conditions:
+      - condition: trigger
+        id: tree_off
+      sequence:
+      - type: turn_off
+        device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
+        entity_id: switch.monoprice_outlet_1
+        domain: switch
+    default: []
+  mode: single
+- id: '1640229738497'
+  alias: Vacation Alerts
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: group.exterior
+    to: 'on'
+    id: doors_opened
+  - platform: state
+    entity_id: cover.garage_door
+    id: garage_opened
+    to: open
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: input_boolean.vacation_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.guest_mode
+      state: 'off'
+  action:
+  - service: notify.mobile_app_iphone
+    data:
+      message: Doors or garage opened while in vacation mode!
+  mode: parallel
+  max: 10
+- id: '1641600921734'
+  alias: 'Living Room: Light Buttons'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: zwave.scene_activated
+    id: light_on_d
+    event_data:
+      entity_id: zwave.dining_room_light
+      node_id: 18
+      scene_data: 7860
+      scene_id: 2
+  - platform: event
+    event_type: zwave.scene_activated
+    id: light_on_e
+    event_data:
+      entity_id: zwave.entryway_light
+      node_id: 12
+      scene_data: 3
+      scene_id: 2
+  - platform: event
+    event_type: zwave.scene_activated
+    id: light_off_d
+    event_data:
+      entity_id: zwave.dining_room_light
+      node_id: 18
+      scene_data: 7860
+      scene_id: 1
+  - platform: event
+    event_type: zwave.scene_activated
+    id: light_off_e
+    event_data:
+      entity_id: zwave.entryway_light
+      node_id: 12
+      scene_data: 3
+      scene_id: 1
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: light_on_d
+        - condition: trigger
+          id: light_on_e
+      sequence:
+      - type: turn_on
+        device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        entity_id: light.living_room_light
+        domain: light
+    default: []
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: light_off_d
+        - condition: trigger
+          id: light_off_e
+      sequence:
+      - type: turn_off
+        device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        entity_id: light.living_room_light
+        domain: light
+    default: []
   mode: single
