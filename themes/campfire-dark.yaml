@@ -46,6 +46,12 @@ Campfire - Dark:
   paper-slider-pin-color: var(--paper-slider-knob-color)
   paper-slider-active-color: var(--paper-slider-knob-color)
   paper-slider-secondary-color: var(--light-primary-color)
+  ### Switches ###
+  switch-checked-color: var(--color-water)
+  switch-checked-track-color: "#7aa9ff"
+  switch-checked-button-color: var(--color-water)
+  switch-unchecked-track-color: var(--color-ash)
+  switch-unchecked-button-color: var(-color-marshmallow)
   ### Labels ###
   label-badge-background-color: var(--color-charcoal)
   label-badge-text-color: var(--color-marshmallow)
