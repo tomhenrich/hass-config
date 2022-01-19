@@ -1,5 +1,5 @@
 - id: '1626148652316'
-  name: Good Night
+  name: Lights Out
   entities:
     zwave.kitchen_light:
       node_id: 19
@@ -14,10 +14,10 @@
       max_baud_rate: 40000
       is_zwave_plus: true
       capabilities:
-      - routing
-      - zwave_plus
       - beaming
       - listening
+      - zwave_plus
+      - routing
       neighbors:
       - 1
       - 3
@@ -26,24 +26,26 @@
       - 6
       - 7
       - 9
+      - 10
       - 12
       - 14
       - 15
       - 16
       - 17
       - 18
-      sentCnt: 10
+      - 22
+      sentCnt: 23
       sentFailed: 0
       retries: 0
-      receivedCnt: 8
-      receivedDups: 0
-      receivedUnsolicited: 3
-      sentTS: '2021-07-21 12:48:17:712 '
-      receivedTS: '2021-07-22 14:34:18:810 '
-      lastRequestRTT: 21
+      receivedCnt: 93
+      receivedDups: 6
+      receivedUnsolicited: 81
+      sentTS: '2021-11-28 16:18:06:167 '
+      receivedTS: '2021-11-30 18:01:57:568 '
+      lastRequestRTT: 26
       averageRequestRTT: 25
-      lastResponseRTT: 35
-      averageResponseRTT: 39
+      lastResponseRTT: 42
+      averageResponseRTT: 41
       application_version: '1.11'
       friendly_name: Kitchen Light Switch
       state: ready
@@ -55,52 +57,6 @@
       friendly_name: Kitchen Light Switch
       icon: hass:lightbulb
       state: 'off'
-    zwave.deck_switch:
-      node_id: 9
-      node_name: Inovelli NZW30 Smart Switch
-      manufacturer_name: Inovelli
-      product_name: NZW30 Smart Switch
-      query_stage: Complete
-      is_awake: true
-      is_ready: true
-      is_failed: false
-      is_info_received: true
-      max_baud_rate: 40000
-      is_zwave_plus: true
-      capabilities:
-      - routing
-      - zwave_plus
-      - beaming
-      - listening
-      neighbors:
-      - 4
-      - 5
-      - 6
-      - 12
-      - 17
-      - 19
-      sentCnt: 10
-      sentFailed: 0
-      retries: 0
-      receivedCnt: 10
-      receivedDups: 0
-      receivedUnsolicited: 4
-      sentTS: '2021-07-21 12:47:53:334 '
-      receivedTS: '2021-07-21 21:54:15:879 '
-      lastRequestRTT: 107
-      averageRequestRTT: 110
-      lastResponseRTT: 181
-      averageResponseRTT: 179
-      application_version: '1.03'
-      friendly_name: Deck Switch
-      state: ready
-    switch.deck_switch:
-      node_id: 9
-      value_index: 0
-      value_instance: 1
-      value_id: '72057594193723392'
-      friendly_name: Deck Light
-      state: 'off'
     light.living_room_light:
       supported_color_modes:
       - brightness
@@ -111,14 +67,14 @@
     light.den_light_1:
       supported_color_modes:
       - brightness
-      off_brightness:
+      off_brightness: 254
       friendly_name: Den Light 1
       supported_features: 41
       state: 'off'
     light.den_light_2:
       supported_color_modes:
       - brightness
-      off_brightness:
+      off_brightness: 254
       friendly_name: Den Light 2
       supported_features: 41
       state: 'off'
@@ -146,30 +102,31 @@
       max_baud_rate: 40000
       is_zwave_plus: true
       capabilities:
-      - routing
-      - zwave_plus
       - beaming
       - listening
+      - zwave_plus
+      - routing
       neighbors:
       - 1
       - 4
-      - 5
-      - 14
+      - 7
       - 16
       - 17
+      - 18
       - 19
-      sentCnt: 28
+      - 22
+      sentCnt: 109
       sentFailed: 0
       retries: 0
-      receivedCnt: 67
-      receivedDups: 4
-      receivedUnsolicited: 45
-      sentTS: '2021-07-22 19:36:19:463 '
-      receivedTS: '2021-07-22 19:36:21:602 '
-      lastRequestRTT: 22
+      receivedCnt: 306
+      receivedDups: 23
+      receivedUnsolicited: 219
+      sentTS: '2021-11-30 19:44:57:060 '
+      receivedTS: '2021-11-30 19:44:59:644 '
+      lastRequestRTT: 23
       averageRequestRTT: 22
-      lastResponseRTT: 41
-      averageResponseRTT: 41
+      lastResponseRTT: 42
+      averageResponseRTT: 42
       application_version: '1.35'
       friendly_name: Master Bathroom Light
       state: ready
@@ -194,31 +151,29 @@
       max_baud_rate: 40000
       is_zwave_plus: true
       capabilities:
-      - routing
-      - zwave_plus
       - beaming
       - listening
+      - zwave_plus
+      - routing
       neighbors:
       - 1
       - 4
       - 5
-      - 6
       - 7
-      - 15
       - 16
       - 19
-      sentCnt: 12
+      sentCnt: 40
       sentFailed: 0
       retries: 0
-      receivedCnt: 24
-      receivedDups: 1
-      receivedUnsolicited: 17
-      sentTS: '2021-07-22 21:02:42:189 '
-      receivedTS: '2021-07-22 21:02:42:375 '
-      lastRequestRTT: 71
-      averageRequestRTT: 82
-      lastResponseRTT: 141
-      averageResponseRTT: 156
+      receivedCnt: 335
+      receivedDups: 72
+      receivedUnsolicited: 305
+      sentTS: '2021-11-30 21:23:49:802 '
+      receivedTS: '2021-11-30 21:23:49:976 '
+      lastRequestRTT: 42
+      averageRequestRTT: 57
+      lastResponseRTT: 86
+      averageResponseRTT: 93
       application_version: '1.03'
       friendly_name: Master Bedroom Light
       state: ready
@@ -235,30 +190,32 @@
       max_baud_rate: 40000
       is_zwave_plus: true
       capabilities:
-      - routing
-      - zwave_plus
       - beaming
       - listening
+      - zwave_plus
+      - routing
       neighbors:
       - 4
       - 6
       - 7
+      - 10
       - 12
-      - 16
+      - 15
       - 17
       - 19
-      sentCnt: 15
+      - 22
+      sentCnt: 68
       sentFailed: 0
       retries: 0
-      receivedCnt: 25
-      receivedDups: 2
-      receivedUnsolicited: 4
-      sentTS: '2021-07-22 19:34:13:191 '
-      receivedTS: '2021-07-22 19:34:13:522 '
-      lastRequestRTT: 257
-      averageRequestRTT: 299
-      lastResponseRTT: 330
-      averageResponseRTT: 233
+      receivedCnt: 227
+      receivedDups: 31
+      receivedUnsolicited: 44
+      sentTS: '2021-11-30 13:02:08:608 '
+      receivedTS: '2021-11-30 13:02:08:936 '
+      lastRequestRTT: 249
+      averageRequestRTT: 260
+      lastResponseRTT: 328
+      averageResponseRTT: 250
       application_version: '1.03'
       friendly_name: Dining Room Light
       state: ready
@@ -285,30 +242,30 @@
       max_baud_rate: 40000
       is_zwave_plus: false
       capabilities:
-      - routing
       - beaming
       - listening
+      - routing
       neighbors:
       - 1
-      - 3
       - 4
       - 6
       - 7
       - 9
       - 10
+      - 12
       - 14
-      - 15
       - 16
       - 17
       - 19
-      sentCnt: 8
+      - 22
+      sentCnt: 20
       sentFailed: 0
       retries: 0
-      receivedCnt: 6
+      receivedCnt: 12
       receivedDups: 0
       receivedUnsolicited: 0
-      sentTS: '2021-07-21 12:47:40:336 '
-      receivedTS: '2021-07-21 12:47:40:367 '
+      sentTS: '2021-11-26 19:39:29:665 '
+      receivedTS: '2021-11-26 19:39:29:695 '
       lastRequestRTT: 21
       averageRequestRTT: 21
       lastResponseRTT: 30
@@ -337,16 +294,15 @@
       max_baud_rate: 40000
       is_zwave_plus: false
       capabilities:
-      - routing
       - beaming
       - listening
+      - routing
       neighbors:
       - 1
       - 3
       - 4
       - 5
       - 6
-      - 7
       - 9
       - 10
       - 12
@@ -354,18 +310,19 @@
       - 16
       - 18
       - 19
+      - 22
       sentCnt: 5
       sentFailed: 0
       retries: 0
       receivedCnt: 3
       receivedDups: 0
       receivedUnsolicited: 0
-      sentTS: '2021-07-21 12:47:40:768 '
-      receivedTS: '2021-07-21 12:47:40:932 '
+      sentTS: '2021-11-17 20:16:43:238 '
+      receivedTS: '2021-11-17 20:16:43:400 '
       lastRequestRTT: 114
-      averageRequestRTT: 98
-      lastResponseRTT: 163
-      averageResponseRTT: 147
+      averageRequestRTT: 105
+      lastResponseRTT: 162
+      averageResponseRTT: 161
       application_version: '1.10'
       friendly_name: Wyze Basement Switch
       state: ready
@@ -392,31 +349,34 @@
       max_baud_rate: 40000
       is_zwave_plus: true
       capabilities:
-      - routing
-      - zwave_plus
       - beaming
       - listening
+      - zwave_plus
+      - routing
       neighbors:
+      - 3
       - 4
+      - 5
       - 6
-      - 9
+      - 7
       - 10
       - 16
       - 17
       - 18
       - 19
+      - 22
       sentCnt: 12
       sentFailed: 0
       retries: 0
-      receivedCnt: 12
+      receivedCnt: 15
       receivedDups: 1
-      receivedUnsolicited: 5
-      sentTS: '2021-07-22 21:05:02:468 '
-      receivedTS: '2021-07-22 21:05:02:668 '
-      lastRequestRTT: 73
-      averageRequestRTT: 78
-      lastResponseRTT: 152
-      averageResponseRTT: 166
+      receivedUnsolicited: 8
+      sentTS: '2021-11-29 21:11:23:742 '
+      receivedTS: '2021-11-29 21:11:23:946 '
+      lastRequestRTT: 81
+      averageRequestRTT: 79
+      lastResponseRTT: 157
+      averageResponseRTT: 168
       application_version: '1.03'
       friendly_name: Entryway Light
       state: ready
@@ -428,3 +388,97 @@
       friendly_name: Entryway Light
       icon: hass:lightbulb
       state: 'off'
+    zwave.deck_light:
+      node_id: 9
+      node_name: Inovelli NZW30 Smart Switch
+      manufacturer_name: Inovelli
+      product_name: NZW30 Smart Switch
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: true
+      capabilities:
+      - beaming
+      - listening
+      - zwave_plus
+      - routing
+      neighbors:
+      - 3
+      - 4
+      - 5
+      - 6
+      - 10
+      - 16
+      - 17
+      - 19
+      sentCnt: 28
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 86
+      receivedDups: 24
+      receivedUnsolicited: 70
+      sentTS: '2021-11-26 17:53:55:916 '
+      receivedTS: '2021-11-30 18:10:49:296 '
+      lastRequestRTT: 77
+      averageRequestRTT: 71
+      lastResponseRTT: 158
+      averageResponseRTT: 145
+      application_version: '1.03'
+      friendly_name: Deck Switch
+      state: ready
+    switch.deck_light:
+      node_id: 9
+      value_index: 0
+      value_instance: 1
+      value_id: '72057594193723392'
+      friendly_name: Deck Light
+      icon: mdi:lightbulb
+      state: 'off'
+    zwave.monoprice_outlet_1:
+      node_id: 6
+      node_name: Vision Security Plug-in Switch
+      manufacturer_name: Vision Security
+      product_name: Plug-in Switch
+      query_stage: Complete
+      is_awake: true
+      is_ready: true
+      is_failed: false
+      is_info_received: true
+      max_baud_rate: 40000
+      is_zwave_plus: false
+      capabilities:
+      - beaming
+      - listening
+      - routing
+      neighbors:
+      - 3
+      - 4
+      - 5
+      - 7
+      - 9
+      - 10
+      - 12
+      - 16
+      - 17
+      - 18
+      - 19
+      - 22
+      sentCnt: 40
+      sentFailed: 0
+      retries: 0
+      receivedCnt: 22
+      receivedDups: 0
+      receivedUnsolicited: 0
+      sentTS: '2021-11-30 16:00:00:103 '
+      receivedTS: '2021-11-30 16:00:00:228 '
+      lastRequestRTT: 76
+      averageRequestRTT: 85
+      lastResponseRTT: 125
+      averageResponseRTT: 121
+      application_version: '1.10'
+      friendly_name: Monoprice Outlet 1
+      state: ready
+  icon: hass:sleep
