@@ -1,15 +1,12 @@
 purge_keep_days: 7
 exclude:
   domains:
-    - automation
-    - cover
     - calendar
     - camera
     - cast
     - climate
     - device_tracker
     - fan
-    - media_player
     - plex
     - person
     - scene
@@ -22,41 +19,50 @@ exclude:
     - zone
     - zwave
   entity_globs:
-    - input_number.plex*
-    - sensor.airquality*
-    - sensor.ds420j_memory*
-    - sensor.ds420j_cpu*
-    - sensor.ds420j_network*
     - binary_sensor.ds420j_update*
     - binary_sensor.ds420j_*smart
     - binary_sensor.ds420j_*exceeded
     - binary_sensor.ds420j_*remaining
     - binary_sensor.ecobee*occupancy
-    - binary_sensor.trashday
+    - binary_sensor.fibaro_*
     - binary_sensor.home_assistant_operating*
+    - sensor.airquality*
+    - sensor.ds420j_memory*
+    - sensor.ds420j_cpu*
+    - sensor.ds420j_network*
     - sensor.home_assistant_operating*
     - sensor.iphone*
-    - sensor.ups*
+    - sensor.monoprice_energy_outlet_*
+    - sensor.openweather*
     - sensor.owm_*
     - sensor.plex_*
-    - sensor.sensor.openweathermap_*
   entities:
-    - binary_sensor.fibaro_motion_sensor
+    - binary_sensor.front_door_accelerometer
     - binary_sensor.garage_myq_gateway
+    - binary_sensor.hallway_motion
+    - binary_sensor.monthly_data_concern
+    - binary_sensor.sundown
+    - binary_sensor.trashday
+    - binary_sensor.updater
     - input_datetime.time_night_start
+    - input_select.hvac_mode
     - input_select.presence_mode
-    - sensor.aqi_report
     - sensor.date
     - sensor.hacs
+    - sensor.inside_temp
     - sensor.month_days
     - sensor.month_gone
-    - sensor.openweather_report
+    - sensor.monthly_data_usage
+    - sensor.network_in_eth0
+    - sensor.network_out_eth0
     - sensor.tautulli
     - sensor.time
     - sensor.trash_service
     - sensor.weather_report
+    - sensor.zigguest_electricity
     - switch.adguard_filtering
     - switch.adguard_protection
+    - switch.zigguest
   event_types:
     - service_removed
     - service_executed
