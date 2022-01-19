@@ -11,6 +11,8 @@ tts:
 
 cloud:
 
+wake_on_lan:
+
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
 device_tracker: !include device_tracker.yaml
