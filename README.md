@@ -46,26 +46,51 @@
 
 ### Physical Devices
 
-| Type | Sub-Type | Name | Connection | Make/Model |
-| ---- | -------- | ---- | ---------- | ---------- |
-| Sensor | Open/Close | Aqara Window Sensor 1 | Zigbee | Aqara |
-| Sensor | Open/Close | Aqara Window Sensor 2 | Zigbee | Aqara |
-| Sensor | Open/Close | Aqara Window Sensor 3 | Zigbee | Aqara |
-| Sensor | Multi | Back Door | Zigbee | Samsung Multi-Sensor |
-| Sensor | Multi | Front Door | Zigbee | Samsung Multi-Sensor |
-| Outlet | Plug-In | Bar Light | Z-Wave | Monoprice/Jasco |
-| Standalone | n/a | Bond Hub | Wi-Fi | Bond |
-| Sensor | Open/Close | Chest Freezer | Zigbee | Visonic MCT-340 E |
-| Sensor | Open/Close | Chest Freezer 2 | Zigbee | Visonic MCT-340 E |
-| Switch | On/Off | Deck Switch | Z-Wave Plus | Inovelli NZW30 |
-| Switch | On/Off | Entryway Light | Z-Wave Plus | Inovelli NZW30 w/ Scenes |
-| Switch | On/Off | Porch Switch | Z-Wave Plus | Inovelli NZW30 |
-| Switch | Dimmer | Dining Room Light Switch | Z-Wave Plus | Inovelli NZW31 |
-| Light | Bulb | Den Light 1 | Zigbee | Sengled E11-G13 |
-| Light | Bulb | Den Light 2 | Zigbee | Sengled E11-G13 |
-| Light | Bulb | Living Room | Zigbee | Sengled E11-G13 |
-| Thermostat | n/a | ecobee | Wi-Fi | ecobee 3 |
-| Sensor | Temp/Occupancy | ecobee: Bedroom | 915MHz | ecobee |
-| Sensor | Temp/Occupancy | ecobee: Den | 915MHz | ecobee |
-| Sensor | Motion | Fibaro Motion | Z-Wave | Fibaro FGMS001 |
-| Sensor | Motion | Fibaro Motion 2 | Z-Wave | Fibaro FGMS001 |
+| Type         | Sub-Type       | Name                     | Connection  | Make/Model                 |
+| ------------ | --------------------------------------------------------------------------- |
+| Button       | Dimmer         | Den Light Dimmer         | Zigbee      | IKEA Tradfri Dimmer        |
+| Button       | Dimmer         | Living Room Light Button | Zigbee      | IKEA Tradfri Dimmer        |
+| Button       | Dimmer         | Living Room Light Button | Zigbee      | IKEA Tradfri Dimmer        |
+| Coordinator  | \-             | HUSBZB                   |             | Sigma Designs USB Adapter 
+| Cover        | \-             | Garage Door              | Wi-Fi       | MyQ Liftmaster             |
+| Fan          | \-             | Guest Room Ceiling       | RF          | Olibra RF Adapter          |
+| Fan          | \-             | Master Bedroom Fan       | RF          | Olibra RF Adapter          |
+| Fan          | \-             | Multipass Fan            | RF          | Olibra RF Adapter          |
+| Light        | Bulb           | Den Light 1              | Zigbee      | Sengled E11-G13            |
+| Light        | Bulb           | Den Light 2              | Zigbee      | Sengled E11-G13            |
+| Light        | Bulb           | Living Room Light        | Zigbee      | Sengled E11-G13            |
+| Media Player | \-             | Shield TV                | Ethernet    | NVIDIA Shield              |
+| NAS          | \-             | Synology NAS             | Ethernet    | Synology DS420j            |
+| Outlet       | Plug-In        | Bar Light                | Z-Wave      | Monoprice/Jasco            |
+| Outlet       | Plug-In        | Monoprice Energy Outlet  | Z-Wave Plus | Monoprice HKZW-SO03        |
+| Outlet       | Plug-In        | Monoprice Outlet 1       | Z-Wave      | Monoprice Plug-In          |
+| Outlet       | Plug-In        | Washing Machine Outlet   | Z-Wave Plus | Monoprice HKZW-SO03        |
+| Outlet       | Plug-In        | Wyze Basement            | Z-Wave      | Monoprice Plug-In          |
+| Outlet       | Plug-In        | Wyze Ilium Outlet        | Zigbee      | SmartThings Outlet v4      |
+| Outlet       | Plug-In        | ZigGuest                 | Zigbee      | SmartThings Outlet v4      |
+| Sensor       | Doorbell       | Doorbell                 | Zigbee      | Echostar Bell              |
+| Sensor       | Leak           | Washer Leak Sensor       | Zigbee      | Samsung Leak Sensor        |
+| Sensor       | Motion         | Fibaro Motion            | Z-Wave      | Fibaro FGMS001             |
+| Sensor       | Motion         | Fibaro Motion 2          | Z-Wave      | Fibaro FGMS001             |
+| Sensor       | Multi          | Back Door                | Zigbee      | Samsung Multi-Sensor       |
+| Sensor       | Multi          | Front Door               | Zigbee      | Samsung Multi-Sensor       |
+| Sensor       | Open/Close     | Aqara Window Sensor 1    | Zigbee      | Aqara                      |
+| Sensor       | Open/Close     | Aqara Window Sensor 2    | Zigbee      | Aqara                      |
+| Sensor       | Open/Close     | Aqara Window Sensor 3    | Zigbee      | Aqara                      |
+| Sensor       | Open/Close     | Chest Freezer            | Zigbee      | Visonic MCT-340 E          |
+| Sensor       | Open/Close     | Chest Freezer 2          | Zigbee      | Visonic MCT-340 E          |
+| Sensor       | Open/Close     | Master Bath Window       | Zigbee      | Visonic MCT-340 E          |
+| Sensor       | Open/Close     | Multipass Window         | Zigbee      | \-                         |
+| Sensor       | Temp/Humidity  | Dryer Sensor             | Zigbee      | Samsung Temperature Sensor |
+| Sensor       | Temp/Occupancy | ecobee: Bedroom          | 915MHz      | ecobee                     |
+| Sensor       | Temp/Occupancy | ecobee: Den              | 915MHz      | ecobee                     |
+| Sensor       | Tilt           | Garage Door Sensor       | Z-Wave      | Monoprice ZG8101           |
+| Standalone   | \-             | Bond Hub                 | Wi-Fi       | Bond                       |
+| Switch       | Dimmer         | Dining Room Light Switch | Z-Wave Plus | Inovelli NZW31             |
+| Switch       | Dimmer         | Master Bath Light        | Z-Wave      | Inovelli LZW31-SN          |
+| Switch       | On/Off         | Deck Switch              | Z-Wave Plus | Inovelli NZW30             |
+| Switch       | On/Off         | Entryway Light           | Z-Wave Plus | Inovelli NZW30 w/ Scenes   |
+| Switch       | On/Off         | Master Bedroom Light     | Z-Wave Plus | Inovelli NZW30 w/ Scenes   |
+| Switch       | On/Off         | Porch Light              | Z-Wave Plus | Inovelli NZW30             |
+| Thermostat   | \-             | ecobee                   | Wi-Fi       | ecobee 3                   |
+| UPS          | \-             | UPS                      | Ethernet    | NPC Back-UPS 650           |
