@@ -47,11 +47,11 @@
 ### Physical Devices
 
 | Type         | Sub-Type       | Name                     | Connection  | Make/Model                 |
-| ------------ | --------------------------------------------------------------------------- |
+| ------------ | -------------- | ------------------------ | ----------- | -------------------------- |
 | Button       | Dimmer         | Den Light Dimmer         | Zigbee      | IKEA Tradfri Dimmer        |
 | Button       | Dimmer         | Living Room Light Button | Zigbee      | IKEA Tradfri Dimmer        |
 | Button       | Dimmer         | Living Room Light Button | Zigbee      | IKEA Tradfri Dimmer        |
-| Coordinator  | \-             | HUSBZB                   |             | Sigma Designs USB Adapter 
+| Coordinator  | \-             | HUSBZB                   | \-          | Sigma Designs USB Adapter 
 | Cover        | \-             | Garage Door              | Wi-Fi       | MyQ Liftmaster             |
 | Fan          | \-             | Guest Room Ceiling       | RF          | Olibra RF Adapter          |
 | Fan          | \-             | Master Bedroom Fan       | RF          | Olibra RF Adapter          |
