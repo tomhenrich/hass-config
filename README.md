@@ -5,13 +5,13 @@
     - Can be controlled by IKEA dimmer button mounted to the lamp, or:
     - Turn on/off: double-tap Entryway Light Switch up/down, or double-tap Dining Room Light Switch up/down
     - Make brighter: triple-tap Entryway Light Switch up/down, or triple-tap Dining Room Light Switch up/down
-* **Main Bathroom Light** - single tap up will turn light on at previous level
+- **Main Bathroom Light** - single tap up will turn light on at previous level
     - Turn on to Low brightness: press small config button
     - Turn on to Medium brightness: double-tap up
     - Turn on to Full brightness: triple-tap up
-* **Den Lights**
+- **Den Lights**
     - Controlled from the Den Tablet dashboard, or from the IKEA dimmer button mounted to Den Light 1
-* **Good Night**
+- **Good Night**
     - Double-tap the Main Bedroom Light Switch down
         - Turn off:
             - Kitchen Overhead Light
