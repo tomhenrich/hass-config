@@ -15,17 +15,17 @@
     * Double-tap the Main Bedroom Light Switch down
         * Turn off:
             * Kitchen Overhead Light
+            * Dining Room Overhead Light
             * Bar Light
             * Living Room Light
             * Entryway Light
             * Den Lights
             * Main Bathroom Light
             * Main Bedroom Light
+            * Deck Light
          * Turn on:
             * Outlet for Wyze camera in Living Room
             * Outlet for Wyze camera in Basement
-         * Close:
-            * Garage Door
 
 ## Automations
 * **Barn Door Protocol**
@@ -33,13 +33,10 @@
     * Once all the exterior openings are closed for 5 minutes, the heat will resume.
 * **Garage Door**
    * Garage Door is set to automatically close every night at 11pm. Controlled directly through the MyQ app.
-* **Den Tablet Charging** - don't leave the dashboard tablet continuously charging 24/7
-   * Den tablet power outlet will turn on if it has been off for 1 hour
-   * Den tablet power outlet will turn off if it has been on for 3 hours
 
 ## Timers
 * If **Porch Light Timer** is on:
-    * Porch Light will turn on 1 hour after sunset, and will turn off at 11pm
+    * Porch Light will turn on at sunset, and will turn off 30 minutes before sunrise
 * If **Living Room Light Timer** is on:
     * If either hallway motion sensor detects motion from sunset to sunrise, and the living room light is off, then it will turn on
     * If either hallway motion sensor doesn't detect motion for 2 minutes after being triggered, then the living room light will turn back off
