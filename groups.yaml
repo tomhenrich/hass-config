@@ -3,7 +3,7 @@ mainfloor_lights:
   entities:
   - switch.kitchen_light
   - switch.entryway_light
-  - light.living_room_light
+  - light.livingroom_light
   - light.dining_room_light
   icon: 'hass:lightbulb-group-outline'
 
