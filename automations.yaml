@@ -3,47 +3,14 @@
   description: ''
   trigger:
   - platform: event
-    event_type: zwave.scene_activated
+    event_type: zwave_js_value_notification
     event_data:
-      entity_id: zwave.master_bedroom_light
       node_id: 14
-      scene_data: 7860
-      scene_id: 1
+      label: Scene 001
+      value: KeyPressed2x
   condition: []
   action:
   - scene: scene.good_night
-  mode: single
-- id: '1622671166530'
-  alias: Unexpected Entry
-  description: ''
-  trigger:
-  - type: opened
-    platform: device
-    device_id: b3d3b805c7fd15e7c38179aeb21df064
-    entity_id: binary_sensor.front_door
-    domain: binary_sensor
-  - type: opened
-    platform: device
-    device_id: d235c5737493c72d37c4a73db6d15629
-    entity_id: binary_sensor.garage_door_sensor
-    domain: binary_sensor
-  - type: opened
-    platform: device
-    device_id: b62d5ca6541f93ae5a5d8bcc9f870873
-    entity_id: binary_sensor.back_door
-    domain: binary_sensor
-  condition:
-  - condition: time
-    after: '22:00:00'
-    before: 06:00:00
-  - condition: state
-    entity_id: input_select.presence_mode
-    state: Away
-  action:
-  - service: notify.telegram_tom
-    data:
-      title: Unexpected Entry!
-      message: '{{trigger.to_state.attributes.friendly_name }} opened at night...'
   mode: single
 - id: '1624219701132'
   alias: Hass Shutdown Switch
@@ -138,6 +105,7 @@
   trigger:
   - platform: webhook
     webhook_id: mainbedroomlight
+    id: mainbedroomlight
   condition: []
   action:
   - type: toggle
@@ -242,7 +210,7 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.fibaro_motion_sensor
+    entity_id: binary_sensor.hallway_motion
     from: 'off'
     to: 'on'
     id: motion
@@ -253,18 +221,17 @@
     to: 'off'
     for: 00:02:00
   - platform: state
-    entity_id: light.living_room_light
+    entity_id: light.livingroom_light
     id: lightsout
     from: 'on'
     to: 'off'
   - platform: event
     id: disable
-    event_type: zwave.scene_activated
+    event_type: zwave_js_value_notification
     event_data:
-      entity_id: zwave.master_bedroom_light
       node_id: 18
-      scene_data: 4
-      scene_id: 1
+      label: Scene 002
+      value: KeyPressed3x
   condition: []
   action:
   - choose:
@@ -272,30 +239,23 @@
       - condition: trigger
         id: motion
       - condition: state
-        state: 'on'
-        entity_id: input_boolean.livingroom_nightlight_enabled
-      - condition: state
         entity_id: binary_sensor.sundown
         state: 'on'
       - condition: device
         type: is_off
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        entity_id: light.living_room_light
+        entity_id: light.livingroom_light
         domain: light
-        for:
-          hours: 0
-          minutes: 2
-          seconds: 0
-          milliseconds: 0
       sequence:
       - type: turn_on
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        entity_id: light.living_room_light
+        entity_id: light.livingroom_light
         domain: light
-        brightness_pct: 30
+        brightness_pct: 25
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.livingroom_nightlight_status
+        data: {}
     - conditions:
       - condition: trigger
         id: nomotion
@@ -305,11 +265,12 @@
       sequence:
       - type: turn_off
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        entity_id: light.living_room_light
+        entity_id: light.livingroom_light
         domain: light
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.livingroom_nightlight_status
+        data: {}
     - conditions:
       - condition: or
         conditions:
@@ -321,6 +282,7 @@
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.livingroom_nightlight_status
+        data: {}
     default: []
   mode: restart
 - id: '1635376745271'
@@ -343,29 +305,26 @@
   description: ''
   trigger:
   - platform: event
-    event_type: zwave.scene_activated
+    event_type: zwave_js_value_notification
     id: low
     event_data:
-      entity_id: zwave.master_bath_light
       node_id: 15
-      scene_data: 7680
-      scene_id: 3
+      label: Scene 003
+      value: KeyPressed
   - platform: event
-    event_type: zwave.scene_activated
+    event_type: zwave_js_value_notification
     id: medium
     event_data:
-      entity_id: zwave.master_bath_light
       node_id: 15
-      scene_data: 7860
-      scene_id: 2
+      label: Scene 002
+      value: KeyPressed2x
   - platform: event
-    event_type: zwave.scene_activated
+    event_type: zwave_js_value_notification
     id: high
     event_data:
-      entity_id: zwave.master_bath_light
       node_id: 15
-      scene_data: 7920
-      scene_id: 2
+      label: Scene 002
+      value: KeyPressed3x
   condition: []
   action:
   - choose:
@@ -374,25 +333,25 @@
         id: low
       sequence:
       - type: turn_on
-        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        device_id: 8b8fa19a5dddafb0fa74d2af37668516
         entity_id: light.master_bath_light
         domain: light
-        brightness_pct: 50
+        brightness_pct: 45
     - conditions:
       - condition: trigger
         id: medium
       sequence:
       - type: turn_on
-        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        device_id: 8b8fa19a5dddafb0fa74d2af37668516
         entity_id: light.master_bath_light
         domain: light
-        brightness_pct: 80
+        brightness_pct: 70
     - conditions:
       - condition: trigger
         id: high
       sequence:
       - type: turn_on
-        device_id: 59ed4f9e1e0bf67641b76364515495aa
+        device_id: 8b8fa19a5dddafb0fa74d2af37668516
         entity_id: light.master_bath_light
         domain: light
         brightness_pct: 100
@@ -589,4 +548,20 @@
         entity_id: light.living_room_light
         domain: light
     default: []
+  mode: single
+- id: '1645381546254'
+  alias: iOS Bathroom Light Trigger
+  description: ''
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    id: ios
+    event_data:
+      actionName: Bathroom Light
+  condition: []
+  action:
+  - type: toggle
+    device_id: 8b8fa19a5dddafb0fa74d2af37668516
+    entity_id: light.master_bath_light
+    domain: light
   mode: single
