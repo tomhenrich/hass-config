@@ -1,10 +1,226 @@
-- platform: dlink
-  host: !secret dlink_110_host
-  name: "DLink W110"
-  username: !secret dlink_user
-  password: !secret dlink_pass
-  use_legacy_protocol: true
-  
-- platform: wake_on_lan
-  name: "Wake Scylla"
-  mac: !secret mac_scylla
+- platform: systemmonitor
+  resources:
+    - type: processor_temperature
+    - type: memory_free
+    - type: memory_use_percent
+    - type: processor_use
+    - type: disk_use_percent
+      arg: "/"
+    - type: last_boot
+    - type: network_in
+      arg: eth0
+    - type: network_out
+      arg: eth0
+
+- platform: time_date
+  display_options:
+    - 'time'
+    - 'date'
+
+# scan every 6 hours
+- platform: rest
+  resource: !secret my_trashpickup_url
+  name: "Trash Service"
+  scan_interval: 21600
+  json_attributes:
+    - date
+    - desc
+    - type
+    - prox
+    - when
+  value_template: "{{ value_json.desc }}"
+
+# scan every 1 hour
+- platform: rest
+  resource: !secret my_datausage_url
+  name: "Monthly Data Usage"
+  scan_interval: 3600
+  json_attributes:
+    - used
+    - per
+    - progress
+    - upd
+  value_template: "{{ value_json.used }}"
+  unit_of_measurement: "GB"
+
+# scan every 1 hour
+- platform: rest
+  resource: !secret my_airquality_url
+  name: airquality_report
+  scan_interval: 3600
+  json_attributes:
+    - aqi
+    - desc
+    - upd
+    - fetched
+
+# scan every 1/2 hour
+- platform: rest
+  resource: !secret my_weather_url
+  name: weather_report
+  scan_interval: 1800
+  json_attributes:
+    - current_condition
+    - current_temp
+    - current_feel
+    - current_humidity
+    - today_temphigh
+    - today_templow
+  value_template: '{{ value_json.updated }}'
+
+# scan every 2 hours
+- platform: rest
+  resource: !secret tautulli_api_libs
+  name: "Plex Libraries"
+  scan_interval: 7200
+  json_attributes_path: "$.response"
+  json_attributes:
+    - data
+  value_template: '{{ value_json.response.result }}'
+
+- platform: template
+  sensors:
+
+    owm_current_condition:
+        friendly_name: Current Weather Condition
+        value_template: >
+          {{ state_attr('sensor.weather_report','current_condition') }}
+
+    owm_current_temp:
+        friendly_name: Current Temperature
+        value_template: >
+          {{ state_attr('sensor.weather_report','current_temp')|int }}
+        unit_of_measurement: "°F"
+
+    owm_current_feel:
+        friendly_name: Feels Like
+        value_template: >
+          {{ state_attr('sensor.weather_report','current_feel')|int }}
+        unit_of_measurement: "°F"
+
+    owm_current_humidity:
+        friendly_name: Current Humidity
+        value_template: >
+          {{ state_attr('sensor.weather_report','current_humidity')|int }}
+        unit_of_measurement: "%"
+
+    owm_today_high:
+        friendly_name: "Today's High Temperature"
+        value_template: >
+          {{ state_attr('sensor.weather_report','today_temphigh')|int }}
+        unit_of_measurement: "°F"
+
+    owm_today_low:
+        friendly_name: "Today's Low Temperature"
+        value_template: >
+          {{ state_attr('sensor.weather_report','today_templow')|int }}
+        unit_of_measurement: "°F"
+
+    inside_temp:
+        friendly_name: "Inside Temperature"
+        value_template: >
+          {{ states('sensor.ecobee3_temperature')|int }}
+        unit_of_measurement: "°F"
+
+    plex_movies:
+        friendly_name: "Plex Movies"
+        icon_template: 'mdi:movie'
+        value_template: >
+            {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
+            {% if lib.section_id == '1' %}
+                {{ lib.count }}
+            {% endif %}
+            {% endfor %}
+    plex_shows:
+        friendly_name: "Plex Shows"
+        icon_template: 'mdi:television-classic'
+        value_template: >
+            {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
+            {% if lib.section_id == '3' %}
+                {{ lib.count }}
+            {% endif %}
+            {% endfor %}
+
+    monthly_data_cap:
+        friendly_name: Data Cap Usage
+        value_template: >
+          {{ state_attr('sensor.monthly_data_usage','per')|float }}
+        unit_of_measurement: "%"
+        attribute_templates:
+          updated: >
+            {{ state_attr('sensor.monthly_data_usage','upd') }}
+          progress: >
+            {{ state_attr('sensor.monthly_data_usage','progress')|float }}
+        icon_template: >
+          {% set pct = state_attr('sensor.monthly_data_usage','per')|float %}
+          {% if pct < 12.5 %}
+            mdi:circle-outline
+          {% elif (pct >= 12.5 and pct < 25) %}
+            mdi:circle-slice-1
+          {% elif (pct >= 25 and pct < 37.5) %}
+            mdi:circle-slice-2
+          {% elif (pct >= 37.5 and pct < 50) %}
+            mdi:circle-slice-3
+          {% elif (pct >= 50 and pct < 62.5) %}
+            mdi:circle-slice-4
+          {% elif (pct >= 62.5 and pct < 75) %}
+            mdi:circle-slice-5
+          {% elif (pct >= 75 and pct < 87.5) %}
+            mdi:circle-slice-6
+          {% elif (pct >= 87.5 and pct < 100) %}
+            mdi:circle-slice-7
+          {% else %}
+            mdi:circle-slice-8
+          {% endif %}
+
+    airquality:
+        friendly_name: Air Quality
+        unique_id: airquality
+        value_template: >
+          {{ state_attr('sensor.airquality_report','desc') }}
+        attribute_templates:
+          AQI: >
+            {{ state_attr('sensor.airquality_report','aqi')|float }}
+        icon_template: >
+          {% set aqi = state_attr('sensor.airquality_report','desc') %}
+          {% if aqi == "Good" %}
+            mdi:emoticon-happy-outline
+          {% elif aqi == "Moderate" %}
+            mdi:emoticon-neutral-outline
+          {% elif aqi == "Unhealthy" %}
+            mdi:emoticon-frown-outline
+          {% elif aqi == "Very Unhealthy" %}
+            mdi:emoticon-frown
+          {% elif aqi == "Hazardous" %}
+            mdi:emoticon-dead
+          {% else %}
+            mdi:help-circle-outline
+          {% endif %}
+
+    month_days:
+        friendly_name: Days This Month
+        value_template: >
+          {% if now().month in [1,3,5,7,8,10,12] %}
+            31
+          {% elif now().month in [4,6,9,11] %}
+            30
+          {% elif now().month == 2 and ((now().year-2000) % 4 > 0) %}
+            28
+          {% elif now().month == 2 and ((now().year-2000) % 4 == 0) %}
+            29
+          {% endif %}
+
+    month_gone:
+        friendly_name: Percentage of the Month
+        value_template: >
+          {% set d = now().day | int %}
+          {% set days = states('sensor.month_days') | int %}
+          {% set p = (d / days)|float|round(2) * 100 %}
+          {{ p }}
+        unit_of_measurement: "%"
+        
+    ds420j_last_boot_fmt:
+        friendly_name: DS420j Last Boot
+        value_template: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
+        icon_template: 'mdi:calendar-clock'
+
