@@ -1,4 +1,4 @@
-purge_keep_days: 7
+purge_keep_days: 14
 exclude:
   domains:
     - calendar
@@ -24,8 +24,11 @@ exclude:
     - binary_sensor.ds420j_*exceeded
     - binary_sensor.ds420j_*remaining
     - binary_sensor.ecobee*occupancy
-    - binary_sensor.fibaro_*
     - binary_sensor.home_assistant_operating*
+    - binary_sensor.*home_security*
+    - button.*_ping
+    - select.*local_protection*
+    - select.*rf_protection*
     - sensor.airquality*
     - sensor.ds420j_memory*
     - sensor.ds420j_cpu*
@@ -33,17 +36,17 @@ exclude:
     - sensor.home_assistant_operating*
     - sensor.iphone*
     - sensor.monoprice_energy_outlet_*
+    - sensor.*node_status
     - sensor.openweather*
     - sensor.owm_*
-    - sensor.plex_*
   entities:
     - binary_sensor.front_door_accelerometer
     - binary_sensor.garage_myq_gateway
-    - binary_sensor.hallway_motion
     - binary_sensor.monthly_data_concern
     - binary_sensor.sundown
     - binary_sensor.trashday
     - binary_sensor.updater
+    - input_boolean.check_data_usage
     - input_datetime.time_night_start
     - input_select.hvac_mode
     - input_select.presence_mode
@@ -52,7 +55,6 @@ exclude:
     - sensor.inside_temp
     - sensor.month_days
     - sensor.month_gone
-    - sensor.monthly_data_usage
     - sensor.network_in_eth0
     - sensor.network_out_eth0
     - sensor.tautulli
