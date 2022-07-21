@@ -1,86 +1,293 @@
 button_card_templates:
-  cf_sensor:
+  info:
     layout: icon_name_state2nd
-    size: 65%
+    size: 60%
     styles:
       grid:
-        - grid-template-columns: 3em 1fr
+        - grid-template-columns: 3rem 1fr
       card:
-        - border: 4px solid transparent
+        - border: 0px solid transparent
         - border-width: 0 0 0 4px
+        - padding: 4px 0
+        - height: 100%
+        - line-height: 1.4
+        - background-color: var(--color-coal)
+      name:
+        - font-size: 0.8rem
+        - font-weight: 500
+        - text-align: left
+        - width: 100%
+        - align-self: center
+        - color: var(--color-smoke)
+      state:
+        - font-size: 0.9rem
+        - text-align: left
+        - width: 100%
+        - align-self: center
+        - text-transform: capitalize
+        - font-weight: bold
+      label:
+        - font-size: 0.9rem
+        - text-align: left
+        - width: 100%
+        - align-self: center
+        - text-transform: capitalize
+        - font-weight: bold
+    tap_action:
+      action: none
+  noicon:
+    show_icon: false
+    styles:
+      grid:
+        - grid-template-columns: 4px 1fr
+  borderstatus:
+    styles:
+      card:
+        - border-radius: 7px 0 0 7px
+        - border-left-width: 7px
+  large:
+    show_icon: false
+    styles:
+      name:
+        - font-size: 1.0rem
+      state:
+        - font-size: 1.4rem
+      label:
+        - font-size: 1.4rem
+  push:
+    template:
+      - info
+    styles:
+      card:
+        - border-radius: 7px 0 0 7px
+        - border-left-width: 7px
+    state:
+      - value: 'off'
+        id: push_off
+        styles:
+          card:
+            - background-color: var(--color-charcoal)
+            - border-color: var(--light-primary-color)
+      - value: 'on'
+        id: push_on
+        styles:
+          card:
+            - background-color: var(--color-charcoal)
+          icon:
+            - color: var(--light-primary-color)
+      - value: closed
+        id: push_closed
+        styles:
+          card:
+            - background-color: var(--color-charcoal)
+            - border-color: var(--light-primary-color)
+      - value: open
+        id: push_open
+        styles:
+          card:
+            - background-color: var(--color-charcoal)
+          icon:
+            - color: var(--light-primary-color)
+  nameonly:
+    layout: icon_name_state2nd
+    template:
+      - push
+      - noicon
+    show_state: false
+    show_label: false
+    styles:
+      grid:
+        - grid-template-rows: auto
+      card:
+        - padding: 2px 0
+  roundright:
+    styles:
+      card:
+        - border-radius: 0 7px 7px 0
+  lumos:
+    layout: vertical
+    size: 20%
+    show_state: false
+    custom_fields:
+      info: |
+        [[[ if (entity.state == 'on' && entity.attributes.brightness) {
+            const brightness = Math.round(entity.attributes.brightness/2.54);
+            const radius = 20.5; const circumference = radius * 2 * Math.PI;
+            return `<svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="${radius}"
+            stroke="var(--color-safety)" stroke-width="2" fill="none"
+            style="transform: rotate(-90deg); transform-origin: 50% 50%;
+            stroke-dasharray: ${circumference};
+            stroke-dashoffset: ${circumference - brightness / 100 * circumference};" />
+            <text x="50%" y="54%" fill="var(--color-smoke)" font-size="16" font-weight= "bold"
+            text-anchor="middle" alignment-baseline="middle">
+            ${brightness}<tspan font-size="10">%</tspan></text></svg>`;} ]]]
+    styles:
+      card:
+        - border: 0px solid transparent
+        - border-width: 0 0 2px 0
+        - border-radius: 7px 7px 0 0
+        - padding: 4px 0 8px 0
+        - background-color: var(--color-coal)
+      name:
+        - font-size: 0.8rem
+        - font-weight: 500
+        - text-align: center
+        - width: 100%
+        - color: var(--color-smoke)
+      icon:
+        - margin-bottom: 10px
+      custom_fields:
+        info:
+          - position: absolute
+          - right: 0
+          - top: 0
+          - width: 25%
+          - color: var(--light-primary-color)
+    state:
+      - value: 'off'
+        id: light_off
+        styles:
+          card:
+            - background-color: var(--color-charcoal)
+            - border-color: var(--light-primary-color)
+          icon:
+            - opacity: 0.5
+      - value: 'on'
+        id: light_on
+        styles:
+          card:
+            - border-color: var(--color-safety)
+          icon:
+            - color: var(--color-safety)
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+    style: 'ha-card {height: 100%;}'
+  light:
+    show_state: false
+    size: 25%
+    styles:
+      card:
+        - border-radius: 4px
+        - padding: 4px
+        - background-color: var(--divider-color)
+      name:
+        - font-size: 1.0rem
+        - font-weight: 400
+        - text-align: center
+        - width: 100%
+        - align-self: center
+      icon:
+        - margin-bottom: 10px
+    state:
+      - value: 'off'
+        id: light_off
+        styles:
+          card:
+            - background-color: var(--divider-color)
+          icon:
+            - opacity: 0.5
+      - value: 'on'
+        id: light_on
+        styles:
+          card:
+            - background-color: var(--accent-color)
+          icon:
+            - color: var(--primary-text-color)
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+    style: 'ha-card {height: 100%;}'
+  light_level:
+    size: 40%
+    state:
+      - value: 'on'
+        id: light_off
+        styles:
+          card:
+            - border: 1px solid var(--divider-color)
+            - background: none
+          icon:
+            - opacity: 0.5
+      - value: 'off'
+        id: light_off
+        styles:
+          card:
+            - border: 1px solid var(--divider-color)
+            - background: none
+          icon:
+            - opacity: 0.5
+  infocard:
+    layout: icon_name_state2nd
+    size: 60%
+    styles:
+      grid:
+        - grid-template-columns: 3rem 1fr
+      card:
+        - border: 2px solid transparent
+        - border-width: 0 0 0 6px
+        - border-radius: 4px
         - padding: 8px 0
         - background-color: var(--label-badge-background-color)
         - height: 100%
-      icon:
-        - color: var(--secondary-text-color)
       name:
-        - font-size: medium
-        - font-weight: var(--mcg-title-font-weight, 500)
+        - font-size: 1.1rem
+        - font-weight: 500
         - text-align: left
-        - line-height: 1.2
         - width: 100%
-        - color: var(--secondary-text-color)
         - align-self: center
       state:
-        - font-size: smaller
+        - font-size: 1.0rem
         - text-align: left
-        - color: var(--light-primary-color)
         - width: 100%
         - align-self: center
         - text-transform: capitalize
       label:
-        - font-size: smaller
+        - font-size: 1.0rem
         - text-align: left
-        - color: var(--light-primary-color)
         - width: 100%
         - align-self: center
     tap_action:
       action: none
     hold_action:
       action: more-info
-    style: 'ha-card {height: 100%;} .uom {font-size: small !important;}'
-  cf_sensor_compact:
-    styles:
-      card:
-        - padding: 6px 0
-  cf_sensor_small:
-    size: 55%
-    styles:
-      grid:
-        - grid-template-columns: 2.5em 1fr
-      name:
-        - font-size: smaller
-      state:
-        - font-size: small
-      label:
-        - font-size: small
-      custom_fields:
-        i:
-          - width: 55%
-          - display: flex
-          - place-self: center
-    style: '.uom {font-size: small !important;}'
-  cf_sensor_smallicon:
-    show_icon: true
-    size: 55%
-    styles:
-      grid:
-        - grid-template-columns: 2.5em 1fr
-    style: '.uom {font-size: small !important;}'
-  cf_sensor_noicon:
+    style: 'ha-card {height: 100%;} .uom {display: inline-block; font-size: smaller;}'
+  infocard_noicon:
     show_icon: false
     styles:
       grid:
         - grid-template-columns: 8px 1fr
-    style: '.uom {font-size: small !important;}'
-  cf_sensor_largevalue:
+  infocard_large:
+    template:
+      - infocard
     styles:
+      name:
+        - font-size: 1.25rem
       state:
-        - font-size: large
+        - font-size: 1.2rem
       label:
-        - font-size: large
-    style: '.uom {font-size: small !important;}'
-  cf_pushbutton:
+        - font-size: 1.2rem
+  infocard_small:
+    template:
+      - infocard
+    styles:
+      grid:
+        - grid-template-columns: 2rem 1fr
+      card:
+        - padding: 4px 0
+        - height: 80%
+      name:
+        - font-size: 1.0rem
+      state:
+        - font-size: 0.8rem
+      label:
+        - font-size: 0.8rem
+    style: 'ha-card {height: 100%;} .uom {display: inline-block; font-size: inherit;}'
+  pushbutton:
+    template:
+      - infocard
     state:
       - value: 'off'
         id: pushbutton_off
@@ -92,68 +299,51 @@ button_card_templates:
         styles:
           card:
             - background-color: var(--accent-color)
-  cf_lights_main:
-    style: 'ha-card { height: 100%; }'
-    show_state: false
-    size: 40%
-    tap_action:
-      action: toggle
-    hold_action:
-      action: more-info
-    state:
-      - value: 'on'
-        id: cf_lights_on
+          icon:
+            - color: var(--light-primary-color)
+      - value: closed
+        id: pushbutton_closed
+        styles:
+          card:
+            - background-color: var(--divider-color)
+      - value: open
+        id: pushbutton_open
         styles:
           card:
             - background-color: var(--accent-color)
           icon:
-            - color: var(--primary-text-color)
-      - value: 'off'
-        id: cf_lights_off
-        styles:
-          card:
-            - background-color: var(--divider-color)
-          icon:
-            - opacity: 0.5
+            - color: var(--light-primary-color)
+  pushbutton_small:
+    template:
+      - pushbutton
     styles:
+      grid:
+        - grid-template-columns: 2rem 1fr
+      card:
+        - padding: 4px 0
+        - height: 80%
       name:
-        - font-size: small
-      icon:
-        - margin-bottom: 10px
-  cf_lights:
-    template: cf_lights_main
-    state:
-      - value: 'on'
-        id: cf_lights_on
-        icon: mdi:google-circles-communities
-      - value: 'off'
-        id: cf_lights_off
-        icon: mdi:google-circles-communities
-  cf_lights_onoff:
-    template: cf_lights_main
-    hold_action:
-      action: none
-    state:
-      - value: 'on'
-        id: cf_lights_on
-        icon: mdi:circle
-      - value: 'off'
-        id: cf_lights_off
-        icon: mdi:circle-outline
+        - font-size: 1.0rem
+      state:
+        - font-size: 0.8rem
+      label:
+        - font-size: 0.8rem
+    style: 'ha-card {height: 100%;}'
 views:
-  - icon: hass:home
-    path: fire7
-    theme: Dawson - Dark
+  - path: cf
+    title: ''
+    type: custom:grid-layout
+    theme: Campfire - Dark
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
       - user: 25121d6fff8247f5b3c8b55198ff4705
-    type: custom:grid-layout
+    icon: mdi:home-circle-outline
     badges: []
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout
         layout:
-          grid-template-columns: 35% 65%
+          grid-template-columns: 30% 70%
           grid-template-rows: auto
           mediaquery:
             '(max-width: 600px)':
@@ -164,124 +354,110 @@ views:
             layout:
               grid-template-columns: repeat(4, 25%)
               grid-template-rows: auto
-            view_layout:
-              grid-column: 1
             cards:
-              - type: markdown
-                content: >-
-                  {{ "<div><strong>" + now().strftime("%-I:%M") +
-                  now().strftime("%p").lower() + "</strong></div><div>" +
-                  now().strftime("%A, %-m/%-d") + "</div>"}}
+              - type: custom:mushroom-title-card
+                title: '{{ now().strftime("%-I:%M") + now().strftime("%p").lower() }}'
+                subtitle: '{{ now().strftime("%A, %-m/%-d") }}'
                 view_layout:
                   grid-column: span 4
-                style: >-
-                  ha-card {background-color: transparent; display: flex;}
-                  ha-markdown {padding-left: 8px !important; font-size: large;
-                  align-self: center;} ha-markdown strong {font-size: xx-large
-                  !important;}
-              - type: custom:button-card
+              - type: custom:mushroom-entity-card
                 name: Inside
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.ecobee3_temperature
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + "<span
-                  class='uom'>" + entity.attributes.unit_of_measurement +
-                  "</span>"]]]
-              - type: custom:button-card
-                view_layout:
-                  grid-column: span 2
-                entity: climate.ecobee3
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_pushbutton
-                show_state: true
-                name: Furnace
-                state:
-                  - value: heat
-                    id: pushbutton_on
-                    icon: mdi:fire
-                  - value: 'off'
-                    id: pushbutton_off
-                    icon: mdi:fire-off
+                layout: horizontal
                 tap_action:
-                  action: more-info
-                hold_action:
                   action: none
-              - type: custom:button-card
-                name: Outside
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
+                hold_action:
+                  action: more-info
+                entity: sensor.inside_temp
+                hide_icon: true
                 view_layout:
                   grid-column: span 2
-                entity: sensor.owm_current_temp
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + "<span
-                  class='uom'>°F</span>"]]]
-              - type: custom:button-card
-                name: Humidity
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
+              - type: custom:mushroom-entity-card
+                name: Furnace
+                layout: horizontal
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
+                entity: climate.ecobee3
+                icon_color: red
                 view_layout:
                   grid-column: span 2
-                entity: sensor.owm_current_humidity
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.state + "<span class=''uom''>%</span>"]]]'
-              - type: custom:button-card
-                name: Currently
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
+                style: |
+                  .secondary {
+                    font-size: 16px !important;
+                  }
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.barn_door_protocol
+                    state: 'on'
                 view_layout:
                   grid-column: span 4
+                card:
+                  type: custom:mushroom-chips-card
+                  chips:
+                    - type: entity
+                      entity: input_boolean.barn_door_protocol
+                      content_info: name
+                      name: Barn Door Protocol active
+                      icon_color: red
+                      tap_action:
+                        action: none
+                      hold_action:
+                        action: none
+                      double_tap_action:
+                        action: none
+              - type: custom:mushroom-entity-card
+                name: Outside
+                layout: horizontal
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
+                entity: sensor.owm_current_temp
+                hide_icon: true
+                view_layout:
+                  grid-column: span 2
+              - type: custom:mushroom-entity-card
+                name: High
+                layout: horizontal
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
+                entity: sensor.owm_today_high
+                hide_icon: true
+                view_layout:
+                  grid-column: span 1
+              - type: custom:mushroom-entity-card
+                name: Low
+                layout: horizontal
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
+                entity: sensor.owm_today_low
+                hide_icon: true
+                view_layout:
+                  grid-column: span 1
+              - type: custom:mushroom-entity-card
+                name: Currently
+                layout: horizontal
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
                 entity: sensor.owm_current_condition
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.state ]]]'
+                hide_icon: true
+                view_layout:
+                  grid-column: span 4
               - type: custom:button-card
                 name: Air Quality
                 template:
-                  - cf_sensor
+                  - infocard
                 view_layout:
                   grid-column: span 4
-                show_state: false
-                show_label: true
+                show_state: true
                 entity: sensor.airquality
-                label: |
-                  [[[
-                    return entity.state + " <span class='badge'>" + entity.attributes.AQI + "</span>";
-                  ]]]
-                style: |
-                  .badge {
-                    background: var(--secondary-text-color);
-                    color: var(--label-badge-background-color);
-                    padding: 2px 4px;
-                    border-radius: 7px;
-                    font-size: x-small;
-                    margin-left: 1em;
-                    line-height: 1;
-                    display: inline-block;
-                  }
-                  #label {
-                    display: flex;
-                  }
                 state:
                   - value: Good
                     styles:
@@ -289,21 +465,18 @@ views:
                         - border-left-color: var(--label-badge-green)
                       icon:
                         - color: var(--label-badge-green)
-                    icon: mdi:emoticon-happy-outline
                   - value: Moderate
                     styles:
                       card:
                         - border-left-color: rgb(253,214,75)
                       icon:
                         - color: '#fdd64b'
-                    icon: mdi:emoticon-neutral-outline
                   - value: Unhealthy
                     styles:
                       card:
                         - border-left-color: rgb(235,12,39)
                       icon:
                         - color: '#eb0c27'
-                    icon: mdi:emoticon-frown-outline
                   - value: Very Unhealthy
                     styles:
                       card:
@@ -312,7 +485,6 @@ views:
                         - color: '#fff'
                       label:
                         - color: '#fff'
-                    icon: mdi:emoticon-frown
                   - value: Hazardous
                     styles:
                       card:
@@ -321,13 +493,12 @@ views:
                         - color: '#fff'
                       label:
                         - color: '#fff'
-                    icon: mdi:emoticon-dead
               - type: custom:button-card
                 entity: binary_sensor.trashday
                 view_layout:
                   grid-column: span 4
                 template:
-                  - cf_sensor
+                  - infocard
                 name: '[[[ return entity.attributes.type ]]]'
                 label: '[[[ return entity.attributes.date ]]]'
                 show_state: false
@@ -354,56 +525,95 @@ views:
                         - color: var(--light-primary-color)
                       card:
                         - border-color: var(--light-primary-color)
-              - type: custom:button-card
-                entity: binary_sensor.chest_freezer
-                name: Chest Freezer
-                view_layout:
-                  grid-column: span 2
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
-                tap_action:
-                  action: none
-                show_state: true
-                state:
-                  - value: 'on'
-                    icon: mdi:alert-circle
-                    styles:
-                      card:
-                        - background-color: var(--accent-color)
-                      name:
-                        - color: var(--light-primary-color)
-                      state:
-                        - color: var(--light-primary-color)
-                  - value: 'off'
-                    styles:
-                      icon:
-                        - color: var(--primary-color)
-              - type: custom:button-card
-                entity: binary_sensor.laundry_washer
-                view_layout:
-                  grid-column: span 2
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                show_state: false
-                show_label: true
-                name: Washer
-                tap_action:
-                  action: none
-                state:
-                  - value: 'on'
-                    label: Running
-                    styles:
-                      card:
-                        - border-color: var(--accent-color)
-                      icon:
-                        - color: var(--accent-color)
-                  - value: 'off'
-                    label: Inactive
+            view_layout:
+              grid-column: 1
           - type: vertical-stack
             cards:
+              - type: markdown
+                content: '##### Household'
+                style: >-
+                  ha-card {background-color: transparent;} ha-markdown {padding:
+                  0 !important;}
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: repeat(4, 25%)
+                  grid-template-rows: auto
+                mediaquery:
+                  '(max-width: 600px)':
+                    grid-template-columns: 50% 50%
+                cards:
+                  - type: custom:button-card
+                    entity: binary_sensor.chest_freezer
+                    name: Big Freezer
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - infocard_small
+                      - infocard_noicon
+                    tap_action:
+                      action: none
+                    show_state: true
+                    state:
+                      - value: 'on'
+                        icon: mdi:alert-circle
+                        styles:
+                          card:
+                            - background-color: var(--accent-color)
+                          name:
+                            - color: var(--primary-color)
+                          state:
+                            - color: var(--primary-color)
+                      - value: 'off'
+                        styles:
+                          icon:
+                            - color: var(--primary-color)
+                  - type: custom:button-card
+                    entity: binary_sensor.chest_freezer_2
+                    name: Small Freezer
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - infocard_small
+                      - infocard_noicon
+                    tap_action:
+                      action: none
+                    show_state: true
+                    state:
+                      - value: 'on'
+                        icon: mdi:alert-circle
+                        styles:
+                          card:
+                            - background-color: var(--accent-color)
+                          name:
+                            - color: var(--primary-color)
+                          state:
+                            - color: var(--primary-color)
+                      - value: 'off'
+                        styles:
+                          icon:
+                            - color: var(--primary-color)
+                  - type: custom:button-card
+                    entity: binary_sensor.laundry_washer
+                    view_layout:
+                      grid-column: span 1
+                    template:
+                      - infocard_small
+                    show_state: false
+                    show_label: true
+                    name: Washer
+                    tap_action:
+                      action: none
+                    state:
+                      - value: 'on'
+                        label: Running
+                        styles:
+                          card:
+                            - border-color: var(--accent-color)
+                          icon:
+                            - color: var(--accent-color)
+                      - value: 'off'
+                        label: Inactive
               - type: markdown
                 content: '##### Lights'
                 style: >-
@@ -412,119 +622,112 @@ views:
               - type: custom:layout-card
                 layout_type: custom:grid-layout
                 layout:
-                  grid-template-columns: repeat(10, 10%)
+                  grid-template-columns: repeat(8, 12.5%)
                   grid-template-rows: auto
-                view_layout:
-                  grid-column: 2
+                mediaquery:
+                  '(max-width: 600px)':
+                    grid-template-columns: 100%
                 cards:
-                  - type: custom:button-card
-                    entity: group.den_lights
-                    template:
-                      - cf_lights
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.den_light_1
-                    template:
-                      - cf_lights
-                    name: Den 1
-                  - type: custom:button-card
-                    entity: light.den_light_2
-                    template:
-                      - cf_lights
-                    name: Den 2
-                  - type: custom:button-card
+                  - type: custom:mushroom-entity-card
                     entity: switch.bar_light
                     name: Bar
-                    template:
-                      - cf_lights_onoff
+                    icon_color: orange
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
                     view_layout:
                       grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.living_room_light
-                    name: Living Room
-                    template:
-                      - cf_lights
+                  - type: custom:mushroom-entity-card
+                    entity: switch.kitchen_light
+                    name: Kitchen
+                    icon_color: orange
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
                     view_layout:
                       grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.dining_room_light
-                    name: Dining Room
-                    template:
-                      - cf_lights
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: switch.entryway_light
-                    name: Entryway
-                    template:
-                      - cf_lights_onoff
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
+                  - type: custom:mushroom-entity-card
                     entity: switch.porch_light
                     name: Porch
-                    template:
-                      - cf_lights_onoff
+                    icon_color: orange
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
                     view_layout:
                       grid-column: span 2
-                  - type: custom:button-card
-                    entity: switch.deck_switch
+                  - type: custom:mushroom-entity-card
+                    entity: switch.deck_light
                     name: Deck
-                    template:
-                      - cf_lights_onoff
+                    icon_color: orange
+                    icon: mdi:coach-lamp
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
                     view_layout:
                       grid-column: span 2
+                      action: toggle
+                  - type: custom:mushroom-entity-card
+                    entity: switch.entryway_light
+                    name: Entryway
+                    icon_color: orange
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+                    view_layout:
+                      grid-column: span 2
+                      action: toggle
+                  - type: custom:mushroom-light-card
+                    entity: light.livingroom_light
+                    show_brightness_control: true
+                    layout: horizontal
+                    name: Living Room
+                    tap_action:
+                      action: toggle
+                    view_layout:
+                      grid-column: span 3
+                  - type: custom:mushroom-light-card
+                    entity: light.dining_room_light
+                    show_brightness_control: true
+                    layout: horizontal
+                    name: Dining Room
+                    tap_action:
+                      action: toggle
+                    view_layout:
+                      grid-column: span 3
+                  - type: custom:mushroom-entity-card
+                    entity: group.den_lights
+                    name: Den
+                    icon_color: orange
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+                    view_layout:
+                      grid-column: span 2
+                  - type: custom:mushroom-light-card
+                    entity: light.den_light_1
+                    show_brightness_control: true
+                    layout: horizontal
+                    name: Den 1
+                    tap_action:
+                      action: toggle
+                    view_layout:
+                      grid-column: span 3
+                  - type: custom:mushroom-light-card
+                    entity: light.den_light_2
+                    show_brightness_control: true
+                    layout: horizontal
+                    name: Den 2
+                    tap_action:
+                      action: toggle
+                    view_layout:
+                      grid-column: span 3
               - type: markdown
-                content: '##### Garage'
+                content: ' '
                 style: >-
-                  ha-card {background-color: transparent;} ha-markdown {padding:
-                  0 !important;}
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: repeat(10, 10%)
-                  grid-template-rows: auto
-                cards:
-                  - type: custom:button-card
-                    entity: binary_sensor.garage_door_sensor
-                    name: Garage
-                    view_layout:
-                      grid-column: span 6
-                    template:
-                      - cf_sensor
-                      - cf_sensor_largevalue
-                      - cf_pushbutton
-                    show_state: true
-                    tap_action:
-                      action: call-service
-                      service: cover.toggle
-                      service_data:
-                        entity_id: cover.garage_door
-                    style: |
-                      ha-card {height: auto !important;}
-                    state:
-                      - value: 'on'
-                        id: pushbutton_open
-                        icon: mdi:garage-open
-                      - value: 'off'
-                        id: pushbutton_closed
-                        icon: mdi:garage
-                  - type: custom:button-card
-                    entity: input_boolean.fire_tv_reboot
-                    name: Fire TV
-                    label: Reboot
-                    template:
-                      - cf_sensor
-                      - cf_pushbutton
-                      - cf_sensor_smallicon
-                    view_layout:
-                      grid-column: 9 / span 2
-                    show_state: false
-                    show_label: true
-                    tap_action:
-                      action: navigate
-                      navigation_path: /lovelace/tv
+                  ha-card {background-color: transparent; border-top: 1px solid
+                  var(--secondary-background-color);} ha-markdown {padding: 0
+                  !important;}
               - type: markdown
                 content: '##### Network'
                 style: >-
@@ -535,162 +738,353 @@ views:
                 layout:
                   grid-template-columns: 25% 35% 20% 20%
                   grid-template-rows: auto
+                mediaquery:
+                  '(max-width: 600px)':
+                    grid-template-columns: 50% 50%
                 cards:
-                  - type: custom:button-card
-                    entity: switch.adguard_protection
+                  - type: custom:mushroom-entity-card
                     name: AdBlock
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                    view_layout:
-                      grid-column: span 1
-                    show_state: true
+                    layout: horizontal
                     tap_action:
                       action: toggle
-                    state:
-                      - value: 'on'
-                        icon: mdi:shield-check
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-green)
-                            - background-color: var(--label-badge-background-color)
-                      - value: 'off'
-                        icon: mdi:shield-off-outline
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-red)
-                            - background-color: var(--label-badge-background-color)
-                          icon:
-                            - color: var(--label-badge-red)
-                  - type: custom:button-card
-                    entity: sensor.monthly_data_cap
+                    hold_action:
+                      action: none
+                    entity: switch.adguard_protection
+                    icon_color: green
+                  - type: custom:mushroom-entity-card
                     name: Comcast Data Usage
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_state: false
-                    show_label: true
-                    label: |
-                      [[[
-                        return states['sensor.monthly_data_usage'].state + 
-                        '<span class="uom"> ' + states['sensor.monthly_data_usage'].attributes.unit_of_measurement + "</span> (" +
-                        entity.state + '<span class="uom">' + entity.attributes.unit_of_measurement + '</span>)'
-                      ]]]
-                    icon: mdi:swap-vertical-bold
+                    layout: horizontal
                     tap_action:
                       action: more-info
-                      entity: sensor.monthly_data_usage
-                    state:
-                      - operator: template
-                        value: |
-                          [[[
-                            return entity.state > 75
-                          ]]]
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-yellow)
-                          icon:
-                            - color: var(--label-badge-yellow)
-                  - type: custom:button-card
-                    entity: sensor.speedtest_download
-                    name: Download
-                    icon: mdi:cloud-download
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_state: false
-                    show_label: true
-                    label: >-
-                      [[[ return Math.round(Number(entity.state)) + " <span
-                      class='uom'>Mb/s</span>"]]]
-                  - type: custom:button-card
-                    entity: sensor.speedtest_upload
-                    name: Upload
-                    icon: mdi:cloud-upload
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_label: true
-                    label: >-
-                      [[[ return Math.round(Number(entity.state)) + " <span
-                      class='uom'>Mb/s</span>"]]]
-  - path: shutdown
-    title: ''
-    icon: hass:power
+                    hold_action:
+                      action: none
+                    entity: sensor.monthly_data_cap
+                    icon_color: white
+        card_mod:
+          style: |
+            mushroom-card .secondary {
+              color: red !important;
+            }
+  - path: garage
+    title: Garage
+    icon: ''
     theme: Dawson - Dark
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
-    type: panel
     badges: []
     cards:
-      - type: custom:layout-card
-        layout_type: custom:grid-layout
-        layout:
-          grid-template-columns: 35% 65%
-          grid-template-rows: auto
-          mediaquery:
-            '(max-width: 600px)':
-              grid-template-columns: 100%
+      - type: vertical-stack
         cards:
-          - type: custom:button-card
-            entity: input_boolean.shutdown_primer
-            name: Shut Down Home Assistant
-            template:
-              - cf_sensor
+          - type: custom:mushroom-cover-card
+            entity: cover.garage_door
+            show_buttons_control: true
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: entity
+                entity: cover.garage_door
+                content_info: last-changed
+                tap_action:
+                  action: none
+                hold_action:
+                  action: more-info
+  - path: lights
+    title: Lights
+    type: sidebar
+    theme: Dawson - Dark
+    badges: []
+    cards:
+      - type: grid
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: switch.bar_light
+            icon_color: orange
+            layout: horizontal
+            secondary_info: none
             tap_action:
               action: toggle
-            show_state: false
-            show_label: true
-            label: >-
-              [[[ if(entity.state == "off") return "Shut down Home Assistant";
-              else return "Cancel"; ]]]
-            state:
-              - value: 'on'
-                icon: mdi:alert-circle
-                styles:
-                  card:
-                    - background-color: var(--label-badge-red)
-                  name:
-                    - color: var(--primary-color)
-                  state:
-                    - color: var(--primary-color)
-                  icon:
-                    - color: var(--primary-color)
-              - value: 'off'
-                styles:
-                  icon:
-                    - color: var(--primary-color)
+          - type: custom:mushroom-entity-card
+            entity: switch.deck_light
+            icon_color: orange
+            layout: horizontal
+            secondary_info: none
+            tap_action:
+              action: toggle
+          - type: custom:mushroom-entity-card
+            entity: switch.porch_light
+            icon_color: orange
+            layout: horizontal
+            secondary_info: none
+            name: Porch
+            tap_action:
+              action: toggle
+          - type: custom:mushroom-entity-card
+            entity: switch.kitchen_light
+            layout: horizontal
+            secondary_info: none
+            name: Kitchen
+            tap_action:
+              action: toggle
+          - type: custom:mushroom-entity-card
+            entity: switch.entryway_light
+            secondary_info: none
+            layout: horizontal
+            icon_color: orange
+            name: Entryway
+            tap_action:
+              action: toggle
+        square: false
+        columns: 3
+      - type: grid
+        square: false
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-light-card
+                entity: light.den_light_1
+                name: Den 1
+                layout: horizontal
+                secondary_info: never
+                show_brightness_control: true
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                double_tap_action:
+                  action: none
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_1
+                    name: Low
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 40
+                      target:
+                        entity_id: light.den_light_1
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_1
+                    name: Med
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 70
+                      target:
+                        entity_id: light.den_light_1
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_1
+                    name: High
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 100
+                      target:
+                        entity_id: light.den_light_1
+                    primary_info: name
+                    secondary_info: none
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-light-card
+                entity: light.den_light_2
+                name: Den 2
+                layout: horizontal
+                secondary_info: none
+                show_brightness_control: true
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                double_tap_action:
+                  action: none
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_2
+                    name: Low
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 40
+                      target:
+                        entity_id: light.den_light_2
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_2
+                    name: Med
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 70
+                      target:
+                        entity_id: light.den_light_2
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.den_light_2
+                    name: High
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 100
+                      target:
+                        entity_id: light.den_light_2
+                    primary_info: name
+                    secondary_info: none
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-light-card
+                entity: light.dining_room_light
+                name: Dining
+                layout: horizontal
+                secondary_info: none
+                show_brightness_control: true
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                double_tap_action:
+                  action: none
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-entity-card
+                    entity: light.dining_room_light
+                    name: Low
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 40
+                      target:
+                        entity_id: light.dining_room_light
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.dining_room_light
+                    name: Med
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 70
+                      target:
+                        entity_id: light.dining_room_light
+                    primary_info: name
+                    secondary_info: none
+                  - type: custom:mushroom-entity-card
+                    entity: light.dining_room_light
+                    name: High
+                    layout: horizontal
+                    hide_icon: true
+                    hold_action:
+                      action: none
+                    double_tap_action:
+                      action: none
+                    tap_action:
+                      action: call-service
+                      service: light.turn_on
+                      service_data:
+                        brightness_pct: 100
+                      target:
+                        entity_id: light.dining_room_light
+                    primary_info: name
+                    secondary_info: none
+      - type: entities
+        entities:
+          - entity: automation.porch_light_on_timer
+            name: Porch Light (sunset to sunrise)
+            icon: mdi:theme-light-dark
+          - entity: automation.living_room_christmas_tree_timer
+            name: Christmas Tree Timer
+            icon: mdi:pine-tree-box
+        title: Timers
+        show_header_toggle: false
+        state_color: true
+        view_layout:
+          position: sidebar
+      - type: vertical-stack
+        cards:
+          - type: entities
+            entities:
+              - entity: input_boolean.livingroom_nightlight_enabled
+                name: Hallway Night Light Enabled
+            title: Options
+            show_header_toggle: false
+            state_color: true
           - type: conditional
             conditions:
-              - entity: input_boolean.shutdown_primer
+              - entity: automation.living_room_christmas_tree_timer
                 state: 'on'
             card:
-              type: custom:button-card
-              entity: input_boolean.shutdown_confirm
-              name: Confirm Shutdown
-              template:
-                - cf_sensor
-              show_state: false
-              show_label: true
-              label: >-
-                You will need to physically reconnect the Pi to power to
-                restart.
+              type: entities
+              entities:
+                - entity: input_datetime.time_christmas_tree_on
+                  name: Christmas Tree On
+                - entity: input_datetime.timer_christmas_tree_off
+                  name: Christmas Tree Off
+        view_layout:
+          position: sidebar
   - path: batteries
     icon: hass:battery-charging-70
-    theme: Campfire - Dark
+    theme: Dawson - Dark
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
     type: custom:horizontal-layout
@@ -726,102 +1120,34 @@ views:
             - entity_id: '*plex*'
             - domain: media_player
         show_empty: false
-  - title: Lights
-    path: lights
-    type: sidebar
-    theme: Dawson - Dark
-    badges: []
-    cards:
-      - type: entities
-        entities:
-          - entity: input_boolean.timer_porch
-            name: Porch Light
-        title: Timers
-        show_header_toggle: false
-        state_color: true
-        view_layout:
-          position: sidebar
       - type: vertical-stack
         cards:
-          - type: custom:light-entity-card
-            header: Den Light 1
-            entity: light.den_light_1
-            shorten_cards: true
-            consolidate_entities: false
-            hide_header: false
-            brightness: true
-            show_slider_percent: true
-            full_width_sliders: true
-            brightness_icon: weather-sunny
-          - type: custom:light-entity-card
-            header: Den Light 2
-            entity: light.den_light_2
-            shorten_cards: true
-            consolidate_entities: false
-            hide_header: false
-            brightness: true
-            show_slider_percent: true
-            full_width_sliders: true
-            brightness_icon: weather-sunny
-          - type: custom:light-entity-card
-            header: Bar Light
-            entity: switch.bar_light
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: false
-          - type: custom:light-entity-card
-            header: Living Room Light
-            entity: light.living_room_light
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: true
-            show_slider_percent: true
-            full_width_sliders: true
-            brightness_icon: weather-sunny
-          - type: custom:light-entity-card
-            header: Dining Room Light
-            entity: light.dining_room_light
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: true
-            show_slider_percent: true
-            full_width_sliders: true
-            brightness_icon: weather-sunny
-          - type: custom:light-entity-card
-            header: Entryway Light
-            entity: switch.entryway_light
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: false
-          - type: custom:light-entity-card
-            header: Porch Light
-            entity: switch.porch_light
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: false
-          - type: custom:light-entity-card
-            header: Deck Light
-            entity: switch.deck_switch
-            shorten_cards: true
-            consolidate_entities: false
-            child_card: false
-            hide_header: false
-            brightness: false
-  - icon: ''
-    type: sidebar
-    path: tv
-    theme: Campfire - Dark
+          - type: entity
+            entity: binary_sensor.tom_presence
+            name: Tom’s Presence
+          - type: entities
+            entities:
+              - entity: sensor.iphone_ssid
+                name: Tom's Phone (Wi-Fi)
+                icon: mdi:cellphone-nfc
+              - entity: device_tracker.keys
+            show_header_toggle: false
+            state_color: true
+      - type: entities
+        entities:
+          - entity: group.mainfloor_lights
+          - entity: switch.kitchen_light
+          - entity: light.dining_room_light
+          - entity: light.living_room_light
+      - type: entities
+        entities:
+          - entity: sensor.dryer_sensor_humidity
+          - entity: sensor.dryer_sensor_temperature
+  - path: tv
     title: TV
+    icon: ''
+    theme: Dawson - Dark
+    type: sidebar
     badges: []
     cards:
       - type: entities
@@ -832,25 +1158,24 @@ views:
             name: TV Shows
         title: Plex Library
         show_header_toggle: false
-        view_layout:
-          position: main
       - type: button
         tap_action:
           action: toggle
-        entity: input_boolean.fire_tv_reboot
-        name: Reboot Fire TV
-        icon: mdi:restart-alert
-        show_icon: true
-        show_state: false
-        icon_height: 50px
+        entity: input_boolean.den_tv_reboot
         hold_action:
           action: none
+        show_name: true
+        show_icon: true
+        show_state: false
         view_layout:
           position: sidebar
-  - path: home-test0928
-    title: TEST
-    type: panel
+  - path: shutdown
+    title: ''
+    icon: hass:power
     theme: Dawson - Dark
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    type: panel
     badges: []
     cards:
       - type: custom:layout-card
@@ -862,482 +1187,46 @@ views:
             '(max-width: 600px)':
               grid-template-columns: 100%
         cards:
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(4, 25%)
-              grid-template-rows: auto
-            view_layout:
-              grid-column: 1
-            cards:
-              - type: markdown
-                content: >-
-                  {{ "<div><strong>TEST</strong></div><div>" +
-                  now().strftime("%A, %-m/%-d") + "</div>"}}
-                view_layout:
-                  grid-column: span 4
-                style: >-
-                  ha-card {background-color: transparent; display: flex;}
-                  ha-markdown {padding-left: 8px !important; font-size: large;
-                  align-self: center;} ha-markdown strong {font-size: xx-large
-                  !important;}
-              - type: markdown
-                content: >-
-                  {{ "<div><strong>" + now().strftime("%-I:%M") +
-                  now().strftime("%p").lower() + "</strong></div><div>" +
-                  now().strftime("%A, %-m/%-d") + "</div>"}}
-                view_layout:
-                  grid-column: span 4
-                style: >-
-                  ha-card {background-color: transparent; display: flex;}
-                  ha-markdown {padding-left: 8px !important; font-size: large;
-                  align-self: center;} ha-markdown strong {font-size: xx-large
-                  !important;}
-              - type: custom:button-card
-                name: Inside
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.ecobee3_temperature
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + "<span
-                  class='uom'>" + entity.attributes.unit_of_measurement +
-                  "</span>"]]]
-              - type: custom:button-card
-                view_layout:
-                  grid-column: span 2
-                entity: climate.ecobee3
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_pushbutton
-                show_state: true
-                name: Furnace
-                state:
-                  - value: heat
-                    id: pushbutton_on
-                    icon: mdi:fire
-                  - value: 'off'
-                    id: pushbutton_off
-                    icon: mdi:fire-off
-                tap_action:
-                  action: more-info
-                hold_action:
-                  action: none
-              - type: custom:button-card
-                name: Outside
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.owm_current_temp
-                show_state: false
-                show_label: true
-                label: >-
-                  [[[ return Math.round(Number(entity.state)) + "<span
-                  class='uom'>°F</span>"]]]
-              - type: custom:button-card
-                name: Humidity
-                template:
-                  - cf_sensor
-                  - cf_sensor_largevalue
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.owm_current_humidity
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.state + "<span class=''uom''>%</span>"]]]'
-              - type: custom:button-card
-                name: Currently
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
-                view_layout:
-                  grid-column: span 4
-                entity: sensor.owm_current_condition
-                show_state: false
-                show_label: true
-                label: '[[[ return entity.state ]]]'
-              - type: custom:button-card
-                name: Air Quality
-                template:
-                  - cf_sensor
-                view_layout:
-                  grid-column: span 4
-                show_state: false
-                show_label: true
-                entity: sensor.airquality
-                label: |
-                  [[[
-                    return entity.state + " <span class='badge'>" + entity.attributes.AQI + "</span>";
-                  ]]]
-                style: |
-                  .badge {
-                    background: var(--secondary-text-color);
-                    color: var(--label-badge-background-color);
-                    padding: 2px 4px;
-                    border-radius: 7px;
-                    font-size: x-small;
-                    margin-left: 1em;
-                    line-height: 1;
-                    display: inline-block;
-                  }
-                  #label {
-                    display: flex;
-                  }
-                state:
-                  - value: Good
-                    styles:
-                      card:
-                        - border-left-color: var(--label-badge-green)
-                      icon:
-                        - color: var(--label-badge-green)
-                    icon: mdi:emoticon-happy-outline
-                  - value: Moderate
-                    styles:
-                      card:
-                        - border-left-color: rgb(253,214,75)
-                      icon:
-                        - color: '#fdd64b'
-                    icon: mdi:emoticon-neutral-outline
-                  - value: Unhealthy
-                    styles:
-                      card:
-                        - border-left-color: rgb(235,12,39)
-                      icon:
-                        - color: '#eb0c27'
-                    icon: mdi:emoticon-frown-outline
-                  - value: Very Unhealthy
-                    styles:
-                      card:
-                        - background-color: '#8f3f97'
-                      name:
-                        - color: '#fff'
-                      label:
-                        - color: '#fff'
-                    icon: mdi:emoticon-frown
-                  - value: Hazardous
-                    styles:
-                      card:
-                        - background: var(--label-badge-red)
-                      name:
-                        - color: '#fff'
-                      label:
-                        - color: '#fff'
-                    icon: mdi:emoticon-dead
-              - type: custom:button-card
-                entity: binary_sensor.trashday
-                view_layout:
-                  grid-column: span 4
-                template:
-                  - cf_sensor
-                name: '[[[ return entity.attributes.type ]]]'
-                label: '[[[ return entity.attributes.date ]]]'
-                show_state: false
-                show_label: true
-                tap_action:
-                  action: none
+          - type: custom:button-card
+            entity: input_boolean.shutdown_primer
+            name: Shut Down Home Assistant
+            template:
+              - pushbutton
+            tap_action:
+              action: toggle
+            show_state: false
+            show_label: true
+            label: >-
+              [[[ if(entity.state == "off") return "Shut down Home Assistant";
+              else return "Cancel"; ]]]
+            state:
+              - value: 'on'
+                icon: mdi:alert-circle
+                styles:
+                  card:
+                    - background-color: var(--label-badge-red)
+                  name:
+                    - color: var(--primary-color)
+                  state:
+                    - color: var(--primary-color)
+                  icon:
+                    - color: var(--primary-color)
+              - value: 'off'
                 styles:
                   icon:
                     - color: var(--primary-color)
-                state:
-                  - value: 'on'
-                    styles:
-                      icon:
-                        - color: var(--accent-color)
-                      card:
-                        - border-color: var(--accent-color)
-                  - operator: template
-                    value: |
-                      [[[
-                        return entity.attributes.prox == 1
-                      ]]]
-                    styles:
-                      icon:
-                        - color: var(--light-primary-color)
-                      card:
-                        - border-color: var(--light-primary-color)
-              - type: custom:button-card
-                entity: binary_sensor.chest_freezer
-                name: Chest Freezer
-                view_layout:
-                  grid-column: span 2
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                  - cf_sensor_noicon
-                tap_action:
-                  action: none
-                show_state: true
-                state:
-                  - value: 'on'
-                    icon: mdi:alert-circle
-                    styles:
-                      card:
-                        - background-color: var(--accent-color)
-                      name:
-                        - color: var(--light-primary-color)
-                      state:
-                        - color: var(--light-primary-color)
-                  - value: 'off'
-                    styles:
-                      icon:
-                        - color: var(--primary-color)
-              - type: custom:button-card
-                entity: binary_sensor.laundry_washer
-                view_layout:
-                  grid-column: span 2
-                template:
-                  - cf_sensor
-                  - cf_sensor_compact
-                show_state: false
-                show_label: true
-                name: Washer
-                tap_action:
-                  action: none
-                state:
-                  - value: 'on'
-                    label: Running
-                    styles:
-                      card:
-                        - border-color: var(--accent-color)
-                      icon:
-                        - color: var(--accent-color)
-                  - value: 'off'
-                    label: Inactive
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: '##### Lights'
-                style: >-
-                  ha-card {background-color: transparent;} ha-markdown {padding:
-                  0 !important;}
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: repeat(10, 10%)
-                  grid-template-rows: auto
-                view_layout:
-                  grid-column: 2
-                cards:
-                  - type: custom:button-card
-                    entity: group.den_lights
-                    template:
-                      - cf_lights
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.den_light_1
-                    template:
-                      - cf_lights
-                    name: Den 1
-                  - type: custom:button-card
-                    entity: light.den_light_2
-                    template:
-                      - cf_lights
-                    name: Den 2
-                  - type: custom:button-card
-                    entity: switch.bar_light
-                    name: Bar
-                    template:
-                      - cf_lights_onoff
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.living_room_light
-                    name: Living Room
-                    template:
-                      - cf_lights
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: light.dining_room_light
-                    name: Dining Room
-                    template:
-                      - cf_lights
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: switch.entryway_light
-                    name: Entryway
-                    template:
-                      - cf_lights_onoff
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: switch.porch_light
-                    name: Porch
-                    template:
-                      - cf_lights_onoff
-                    view_layout:
-                      grid-column: span 2
-                  - type: custom:button-card
-                    entity: switch.deck_switch
-                    name: Deck
-                    template:
-                      - cf_lights_onoff
-                    view_layout:
-                      grid-column: span 2
-              - type: markdown
-                content: '##### Garage'
-                style: >-
-                  ha-card {background-color: transparent;} ha-markdown {padding:
-                  0 !important;}
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: repeat(10, 10%)
-                  grid-template-rows: auto
-                cards:
-                  - type: custom:button-card
-                    entity: binary_sensor.garage_door_sensor
-                    name: Garage
-                    view_layout:
-                      grid-column: span 6
-                    template:
-                      - cf_sensor
-                      - cf_sensor_largevalue
-                      - cf_pushbutton
-                    show_state: true
-                    tap_action:
-                      action: call-service
-                      service: cover.toggle
-                      service_data:
-                        entity_id: cover.garage_door
-                    style: |
-                      ha-card {height: auto !important;}
-                    state:
-                      - value: 'on'
-                        id: pushbutton_open
-                        icon: mdi:garage-open
-                      - value: 'off'
-                        id: pushbutton_closed
-                        icon: mdi:garage
-                  - type: custom:button-card
-                    entity: input_boolean.fire_tv_reboot
-                    name: Fire TV
-                    label: Reboot
-                    template:
-                      - cf_sensor
-                      - cf_pushbutton
-                      - cf_sensor_smallicon
-                    view_layout:
-                      grid-column: 9 / span 2
-                    show_state: false
-                    show_label: true
-                    tap_action:
-                      action: navigate
-                      navigation_path: /lovelace/tv
-              - type: markdown
-                content: '##### Network'
-                style: >-
-                  ha-card {background-color: transparent;} ha-markdown {padding:
-                  0 !important;}
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: 25% 35% 20% 20%
-                  grid-template-rows: auto
-                cards:
-                  - type: custom:button-card
-                    entity: switch.adguard_protection
-                    name: AdBlock
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                    view_layout:
-                      grid-column: span 1
-                    show_state: true
-                    tap_action:
-                      action: toggle
-                    state:
-                      - value: 'on'
-                        icon: mdi:shield-check
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-green)
-                            - background-color: var(--label-badge-background-color)
-                      - value: 'off'
-                        icon: mdi:shield-off-outline
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-red)
-                            - background-color: var(--label-badge-background-color)
-                          icon:
-                            - color: var(--label-badge-red)
-                  - type: custom:button-card
-                    entity: sensor.monthly_data_cap
-                    name: Comcast Data Usage
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_state: false
-                    show_label: true
-                    label: |
-                      [[[
-                        return states['sensor.monthly_data_usage'].state + 
-                        '<span class="uom"> ' + states['sensor.monthly_data_usage'].attributes.unit_of_measurement + "</span> (" +
-                        entity.state + '<span class="uom">' + entity.attributes.unit_of_measurement + '</span>)'
-                      ]]]
-                    icon: mdi:swap-vertical-bold
-                    tap_action:
-                      action: more-info
-                      entity: sensor.monthly_data_usage
-                    state:
-                      - operator: template
-                        value: |
-                          [[[
-                            return entity.state > 75
-                          ]]]
-                        styles:
-                          card:
-                            - border-left-color: var(--label-badge-yellow)
-                          icon:
-                            - color: var(--label-badge-yellow)
-                  - type: custom:button-card
-                    entity: sensor.speedtest_download
-                    name: Download
-                    icon: mdi:cloud-download
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_state: false
-                    show_label: true
-                    label: >-
-                      [[[ return Math.round(Number(entity.state)) + " <span
-                      class='uom'>Mb/s</span>"]]]
-                  - type: custom:button-card
-                    entity: sensor.speedtest_upload
-                    name: Upload
-                    icon: mdi:cloud-upload
-                    view_layout:
-                      grid-column: span 1
-                    template:
-                      - cf_sensor
-                      - cf_sensor_compact
-                      - cf_sensor_small
-                      - cf_sensor_noicon
-                    show_label: true
-                    label: >-
-                      [[[ return Math.round(Number(entity.state)) + " <span
-                      class='uom'>Mb/s</span>"]]]
+          - type: conditional
+            conditions:
+              - entity: input_boolean.shutdown_primer
+                state: 'on'
+            card:
+              type: custom:button-card
+              entity: input_boolean.shutdown_confirm
+              name: Confirm Shutdown
+              template:
+                - pushbutton
+              show_state: false
+              show_label: true
+              label: >-
+                You will need to physically reconnect the Pi to power to
+                restart.
