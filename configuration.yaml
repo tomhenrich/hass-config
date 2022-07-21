@@ -61,4 +61,3 @@ panel_custom:
       edge_visibility: relevant
       # grouping - pick one: z-wave, ungrouped
       grouping: z-wave
-
