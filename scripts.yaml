@@ -1,9 +1,1 @@
-den_shield_tv_reboot:
-  alias: 'Den: Reboot Shield TV'
-  sequence:
-  - service: androidtv.adb_command
-    data:
-      entity_id: media_player.nvidia_shield
-      command: reboot
-  mode: single
-  icon: mdi:shield-sync
+
