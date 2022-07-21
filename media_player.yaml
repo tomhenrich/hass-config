@@ -1,14 +1,8 @@
 - platform: androidtv
-  name: Nvidia Shield
-  device_class: androidtv
-  screencap: false
-  host: 10.0.0.100
-  exclude_unnamed_apps: false
-- platform: androidtv
   name: Den TV
   device_class: firetv
   screencap: false
-  host: 10.0.0.102
+  host: 10.0.0.101
   apps:
     com.amazon.tv.launcher: "Fire TV"
     com.plexapp.android: "Plex"
