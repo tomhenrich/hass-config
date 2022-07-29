@@ -40,11 +40,8 @@
   condition: []
   action:
   - service: media_player.turn_on
+    data: {}
     target:
-      entity_id: media_player.den_tv
-  - service: androidtv.adb_command
-    data:
-      command: ' am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity'
       entity_id: media_player.den_tv
   mode: restart
 - id: '1629823138157'
@@ -56,24 +53,6 @@
   condition: []
   action:
   - service: speedtestdotnet.speedtest
-  mode: single
-- id: '1632795665418'
-  alias: 'Den: TV - Reboot'
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: input_boolean.den_tv_reboot
-    to: 'on'
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    target:
-      entity_id:
-      - input_boolean.den_tv_reboot
-  - service: androidtv.adb_command
-    data:
-      command: reboot
-      entity_id: media_player.den_tv
   mode: single
 - id: '1632860503837'
   alias: 'Living Room: Light - Dimmer Button'
@@ -285,21 +264,6 @@
         data: {}
     default: []
   mode: restart
-- id: '1635376745271'
-  alias: 'Notify: Washing Machine Done'
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.laundry_washer
-    from: 'on'
-    to: 'off'
-  condition: []
-  action:
-  - service: notify.mobile_app_iphone
-    data:
-      message: Washing machine has finished.
-      title: Wet Laundry
-  mode: single
 - id: '1635383409645'
   alias: 'Master Bathroom: Light Buttons'
   description: ''
@@ -367,39 +331,15 @@
     type: remote_button_short_press
     subtype: button_1
     id: pressed
-  - platform: state
-    entity_id: input_boolean.doorbell
-    id: delay_off
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 30
-      milliseconds: 0
   condition: []
   action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: pressed
-      - condition: state
-        entity_id: input_boolean.doorbell
-        state: 'off'
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.doorbell
-      - service: notify.mobile_app_iphone
-        data:
-          message: Doorbell pressed!
-    - conditions:
-      - condition: trigger
-        id: delay_off
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.doorbell
-    default: []
+  - service: notify.mobile_app_iphone
+    data:
+      message: Doorbell pressed!
+  - service: counter.increment
+    data: {}
+    target:
+      entity_id: counter.doorbell
   mode: single
 - id: '1635605604406'
   alias: 'Notify: Washer Leak'
