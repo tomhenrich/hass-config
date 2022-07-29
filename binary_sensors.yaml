@@ -33,28 +33,6 @@
           mdi:delete
         {% endif %}
 
-    laundry_washer:
-      friendly_name: "Washing Machine"
-      # delay_on: Value condition must be true for this long before the sensor switches ON
-      delay_on:
-        minutes: 2
-      # delay_off: Value condition must be false for this long before the sensor switches OFF
-      delay_off:
-        minutes: 3
-      value_template: >-
-        {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
-      icon_template: >
-        mdi:washing-machine
-    laundry_dryer:
-      friendly_name: "Clothes Dryer"
-      # delay_off: Value condition must be false for this long before the sensor switches OFF
-      delay_off:
-        minutes: 2
-      value_template: >-
-        {{ states('sensor.dryer_sensor_temperature')|float > 75 }}
-      icon_template: >
-        mdi:tumble-dryer
-
     monthly_data_concern:
       friendly_name: Data Cap Issue
       value_template: >
@@ -66,18 +44,6 @@
           mdi:thumb-up
         {% endif %}
 
-    hallway_motion:
-      friendly_name: "Hallway Motion"
-      value_template: >-
-        {{ is_state('binary_sensor.fibaro_motion_1_any', 'on') or
-           is_state('binary_sensor.fibaro_motion_2_any', 'on') }}
-      device_class: motion
-      icon_template: >
-        {% if is_state('binary_sensor.hallway_motion','on') %}
-          mdi:motion-sensor
-        {% else %}
-          mdi:motion-sensor-off
-        {% endif %}
 
 ##########################################################
 ## Network Devices
