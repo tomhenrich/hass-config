@@ -43,6 +43,11 @@
     data: {}
     target:
       entity_id: media_player.den_tv
+  - service: androidtv.adb_command
+    data:
+      command: am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity
+    target:
+      entity_id: media_player.den_tv
   mode: restart
 - id: '1629823138157'
   alias: Speed Tests
@@ -62,7 +67,8 @@
     input:
       button_device: 72b251a428277f7ce1b4de58b20344b5
       light_target:
-        entity_id: light.living_room_light
+        entity_id:
+        - light.livingroom_light
       light_step: 20
       light_delay_ms: 250
 - id: '1632860568197'
@@ -427,37 +433,47 @@
   description: ''
   trigger:
   - platform: event
-    event_type: zwave.scene_activated
-    id: light_on_d
+    event_type: zwave_js_value_notification
+    id: dining_up2
     event_data:
-      entity_id: zwave.dining_room_light
       node_id: 18
-      scene_data: 7860
-      scene_id: 2
+      label: Scene 002
+      value: KeyPressed2x
   - platform: event
-    event_type: zwave.scene_activated
-    id: light_on_e
+    event_type: zwave_js_value_notification
+    id: dining_down2
     event_data:
-      entity_id: zwave.entryway_light
-      node_id: 12
-      scene_data: 3
-      scene_id: 2
-  - platform: event
-    event_type: zwave.scene_activated
-    id: light_off_d
-    event_data:
-      entity_id: zwave.dining_room_light
       node_id: 18
-      scene_data: 7860
-      scene_id: 1
+      label: Scene 001
+      value: KeyPressed2x
   - platform: event
-    event_type: zwave.scene_activated
-    id: light_off_e
+    event_type: zwave_js_value_notification
+    id: dining_up3
     event_data:
-      entity_id: zwave.entryway_light
+      node_id: 18
+      label: Scene 002
+      value: KeyPressed3x
+  - platform: event
+    event_type: zwave_js_value_notification
+    id: dining_down3
+    event_data:
+      node_id: 18
+      label: Scene 001
+      value: KeyPressed3x
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
       node_id: 12
-      scene_data: 3
-      scene_id: 1
+      label: Scene 002
+      value: 3
+    id: entry_up2
+  - platform: event
+    event_type: zwave_js_value_notification
+    event_data:
+      node_id: 12
+      label: Scene 001
+      value: 3
+    id: entry_down2
   condition: []
   action:
   - choose:
@@ -465,28 +481,49 @@
       - condition: or
         conditions:
         - condition: trigger
-          id: light_on_d
+          id: dining_up2
         - condition: trigger
-          id: light_on_e
+          id: entry_up2
       sequence:
       - type: turn_on
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        entity_id: light.living_room_light
+        entity_id: light.livingroom_light
         domain: light
+        brightness_pct: 75
     default: []
   - choose:
     - conditions:
       - condition: or
         conditions:
         - condition: trigger
-          id: light_off_d
+          id: dining_down2
         - condition: trigger
-          id: light_off_e
+          id: entry_down2
       sequence:
       - type: turn_off
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        entity_id: light.living_room_light
+        entity_id: light.livingroom_light
         domain: light
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: dining_up3
+      sequence:
+      - device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        domain: light
+        entity_id: light.livingroom_light
+        type: brightness_increase
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: dining_down3
+      sequence:
+      - device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
+        domain: light
+        entity_id: light.livingroom_light
+        type: brightness_decrease
     default: []
   mode: single
 - id: '1645381546254'
@@ -505,3 +542,34 @@
     entity_id: light.master_bath_light
     domain: light
   mode: single
+- id: '1659667558403'
+  alias: 'Plex: Online Status'
+  description: ''
+  trigger:
+  - platform: webhook
+    webhook_id: plex-online-status-down
+    id: plex_down
+  - platform: webhook
+    webhook_id: plex-online-status-up
+    id: plex_up
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: plex_down
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.plex_online
+    - conditions:
+      - condition: trigger
+        id: plex_up
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.plex_online
+    default: []
+  mode: restart
