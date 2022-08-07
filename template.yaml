@@ -1,0 +1,6 @@
+- sensor:
+  - unique_id: den_tv_source
+    name: Den TV Source
+    availability: "{{ not is_state('media_player.den_tv', 'unavailable') }}"
+    state: "{{ state_attr('media_player.den_tv', 'source')|default('off', true) }}"
+    icon: 'mdi:import'
