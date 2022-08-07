@@ -12,6 +12,33 @@
 ## Template Sensors
 ##########################################################
 
+
+- platform: command_line
+  name: "Plex Ping"
+  command: 'response=$(curl -LIk 10.0.0.202:32400 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
+  device_class: connectivity
+  scan_interval: 60
+  payload_on: 'ON'
+  payload_off: 'OFF'
+
+- platform: bayesian
+  prior: 0.9
+  name: "Plex Online"
+  device_class: connectivity
+  probability_threshold: 0.8
+  observations:
+    - entity_id: 'binary_sensor.plex_ping'
+      prob_given_true: 0.9
+      prob_given_false: 0.1
+      platform: 'state'
+      to_state: 'on'
+    - entity_id: 'input_boolean.plex_online'
+      prob_given_true: 0.7
+      prob_given_false: 0.4
+      platform: 'state'
+      to_state: 'on'
+
+    
 - platform: template
   sensors:
 
@@ -32,6 +59,20 @@
         {% else %}
           mdi:delete
         {% endif %}
+
+#    laundry_washer:
+#      friendly_name: "Washing Machine"
+#      # delay_on: Value condition must be true for this long before the sensor switches ON
+#      delay_on:
+#        minutes: 2
+      # delay_off: Value condition must be false for this long before the sensor switches OFF
+#      delay_off:
+#        minutes: 3
+#      value_template: >-
+#        {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
+#      icon_template: >
+#        mdi:washing-machine
+
 
     monthly_data_concern:
       friendly_name: Data Cap Issue
