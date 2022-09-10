@@ -1,26 +1,63 @@
+# SYSTEM MONITOR
 - platform: systemmonitor
   resources:
-    - type: processor_temperature
-    - type: memory_free
-    - type: memory_use_percent
     - type: processor_use
+    - type: processor_temperature
+    - type: memory_use_percent
     - type: disk_use_percent
       arg: "/"
     - type: last_boot
-    - type: network_in
-      arg: eth0
-    - type: network_out
-      arg: eth0
 
 - platform: time_date
   display_options:
     - 'time'
     - 'date'
 
-# scan every 6 hours
+- platform: moon
+
+####################
+# REST SENSORS
+####################
+
+# PLEX SERVER: OPEN HARDWARE MONITOR
+- platform: rest
+  resource: !secret scylla_ohm
+  name: Scylla OHM
+  scan_interval: 300
+  json_attributes_path: "$.Children[0]"
+  json_attributes:
+    - Children
+  value_template: "{{ now() }}"
+
+# PLEX SERVER: TAUTULLI STREAMS
+- platform: rest
+  resource: !secret tautulli_api_streams
+  name: "Plex Streams"
+# scan every 2 hours
+  scan_interval: 3600
+  json_attributes_path: "$.response.data"
+  json_attributes:
+    - stream_count_direct_play
+    - stream_count_direct_stream
+    - stream_count_transcode
+  value_template: '{{ value_json.response.data.stream_count }}'
+
+# PLEX SERVER: TAUTULLI LIBRARIES
+- platform: rest
+  resource: !secret tautulli_api_libs
+  name: "Plex Libraries"
+# scan every 24 hours
+  scan_interval: 86400
+  json_attributes_path: "$.response"
+  json_attributes:
+    - data
+  value_template: '{{ value_json.response.result }}'
+
+# TRASH PICKUP SERVICE
 - platform: rest
   resource: !secret my_trashpickup_url
   name: "Trash Service"
+# scan every 6 hours
   scan_interval: 21600
   json_attributes:
     - date
@@ -30,10 +67,11 @@
     - when
   value_template: "{{ value_json.desc }}"
 
-# scan every 1 hour
+# ROUTER-BASED DATA MONITOR
 - platform: rest
   resource: !secret my_datausage_url
   name: "Monthly Data Usage"
+# scan every 1 hour
   scan_interval: 3600
   json_attributes:
     - used
@@ -43,11 +81,12 @@
   value_template: "{{ value_json.used }}"
   unit_of_measurement: "GB"
 
-# scan every 1 hour
+# AIR QUALITY MONITOR sourced from AirVisual
 - platform: rest
-  resource: !secret my_airvisual_url
-  name: airvisual_data
-  scan_interval: 3600 # one hour
+  resource: !secret my_airquality_url
+  name: "AirVisual Data"
+# scan every 1 hour
+  scan_interval: 3600
   json_attributes_path: "$.data.current.pollution"
   json_attributes:
     - ts
@@ -55,103 +94,79 @@
     - mainus
   value_template: '{{ value_json.data.current.pollution.aqius }}'
 
-# scan every 1/2 hour
+# WEATHER REPORT sourced from OpenWeatherMap
 - platform: rest
   resource: !secret my_weather_url
   name: weather_report
+# scan every 1/2 hour
   scan_interval: 1800
   json_attributes:
-    - current_condition
-    - current_temp
-    - current_feel
-  value_template: '{{ value_json.updated }}'
+    - temp
+    - feels_like
+  value_template: '{{ value_json.temp|float }}'
+  unit_of_measurement: '°F'
 
-# scan every 2 hours
+# POLLEN REPORT sourced from tomorrow.io
 - platform: rest
-  resource: !secret tautulli_api_libs
-  name: "Plex Libraries"
-  scan_interval: 7200
-  json_attributes_path: "$.response"
+  resource: !secret my_pollen_url
+  name: pollen_data
+# scan every 1/2 hour
+  scan_interval: 3600
+  json_attributes_path: "$.data.timelines[0].intervals[0].values"
   json_attributes:
-    - data
-  value_template: '{{ value_json.response.result }}'
+    - grassIndex
+    - treeIndex
+    - weedIndex
+  value_template: >
+    {% set grass = value_json.data.timelines[0].intervals[0]['values']['grassIndex'] %}
+    {% set trees = value_json.data.timelines[0].intervals[0]['values']['treeIndex'] %}
+    {% set weeds = value_json.data.timelines[0].intervals[0]['values']['weedIndex'] %}
+    {{ max(grass,trees,grass) }}
+
+
+
+####################
+# TEMPLATE SENSORS
+####################
 
 - platform: template
   sensors:
 
-    airvisual:
-      friendly_name: Air Quality
+    scylla_ohm_cpu_load:
+      friendly_name: Scylla CPU Load
       value_template: >
-        {% set aqi = states('sensor.airvisual_data')|int %}
-        {% if aqi > 300 %} Hazardous
-        {% elif aqi > 200 %} Very Unhealthy
-        {% elif aqi > 100 %} Unhealthy
-        {% elif aqi > 50 %} Moderate
-        {% else %} Good
-        {% endif %}
-      icon_template: >
-        {% set aqi = states('sensor.airvisual') %}
-        {% if aqi == "Good" %}
-          mdi:emoticon
-        {% elif aqi == "Moderate" %}
-          mdi:emoticon-neutral-outline
-        {% elif aqi == "Unhealthy" %}
-          mdi:emoticon-frown-outline
-        {% elif aqi == "Very Unhealthy" %}
-          mdi:emoticon-frown
-        {% elif aqi == "Hazardous" %}
-          mdi:emoticon-dead
-        {% else %}
-          mdi:help-circle-outline
-        {% endif %}
-      attribute_templates:
-        contaminant: >
-          {{ state_attr('sensor.airvisual_data','mainus') }}
+        {% set ohm = state_attr('sensor.scylla_ohm', 'Children')[1] %}
+        {% set cpu = ohm.Children[2].Children[0].Value | regex_findall_index('\d+.?\d+') | float %}
+        {{ cpu }}
+      unit_of_measurement: "%"
 
-    outside_temp:
-      friendly_name: "Outside Temperature"
+    scylla_ohm_cpu_temp:
+      friendly_name: Scylla CPU Temp
       value_template: >
-        {{ state_attr('sensor.weather_report','current_temp')|int }}
+        {% set ohm = state_attr('sensor.scylla_ohm', 'Children')[1] %}
+        {% set temp = ohm.Children[1].Children[4].Value | regex_findall_index('\d+.?\d+') | float %}
+        {% set temp = (temp * 1.8) + 32 %}
+        {{ temp }}
       unit_of_measurement: "°F"
 
-#    inside_temp:
-#        friendly_name: "Inside Temperature"
-#        value_template: >
-#          {{ states('sensor.ecobee3_temperature')|int }}
-#        unit_of_measurement: "°F"
 
-    monthly_data_cap:
-      friendly_name: Data Cap Usage
+    plex_streams_direct_play:
+      friendly_name: "Plex Streams: Direct Play"
+      icon_template: 'mdi:play-circle'
       value_template: >
-        {{ state_attr('sensor.monthly_data_usage','per')|float }}
-      unit_of_measurement: "%"
-      attribute_templates:
-        updated: >
-          {{ state_attr('sensor.monthly_data_usage','upd') }}
-        progress: >
-          {{ state_attr('sensor.monthly_data_usage','progress')|float }}
-      icon_template: >
-        {% set pct = state_attr('sensor.monthly_data_usage','per')|float %}
-        {% if pct < 12.5 %}
-          mdi:circle-outline
-        {% elif (pct >= 12.5 and pct < 25) %}
-          mdi:circle-slice-1
-        {% elif (pct >= 25 and pct < 37.5) %}
-          mdi:circle-slice-2
-        {% elif (pct >= 37.5 and pct < 50) %}
-          mdi:circle-slice-3
-        {% elif (pct >= 50 and pct < 62.5) %}
-          mdi:circle-slice-4
-        {% elif (pct >= 62.5 and pct < 75) %}
-          mdi:circle-slice-5
-        {% elif (pct >= 75 and pct < 87.5) %}
-          mdi:circle-slice-6
-        {% elif (pct >= 87.5 and pct < 100) %}
-          mdi:circle-slice-7
-        {% else %}
-          mdi:circle-slice-8
-        {% endif %}
+          {{ state_attr('sensor.plex_streams', 'stream_count_direct_play')|int }}
 
+    plex_streams_direct_stream:
+      friendly_name: "Plex Streams: Direct Stream"
+      icon_template: 'mdi:motion-play-outline'
+      value_template: >
+          {{ state_attr('sensor.plex_streams', 'stream_count_direct_stream')|int }}
+
+    plex_streams_transcode:
+      friendly_name: "Plex Streams: Transcode"
+      icon_template: 'mdi:server'
+      value_template: >
+          {{ state_attr('sensor.plex_streams', 'stream_count_transcode')|int }}
 
     plex_movies:
       friendly_name: "Plex: Movies"
@@ -162,6 +177,7 @@
               {{ lib.count }}
           {% endif %}
           {% endfor %}
+
     plex_movies4k:
       friendly_name: "Plex: 4K Movies"
       icon_template: 'mdi:movie'
@@ -171,6 +187,7 @@
               {{ lib.count|int }}
           {% endif %}
           {% endfor %}
+
     plex_shows:
       friendly_name: "Plex: TV Shows"
       icon_template: 'mdi:television-classic'
@@ -195,6 +212,82 @@
           {% endfor %}
 
 
+    monthly_data_cap:
+      friendly_name: Data Cap Usage
+      value_template: >
+        {{ state_attr('sensor.monthly_data_usage','per')|float }}
+      unit_of_measurement: "%"
+      attribute_templates:
+        updated: >
+          {{ state_attr('sensor.monthly_data_usage','upd') }}
+        progress: >
+          {{ state_attr('sensor.monthly_data_usage','progress')|float }}
+
+
+    airvisual:
+      friendly_name: Air Quality
+      value_template: >
+        {% set aqi = states('sensor.airvisual_data')|int %}
+        {% if aqi > 300 %} Hazardous
+        {% elif aqi > 200 %} Very Unhealthy
+        {% elif aqi > 100 %} Unhealthy
+        {% elif aqi > 50 %} Moderate
+        {% else %} Good
+        {% endif %}
+      icon_template: >
+        {% set aqi = states('sensor.airvisual') %}
+        {% if aqi == "Good" %} mdi:emoticon
+        {% elif aqi == "Moderate" %} mdi:emoticon-neutral-outline
+        {% elif aqi == "Unhealthy" %} mdi:emoticon-frown-outline
+        {% elif aqi == "Very Unhealthy" %} mdi:alert
+        {% elif aqi == "Hazardous" %} mdi:skull
+        {% else %} mdi:help-circle-outline
+        {% endif %}
+      attribute_templates:
+        contaminant_id: >
+          {{ state_attr('sensor.airvisual_data','mainus') }}
+        contaminant: >
+          {% set main_pollutant = state_attr('sensor.airvisual_data','mainus') %}
+          {% if main_pollutant == "co" %} Carbon Monoxide
+          {% elif main_pollutant == "n2" %} Nitrogen Dioxide
+          {% elif main_pollutant == "o3" %} Ozone
+          {% elif main_pollutant == "p1" %} PM10
+          {% elif main_pollutant == "p2" %} PM2.5
+          {% elif main_pollutant == "s2" %} Sulfur Dioxide
+          {% else %} Unknown
+          {% endif %}
+
+    pollen_grass:
+      friendly_name: "Pollen: Grass Index"
+      icon_template: "mdi:grass"
+      value_template: >
+        {{ state_attr('sensor.pollen_data', 'grassIndex') | int }}
+
+    pollen_trees:
+      friendly_name: "Pollen: Tree Index"
+      icon_template: "mdi:tree"
+      value_template: >
+        {{ state_attr('sensor.pollen_data', 'treeIndex') | int }}
+
+    pollen_weeds:
+      friendly_name: "Pollen: Weed Index"
+      icon_template: "mdi:spa"
+      value_template: >
+        {{ state_attr('sensor.pollen_data', 'weedIndex') | int }}
+
+    outside_temp:
+      friendly_name: "Outside Temperature"
+      value_template: >
+        {{ state_attr("sensor.weather_report", "temp")|float|round(1) }}
+      unit_of_measurement: "°F"
+
+    inside_temp:
+        friendly_name: "Inside Temperature"
+        value_template: >
+          {{ states('sensor.ecobee3_temperature')|int }}
+        unit_of_measurement: "°F"
+
+
     month_gone:
       friendly_name: Percentage of the Month
       value_template: >
@@ -211,7 +304,8 @@
         {% set p = (d / days)|float|round(2) * 100 %}
         {{ p }}
       unit_of_measurement: "%"
-        
+
+ 
     ds420j_last_boot_fmt:
       friendly_name: DS420j Last Boot
       value_template: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
