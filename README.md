@@ -1,7 +1,5 @@
 # Smart Home Documentation
 
- [![Last Commit][github-last-commit]][github-master] [![GitHub Activity][commits-shield]][commits]
-
 ## Controls
 - **Living Room Light**
     - Can be controlled by IKEA dimmer button mounted to the lamp, or:
