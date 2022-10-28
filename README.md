@@ -1,2 +1,2 @@
 # Smart Home Documentation
-see the wiki
+See the [Wiki](/tomhenrich/hass-config/wiki)
