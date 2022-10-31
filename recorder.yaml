@@ -7,8 +7,11 @@ exclude:
     - climate
     - device_tracker
     - fan
+    - input_datetime
     - plex
     - media_player
+    - moon
+    - number
     - scene
     - script
     - stream
@@ -25,12 +28,13 @@ exclude:
     - binary_sensor.ecobee*occupancy
     - binary_sensor.home_assistant_operating*
     - binary_sensor.*home_security*
+    - binary_sensor.trashday
     - button.ds420j_*
     - button.*_ping
     - button.*_ping*
     - button.*_identify
-    - number.fibaro_motion_*_basic
-    - number.den_light_*_on_level
+    - number.fibaro_motion*basic
+    - number.den_light_*on_level
     - select.*local_protection*
     - select.*rf_protection*
     - sensor.airquality*
@@ -38,7 +42,6 @@ exclude:
     - sensor.ds420j_cpu*
     - sensor.ds420j_network*
     - sensor.owm_*
-    - sensor.*_laundry_sub_cycle
     - sensor.*_laundry_time_remaining
     - sensor.*_laundry_delay_time_remaining
     - sensor.home_assistant_*_version
@@ -47,6 +50,7 @@ exclude:
     - sensor.openweather*
     - sensor.scylla_library_*
   entities:
+    - binary_sensor.den_tablet_ping
     - binary_sensor.ds420j_update_available
     - binary_sensor.garage_door_sensor_cover_removed
     - binary_sensor.garage_myq_gateway
@@ -68,6 +72,8 @@ exclude:
     - input_boolean.vacation_mode
     - input_button.den_tv_reboot
     - number.livingroom_light_on_level
+    - sensor.adguard_dns_queries
+    - sensor.adguard_dns_queries_blocked_ratio
     - sensor.airquality_report
     - sensor.date
     - sensor.den_light_dimmer_power
@@ -86,11 +92,12 @@ exclude:
     - sensor.month_days
     - sensor.month_gone
     - sensor.network_cabinet_temp_humidity
-    - sensor.plex_scylla
+    - sensor.scylla_ohm
     - sensor.smart_plug_electric_consumption_kwh
     - sensor.smart_plug_electric_w
     - sensor.smart_plug_node_status
     - sensor.time
+    - sensor.trash_service
     - sensor.washer_leak_sensor_temperature
     - sensor.weather_report
     - switch.wake_on_lan
