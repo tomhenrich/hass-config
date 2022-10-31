@@ -1,6 +1,19 @@
 - sensor:
   - unique_id: den_tv_source
     name: Den TV Source
-    availability: "{{ not is_state('media_player.den_tv', 'unavailable') }}"
-    state: "{{ state_attr('media_player.den_tv', 'source')|default('off', true) }}"
+    #availability: "{{ not is_state('media_player.den_tv', 'unavailable') }}"
+    state: >
+      {% set source = state_attr('media_player.den_tv', 'source')|default('off', true) %}
+      {% if source == "com.amazon.tv.launcher" %} Launcher
+      {% elif source == "com.hbo.hbonow" %} HBO
+      {% elif source == "com.cbs.ott" %} Paramount+
+      {% elif source == "com.amcplus.firetv" %} AMC+
+      {% elif source == "com.showtime.showtimeanytime" %} Showtime
+      {% else %} {{ source }}
+      {% endif %}
     icon: 'mdi:import'
+
+- binary_sensor:
+  - name: Scylla Online
+    state: '{{ not is_state("sensor.scylla_status", "unavailable") }}'
+    device_class: connectivity
