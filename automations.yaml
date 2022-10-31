@@ -12,22 +12,6 @@
   action:
   - scene: scene.good_night
   mode: single
-- id: '1624219701132'
-  alias: Hass Shutdown Switch
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: input_boolean.shutdown_confirm
-    to: 'on'
-  condition: []
-  action:
-  - service: input_boolean.turn_off
-    target:
-      entity_id:
-      - input_boolean.shutdown_confirm
-      - input_boolean.shutdown_primer
-  - service: hassio.host_shutdown
-  mode: single
 - id: '1625264068184'
   alias: Plex Button
   description: ''
@@ -37,28 +21,43 @@
     platform: device
     type: remote_button_short_press
     subtype: turn_on
+    id: singlepress
+  - device_id: c41a7cabdaf68d062d0fa206dfe908cb
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: dim_up
+    id: longpress
   condition: []
   action:
-  - service: media_player.turn_on
-    data: {}
-    target:
-      entity_id: media_player.den_tv
-  - service: androidtv.adb_command
-    data:
-      command: am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity
-    target:
-      entity_id: media_player.den_tv
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: singlepress
+      sequence:
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id: media_player.den_tv
+      - service: androidtv.adb_command
+        data:
+          command: am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity
+        target:
+          entity_id: media_player.den_tv
+    - conditions:
+      - condition: trigger
+        id: longpress
+      sequence:
+      - service: media_player.turn_on
+        data: {}
+        target:
+          entity_id: media_player.den_tv
+      - service: androidtv.adb_command
+        data:
+          command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
+        target:
+          entity_id: media_player.den_tv
   mode: restart
-- id: '1629823138157'
-  alias: Speed Tests
-  description: ''
-  trigger:
-  - platform: time
-    at: '12:00:00'
-  condition: []
-  action:
-  - service: speedtestdotnet.speedtest
-  mode: single
 - id: '1632860503837'
   alias: 'Living Room: Light - Dimmer Button'
   description: ''
@@ -210,27 +209,24 @@
     id: lightsout
     from: 'on'
     to: 'off'
-  - platform: event
-    id: disable
-    event_type: zwave_js_value_notification
-    event_data:
-      node_id: 18
-      label: Scene 002
-      value: KeyPressed3x
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
         id: motion
-      - condition: state
-        entity_id: binary_sensor.sundown
-        state: 'on'
       - condition: device
         type: is_off
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
         entity_id: light.livingroom_light
         domain: light
+      - condition: state
+        entity_id: sun.sun
+        state: below_horizon
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
       sequence:
       - type: turn_on
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
@@ -252,18 +248,6 @@
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
         entity_id: light.livingroom_light
         domain: light
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.livingroom_nightlight_status
-        data: {}
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: lightsout
-        - condition: trigger
-          id: disable
-      sequence:
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.livingroom_nightlight_status
@@ -306,7 +290,7 @@
         device_id: 8b8fa19a5dddafb0fa74d2af37668516
         entity_id: light.master_bath_light
         domain: light
-        brightness_pct: 45
+        brightness_pct: 25
     - conditions:
       - condition: trigger
         id: medium
@@ -315,7 +299,7 @@
         device_id: 8b8fa19a5dddafb0fa74d2af37668516
         entity_id: light.master_bath_light
         domain: light
-        brightness_pct: 70
+        brightness_pct: 50
     - conditions:
       - condition: trigger
         id: high
@@ -542,34 +526,112 @@
     entity_id: light.master_bath_light
     domain: light
   mode: single
-- id: '1659667558403'
-  alias: 'Plex: Online Status'
+- id: '1661816714579'
+  alias: Guest Room Light
+  description: ''
+  trigger:
+  - device_id: 132629fb04b6ce78bd0cb46fac618f43
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+  condition: []
+  action:
+  - type: toggle
+    device_id: b7168513f86403297139fd9c668b8093
+    entity_id: light.guest_room_ceiling_fan
+    domain: light
+  mode: single
+- id: '1662853310691'
+  alias: 'Plex: Stream Activity'
   description: ''
   trigger:
   - platform: webhook
-    webhook_id: plex-online-status-down
-    id: plex_down
+    webhook_id: plex-stream-activity
+  condition:
+  - condition: template
+    value_template: '{{ ("media.play".encode() in trigger.data.payload) or ("media.resume".encode()
+      in trigger.data.payload) or ("media.stop".encode() in trigger.data.payload)  or
+      ("media.pause".encode() in trigger.data.payload)  }}'
+  action:
+  - service: homeassistant.update_entity
+    data: {}
+    target:
+      entity_id: sensor.plex_streams
+  mode: queued
+  max: 4
+- id: '1663332587839'
+  alias: Living Room Night Light disable
+  description: Turn off the night light automation if the brightness changes independently
+  trigger:
+  - platform: state
+    entity_id:
+    - light.livingroom_light
+    attribute: brightness
+  condition:
+  - condition: state
+    entity_id: input_boolean.livingroom_nightlight_status
+    state: 'on'
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.livingroom_nightlight_status
+  mode: single
+- id: '1663689219205'
+  alias: Plex Meta Manager Notifications
+  description: ''
+  trigger:
   - platform: webhook
-    webhook_id: plex-online-status-up
-    id: plex_up
+    webhook_id: pmm-complete
+    id: pmm-complete
+    alias: 'Webhook: PMM Completed'
+  - platform: webhook
+    webhook_id: pmm-error
+    id: pmm-error
+    alias: 'Webhook: PMM Error'
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
-        id: plex_down
+        id: pmm-error
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.plex_online
-    - conditions:
-      - condition: trigger
-        id: plex_up
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.plex_online
-    default: []
-  mode: restart
+      - service: notify.telegram_tom
+        data_template:
+          title: PMM Error
+          message: '{{ dict(trigger.json)|tojson }}'
+  mode: single
+- id: '1665168686491'
+  alias: NAS Shutdown
+  description: ''
+  trigger: []
+  condition:
+  - condition: state
+    entity_id: input_boolean.nas_shutdown
+    attribute: 'on'
+    state: ''
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.nas_shutdown
+  - service: notify.telegram_tom
+    data:
+      message: NAS shutting down
+  mode: single
+- id: '1666133749249'
+  alias: Print Jobs
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.canon_mx470_series
+    to: printing
+  condition: []
+  action:
+  - service: counter.increment
+    data: {}
+    target:
+      entity_id: counter.prints
+  mode: single
