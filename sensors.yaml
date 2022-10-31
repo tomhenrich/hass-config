@@ -69,7 +69,7 @@
 - platform: rest
   resource: !secret my_datausage_url
   name: "Monthly Data Usage"
-  scan_interval: 1800
+  scan_interval: 86400
   json_attributes:
     - used
     - progress
@@ -308,8 +308,8 @@
         {% elif now().month == 2 and ((now().year-2000) % 4 == 0) %}
         {% set days = 29 %}
         {% endif %}
-        {% set d = now().day | int %}
-        {% set p = ((d-1) / days)|float|round(2) * 100 %}
+        {% set d = (now().day-1) + (now().hour/24) %}
+        {% set p = (d / days)|float|round(2) * 100 %}
         {{ p }}
       unit_of_measurement: "%"
 
