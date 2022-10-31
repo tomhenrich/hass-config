@@ -296,6 +296,11 @@
       value_template: '{{ state_attr("sensor.monthly_data_usage", "used")|float }}'
       unit_of_measurement: "GB"
 
+    rbr50_monthly_data_gb:
+      friendly_name: Monthly Data
+      value_template: '{{ ((states("sensor.rbr50_download_month")|float + states("sensor.rbr50_upload_month")|float)/1000)|round(1) }}'
+      unit_of_measurement: "GB"
+
     month_gone:
       friendly_name: Percentage of the Month
       value_template: >
