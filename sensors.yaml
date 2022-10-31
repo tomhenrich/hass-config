@@ -13,8 +13,6 @@
     - 'time'
     - 'date'
 
-- platform: moon
-
 ####################
 # REST SENSORS
 ####################
@@ -33,8 +31,8 @@
 - platform: rest
   resource: !secret tautulli_api_streams
   name: "Plex Streams"
-# scan every 2 hours
-  scan_interval: 3600
+# scan every 10 minutes
+  scan_interval: 600
   json_attributes_path: "$.response.data"
   json_attributes:
     - stream_count_direct_play
@@ -71,21 +69,18 @@
 - platform: rest
   resource: !secret my_datausage_url
   name: "Monthly Data Usage"
-# scan every 1 hour
-  scan_interval: 3600
+  scan_interval: 1800
   json_attributes:
     - used
-    - per
     - progress
     - upd
-  value_template: "{{ value_json.used }}"
-  unit_of_measurement: "GB"
+  value_template: "{{ value_json.per|float }}"
+  unit_of_measurement: "%"
 
 # AIR QUALITY MONITOR sourced from AirVisual
 - platform: rest
   resource: !secret my_airquality_url
   name: "AirVisual Data"
-# scan every 1 hour
   scan_interval: 3600
   json_attributes_path: "$.data.current.pollution"
   json_attributes:
@@ -98,19 +93,19 @@
 - platform: rest
   resource: !secret my_weather_url
   name: weather_report
-# scan every 1/2 hour
   scan_interval: 1800
   json_attributes:
     - temp
     - feels_like
-  value_template: '{{ value_json.temp|float }}'
-  unit_of_measurement: '°F'
+    - condition
+    - condition_icon
+  value_template: '{{ value_json.condition }}'
+
 
 # POLLEN REPORT sourced from tomorrow.io
 - platform: rest
   resource: !secret my_pollen_url
   name: pollen_data
-# scan every 1/2 hour
   scan_interval: 3600
   json_attributes_path: "$.data.timelines[0].intervals[0].values"
   json_attributes:
@@ -212,18 +207,6 @@
           {% endfor %}
 
 
-    monthly_data_cap:
-      friendly_name: Data Cap Usage
-      value_template: >
-        {{ state_attr('sensor.monthly_data_usage','per')|float }}
-      unit_of_measurement: "%"
-      attribute_templates:
-        updated: >
-          {{ state_attr('sensor.monthly_data_usage','upd') }}
-        progress: >
-          {{ state_attr('sensor.monthly_data_usage','progress')|float }}
-
-
     airvisual:
       friendly_name: Air Quality
       value_template: >
@@ -281,12 +264,37 @@
         {{ state_attr("sensor.weather_report", "temp")|float|round(1) }}
       unit_of_measurement: "°F"
 
+    outside_condition:
+      friendly_name: "Outside Condition"
+      value_template: >
+        {{ state_attr("sensor.weather_report", "condition") }}
+      icon_template: >
+        {% set code = state_attr("sensor.weather_report", "condition_icon") %}
+        {% if code == "09d" %} mdi:weather-rainy
+        {% elif code == "10d" %} mdi:weather-rainy
+        {% elif code == "11d" %} mdi:weather-lightning-rainy
+        {% elif code == "13d" %} mdi:weather-snowy-rainy
+        {% elif code == "50d" %} mdi:weather-dust
+        {% elif code == "01d" %} mdi:weather-sunny
+        {% elif code == "01n" %} mdi:weather-night
+        {% elif code == "02d" %} mdi:weather-cloudy
+        {% elif code == "02n" %} mdi:weather-night-partly-cloudy
+        {% elif code == "03d" or code == "03n" %} mdi:weather-partly-cloudy
+        {% elif code == "04d" or code == "04n" %} mdi:weather-partly-cloudy
+        {% else %} mdi:weather-fog
+        {% endif %}
+
     inside_temp:
         friendly_name: "Inside Temperature"
         value_template: >
           {{ states('sensor.ecobee3_temperature')|int }}
         unit_of_measurement: "°F"
 
+
+    monthly_data_gb:
+      friendly_name: Monthly Data
+      value_template: '{{ state_attr("sensor.monthly_data_usage", "used")|float }}'
+      unit_of_measurement: "GB"
 
     month_gone:
       friendly_name: Percentage of the Month
@@ -301,7 +309,7 @@
         {% set days = 29 %}
         {% endif %}
         {% set d = now().day | int %}
-        {% set p = (d / days)|float|round(2) * 100 %}
+        {% set p = ((d-1) / days)|float|round(2) * 100 %}
         {{ p }}
       unit_of_measurement: "%"
 
