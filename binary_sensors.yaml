@@ -2,11 +2,7 @@
 ## Time of Day
 ##########################################################
 
-- platform: tod
-  name: Sundown
-  after: sunset
-  before: sunrise
-  before_offset: "-00:30"
+
 
 ##########################################################
 ## Template Sensors
@@ -21,31 +17,14 @@
   payload_on: 'ON'
   payload_off: 'OFF'
 
-- platform: bayesian
-  prior: 0.9
-  name: "Plex Online"
-  device_class: connectivity
-  probability_threshold: 0.8
-  observations:
-    - entity_id: 'binary_sensor.plex_ping'
-      prob_given_true: 0.9
-      prob_given_false: 0.1
-      platform: 'state'
-      to_state: 'on'
-    - entity_id: 'input_boolean.plex_online'
-      prob_given_true: 0.7
-      prob_given_false: 0.4
-      platform: 'state'
-      to_state: 'on'
 
-    
 - platform: template
   sensors:
 
     trashday:
       friendly_name: Trash Pickup
       value_template: >
-        {{ state_attr('sensor.trash_service','prox')|float == 0 }}
+        {{ state_attr('sensor.trash_service','prox')|int == 0 }}
       attribute_templates:
         type: >
           {{ state_attr('sensor.trash_service','desc') }}
@@ -54,10 +33,10 @@
         date: >
           {{ state_attr('sensor.trash_service','when') }}
       icon_template: >
-        {% if state_attr('sensor.trash_service','type') == 'both' %}
-          mdi:recycle
-        {% else %}
+        {% if state_attr('sensor.trash_service','type') == 'trash' %}
           mdi:delete
+        {% else %}
+          mdi:recycle
         {% endif %}
 
 #    laundry_washer:
@@ -73,11 +52,20 @@
 #      icon_template: >
 #        mdi:washing-machine
 
+    gewasher_status:
+      friendly_name: Washer Running
+      value_template: >
+        {{ states('sensor.gewasher_laundry_machine_state') == "Run" }}
+    gedryer_status:
+      friendly_name: Dryer Running
+      value_template: >
+        {{ states('sensor.gedryer_laundry_machine_state') == "Run" }}
+
 
     monthly_data_concern:
       friendly_name: Data Cap Issue
       value_template: >
-        {{ states('sensor.monthly_data_cap')|float >= states('sensor.month_gone')|float }}
+        {{ states('sensor.monthly_data_usage')|float > states('sensor.month_gone')|float }}
       icon_template: >
         {% if is_state('binary_sensor.monthly_data_concern','on') %}
           mdi:alert-circle-outline
@@ -93,11 +81,20 @@
 - platform: ping
   host: !secret nas_host
   name: DS420j Online
+  scan_interval: 3600
+  count: 2
 
 - platform: ping
   host: !secret pizero_host
   name: Raspberry Pi Zero Online
+  scan_interval: 3600
+  count: 2
 
+- platform: ping
+  host: "10.0.0.4"
+  name: den_tablet_ping
+  scan_interval: 30
+  count: 1
 
 ##########################################################
 ## Presence Detection
@@ -108,9 +105,16 @@
   name: 'Tom Presence'
   probability_threshold: 0.8
   observations:
+    - entity_id: 'device_tracker.iphone_chasm_11'
+      # likelihood i'm home if this is true:
+      prob_given_true: 0.9
+      # likelihood this shows as home when i'm not:
+      prob_given_false: 0.1
+      platform: 'state'
+      to_state: 'home'
     - entity_id: 'device_tracker.keys'
-      prob_given_true: 0.7 #likelihood i'm home if this is true
-      prob_given_false: 0.2 #likelihood this shows as home when i'm not
+      prob_given_true: 0.7
+      prob_given_false: 0.2
       platform: 'state'
       to_state: 'home'
     - entity_id: 'sensor.iphone_ssid'
