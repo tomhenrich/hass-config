@@ -35,15 +35,8 @@
       - condition: trigger
         id: singlepress
       sequence:
-      - service: media_player.turn_on
+      - service: script.plex_on_den_tv
         data: {}
-        target:
-          entity_id: media_player.den_tv
-      - service: androidtv.adb_command
-        data:
-          command: am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity
-        target:
-          entity_id: media_player.den_tv
     - conditions:
       - condition: trigger
         id: longpress
@@ -134,15 +127,23 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: group.exterior
+    entity_id:
+    - binary_sensor.exterior_openings
     to: 'on'
-    for: 00:10:00
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
     id: doorsopened
   - platform: state
-    entity_id: group.exterior
+    entity_id:
+    - binary_sensor.exterior_openings
     id: doorsclosed
     to: 'off'
-    for: 00:05:00
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
   condition: []
   action:
   - choose:
@@ -164,6 +165,7 @@
       - service: input_boolean.turn_on
         target:
           entity_id: input_boolean.barn_door_protocol
+        data: {}
       - service: notify.mobile_app_iphone
         data:
           message: Furnace has been turned off.
@@ -183,6 +185,7 @@
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.barn_door_protocol
+        data: {}
       - service: notify.mobile_app_iphone
         data:
           message: Furnace has resumed heat.
@@ -320,16 +323,14 @@
     platform: device
     type: remote_button_short_press
     subtype: button_1
-    id: pressed
-  condition: []
+  condition:
+  - condition: state
+    entity_id: binary_sensor.doorbell_delay
+    state: 'off'
   action:
   - service: notify.mobile_app_iphone
     data:
       message: Doorbell pressed!
-  - service: counter.increment
-    data: {}
-    target:
-      entity_id: counter.doorbell
   mode: single
 - id: '1635605604406'
   alias: 'Notify: Washer Leak'
@@ -371,18 +372,18 @@
       - condition: trigger
         id: tree_on
       sequence:
-      - type: turn_on
-        device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
-        entity_id: switch.monoprice_outlet_1
-        domain: switch
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.monoprice_1
     - conditions:
       - condition: trigger
         id: tree_off
       sequence:
-      - type: turn_off
-        device_id: 3e0d15744eb7fca2a0e5e1e71aae0770
-        entity_id: switch.monoprice_outlet_1
-        domain: switch
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.monoprice_1
     default: []
   mode: single
 - id: '1640229738497'
@@ -413,7 +414,7 @@
   mode: parallel
   max: 10
 - id: '1641600921734'
-  alias: 'Living Room: Light Buttons'
+  alias: 'Living Room: Light Switches'
   description: ''
   trigger:
   - platform: event
@@ -423,6 +424,7 @@
       node_id: 18
       label: Scene 002
       value: KeyPressed2x
+    alias: 'Dining Room Switch: Up 2x'
   - platform: event
     event_type: zwave_js_value_notification
     id: dining_down2
@@ -430,6 +432,7 @@
       node_id: 18
       label: Scene 001
       value: KeyPressed2x
+    alias: 'Dining Room Switch: Down 2x'
   - platform: event
     event_type: zwave_js_value_notification
     id: dining_up3
@@ -437,6 +440,7 @@
       node_id: 18
       label: Scene 002
       value: KeyPressed3x
+    alias: 'Dining Room Switch: Up 3x'
   - platform: event
     event_type: zwave_js_value_notification
     id: dining_down3
@@ -444,6 +448,7 @@
       node_id: 18
       label: Scene 001
       value: KeyPressed3x
+    alias: 'Dining Room Switch: Down 3x'
   - platform: event
     event_type: zwave_js_value_notification
     event_data:
@@ -451,6 +456,7 @@
       label: Scene 002
       value: 3
     id: entry_up2
+    alias: 'Entryway Switch: Up 2x'
   - platform: event
     event_type: zwave_js_value_notification
     event_data:
@@ -458,6 +464,7 @@
       label: Scene 001
       value: 3
     id: entry_down2
+    alias: 'Entryway Switch: Down 2x'
   condition: []
   action:
   - choose:
@@ -495,19 +502,10 @@
           id: dining_up3
       sequence:
       - device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        domain: light
-        entity_id: light.livingroom_light
-        type: brightness_increase
-    - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: dining_down3
-      sequence:
-      - device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
-        domain: light
-        entity_id: light.livingroom_light
-        type: brightness_decrease
+        domain: number
+        entity_id: number.livingroom_light_on_level
+        type: set_value
+        value: 100
     default: []
   mode: single
 - id: '1645381546254'
@@ -539,7 +537,7 @@
   action:
   - type: toggle
     device_id: b7168513f86403297139fd9c668b8093
-    entity_id: light.guest_room_ceiling_fan
+    entity_id: light.guest_ceiling
     domain: light
   mode: single
 - id: '1662853310691'
@@ -611,27 +609,86 @@
     entity_id: input_boolean.nas_shutdown
     attribute: 'on'
     state: ''
+    alias: Shutdown Primer Active
   action:
   - service: input_boolean.turn_off
     data: {}
     target:
       entity_id: input_boolean.nas_shutdown
+    alias: Reset Primer Switch
   - service: notify.telegram_tom
     data:
       message: NAS shutting down
+    alias: Telegram Notification
   mode: single
-- id: '1666133749249'
-  alias: Print Jobs
+- id: '1668914116789'
+  alias: Check Monthly Data
   description: ''
   trigger:
-  - platform: state
-    entity_id:
-    - sensor.canon_mx470_series
-    to: printing
-  condition: []
+  - platform: time_pattern
+    minutes: /1
+  condition:
+  - condition: template
+    value_template: '{{ now().minute % states("input_number.check_data")|int == 0
+      }}'
   action:
-  - service: counter.increment
+  - service: rest_command.check_monthly_data
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 15
+      milliseconds: 0
+  - service: homeassistant.update_entity
     data: {}
     target:
-      entity_id: counter.prints
+      entity_id: sensor.monthly_data_report
+  mode: single
+- id: '1669779259047'
+  alias: Wallpanel Charging
+  description: ''
+  trigger:
+  - type: battery_level
+    platform: device
+    device_id: d30463ca753d47d6291b1ebfb2160b3a
+    entity_id: sensor.my_wall_panel_battery_level
+    domain: sensor
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    alias: Low Battery
+    below: 45
+    id: low_battery
+  - type: battery_level
+    platform: device
+    device_id: d30463ca753d47d6291b1ebfb2160b3a
+    entity_id: sensor.my_wall_panel_battery_level
+    domain: sensor
+    for:
+      hours: 24
+      minutes: 0
+      seconds: 0
+    id: charged_battery
+    alias: Battery Charged
+    above: 85
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: low_battery
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.dlink_w110
+    - conditions:
+      - condition: trigger
+        id: charged_battery
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.dlink_w110
   mode: single
