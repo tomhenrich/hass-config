@@ -7,14 +7,21 @@
     - type: disk_use_percent
       arg: "/"
     - type: last_boot
+    - type: network_in
+      arg: "eth0"
+    - type: network_out
+      arg: "eth0"
 
 - platform: time_date
   display_options:
     - 'time'
     - 'date'
 
+  
 ####################
+#
 # REST SENSORS
+#
 ####################
 
 # PLEX SERVER: OPEN HARDWARE MONITOR
@@ -39,6 +46,7 @@
     - stream_count_direct_stream
     - stream_count_transcode
   value_template: '{{ value_json.response.data.stream_count }}'
+  state_class: measurement
 
 # PLEX SERVER: TAUTULLI LIBRARIES
 - platform: rest
@@ -68,14 +76,17 @@
 # ROUTER-BASED DATA MONITOR
 - platform: rest
   resource: !secret my_datausage_url
-  name: "Monthly Data Usage"
-  scan_interval: 86400
+  name: "Monthly Data Report"
+  scan_interval: 42300
   json_attributes:
-    - used
-    - progress
-    - upd
-  value_template: "{{ value_json.per|float }}"
+    - pct_of_month
+    - gb
+    - pct_of_cap
+    - concern
+    - updated
+  value_template: "{{ value_json.pct_of_cap|float }}"
   unit_of_measurement: "%"
+  state_class: total_increasing
 
 # AIR QUALITY MONITOR sourced from AirVisual
 - platform: rest
@@ -88,11 +99,12 @@
     - aqius
     - mainus
   value_template: '{{ value_json.data.current.pollution.aqius }}'
+  device_class: aqi
 
 # WEATHER REPORT sourced from OpenWeatherMap
 - platform: rest
   resource: !secret my_weather_url
-  name: weather_report
+  name: Weather Report
   scan_interval: 1800
   json_attributes:
     - temp
@@ -101,11 +113,10 @@
     - condition_icon
   value_template: '{{ value_json.condition }}'
 
-
 # POLLEN REPORT sourced from tomorrow.io
 - platform: rest
   resource: !secret my_pollen_url
-  name: pollen_data
+  name: Pollen Data
   scan_interval: 3600
   json_attributes_path: "$.data.timelines[0].intervals[0].values"
   json_attributes:
@@ -116,211 +127,6 @@
     {% set grass = value_json.data.timelines[0].intervals[0]['values']['grassIndex'] %}
     {% set trees = value_json.data.timelines[0].intervals[0]['values']['treeIndex'] %}
     {% set weeds = value_json.data.timelines[0].intervals[0]['values']['weedIndex'] %}
-    {{ max(grass,trees,grass) }}
+    {{ max(grass,trees,weeds) }}
 
-
-
-####################
-# TEMPLATE SENSORS
-####################
-
-- platform: template
-  sensors:
-
-    scylla_ohm_cpu_load:
-      friendly_name: Scylla CPU Load
-      value_template: >
-        {% set ohm = state_attr('sensor.scylla_ohm', 'Children')[1] %}
-        {% set cpu = ohm.Children[2].Children[0].Value | regex_findall_index('\d+.?\d+') | float %}
-        {{ cpu }}
-      unit_of_measurement: "%"
-
-    scylla_ohm_cpu_temp:
-      friendly_name: Scylla CPU Temp
-      value_template: >
-        {% set ohm = state_attr('sensor.scylla_ohm', 'Children')[1] %}
-        {% set temp = ohm.Children[1].Children[4].Value | regex_findall_index('\d+.?\d+') | float %}
-        {% set temp = (temp * 1.8) + 32 %}
-        {{ temp }}
-      unit_of_measurement: "°F"
-
-
-    plex_streams_direct_play:
-      friendly_name: "Plex Streams: Direct Play"
-      icon_template: 'mdi:play-circle'
-      value_template: >
-          {{ state_attr('sensor.plex_streams', 'stream_count_direct_play')|int }}
-
-    plex_streams_direct_stream:
-      friendly_name: "Plex Streams: Direct Stream"
-      icon_template: 'mdi:motion-play-outline'
-      value_template: >
-          {{ state_attr('sensor.plex_streams', 'stream_count_direct_stream')|int }}
-
-    plex_streams_transcode:
-      friendly_name: "Plex Streams: Transcode"
-      icon_template: 'mdi:server'
-      value_template: >
-          {{ state_attr('sensor.plex_streams', 'stream_count_transcode')|int }}
-
-    plex_movies:
-      friendly_name: "Plex: Movies"
-      icon_template: 'mdi:movie'
-      value_template: >
-          {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
-          {% if lib.section_id == '1' %}
-              {{ lib.count }}
-          {% endif %}
-          {% endfor %}
-
-    plex_movies4k:
-      friendly_name: "Plex: 4K Movies"
-      icon_template: 'mdi:movie'
-      value_template: >
-          {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
-          {% if lib.section_id == '2' %}
-              {{ lib.count|int }}
-          {% endif %}
-          {% endfor %}
-
-    plex_shows:
-      friendly_name: "Plex: TV Shows"
-      icon_template: 'mdi:television-classic'
-      value_template: >
-          {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
-          {% if lib.section_id == '3' %}
-              {{ lib.count|int }}
-          {% endif %}
-          {% endfor %}
-      attribute_templates:
-        seasons: >
-          {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
-          {% if lib.section_id == '3' %}
-              {{ lib.parent_count|int }}
-          {% endif %}
-          {% endfor %}
-        episodes: >
-          {% for lib in state_attr('sensor.plex_libraries', 'data') -%}
-          {% if lib.section_id == '3' %}
-              {{ lib.child_count|int }}
-          {% endif %}
-          {% endfor %}
-
-
-    airvisual:
-      friendly_name: Air Quality
-      value_template: >
-        {% set aqi = states('sensor.airvisual_data')|int %}
-        {% if aqi > 300 %} Hazardous
-        {% elif aqi > 200 %} Very Unhealthy
-        {% elif aqi > 100 %} Unhealthy
-        {% elif aqi > 50 %} Moderate
-        {% else %} Good
-        {% endif %}
-      icon_template: >
-        {% set aqi = states('sensor.airvisual') %}
-        {% if aqi == "Good" %} mdi:emoticon
-        {% elif aqi == "Moderate" %} mdi:emoticon-neutral-outline
-        {% elif aqi == "Unhealthy" %} mdi:emoticon-frown-outline
-        {% elif aqi == "Very Unhealthy" %} mdi:alert
-        {% elif aqi == "Hazardous" %} mdi:skull
-        {% else %} mdi:help-circle-outline
-        {% endif %}
-      attribute_templates:
-        contaminant_id: >
-          {{ state_attr('sensor.airvisual_data','mainus') }}
-        contaminant: >
-          {% set main_pollutant = state_attr('sensor.airvisual_data','mainus') %}
-          {% if main_pollutant == "co" %} Carbon Monoxide
-          {% elif main_pollutant == "n2" %} Nitrogen Dioxide
-          {% elif main_pollutant == "o3" %} Ozone
-          {% elif main_pollutant == "p1" %} PM10
-          {% elif main_pollutant == "p2" %} PM2.5
-          {% elif main_pollutant == "s2" %} Sulfur Dioxide
-          {% else %} Unknown
-          {% endif %}
-
-    pollen_grass:
-      friendly_name: "Pollen: Grass Index"
-      icon_template: "mdi:grass"
-      value_template: >
-        {{ state_attr('sensor.pollen_data', 'grassIndex') | int }}
-
-    pollen_trees:
-      friendly_name: "Pollen: Tree Index"
-      icon_template: "mdi:tree"
-      value_template: >
-        {{ state_attr('sensor.pollen_data', 'treeIndex') | int }}
-
-    pollen_weeds:
-      friendly_name: "Pollen: Weed Index"
-      icon_template: "mdi:spa"
-      value_template: >
-        {{ state_attr('sensor.pollen_data', 'weedIndex') | int }}
-
-    outside_temp:
-      friendly_name: "Outside Temperature"
-      value_template: >
-        {{ state_attr("sensor.weather_report", "temp")|float|round(1) }}
-      unit_of_measurement: "°F"
-
-    outside_condition:
-      friendly_name: "Outside Condition"
-      value_template: >
-        {{ state_attr("sensor.weather_report", "condition") }}
-      icon_template: >
-        {% set code = state_attr("sensor.weather_report", "condition_icon") %}
-        {% if code == "09d" %} mdi:weather-rainy
-        {% elif code == "10d" %} mdi:weather-rainy
-        {% elif code == "11d" %} mdi:weather-lightning-rainy
-        {% elif code == "13d" %} mdi:weather-snowy-rainy
-        {% elif code == "50d" %} mdi:weather-dust
-        {% elif code == "01d" %} mdi:weather-sunny
-        {% elif code == "01n" %} mdi:weather-night
-        {% elif code == "02d" %} mdi:weather-cloudy
-        {% elif code == "02n" %} mdi:weather-night-partly-cloudy
-        {% elif code == "03d" or code == "03n" %} mdi:weather-partly-cloudy
-        {% elif code == "04d" or code == "04n" %} mdi:weather-partly-cloudy
-        {% else %} mdi:weather-fog
-        {% endif %}
-
-    inside_temp:
-        friendly_name: "Inside Temperature"
-        value_template: >
-          {{ states('sensor.ecobee3_temperature')|int }}
-        unit_of_measurement: "°F"
-
-
-    monthly_data_gb:
-      friendly_name: Monthly Data
-      value_template: '{{ state_attr("sensor.monthly_data_usage", "used")|float }}'
-      unit_of_measurement: "GB"
-
-    rbr50_monthly_data_gb:
-      friendly_name: Monthly Data
-      value_template: '{{ ((states("sensor.rbr50_download_month")|float + states("sensor.rbr50_upload_month")|float)/1000)|round(1) }}'
-      unit_of_measurement: "GB"
-
-    month_gone:
-      friendly_name: Percentage of the Month
-      value_template: >
-        {% if now().month in [1,3,5,7,8,10,12] %}
-        {% set days = 31 %}
-        {% elif now().month in [4,6,9,11] %}
-        {% set days = 30 %}
-        {% elif now().month == 2 and ((now().year-2000) % 4 > 0) %}
-        {% set days = 28 %}
-        {% elif now().month == 2 and ((now().year-2000) % 4 == 0) %}
-        {% set days = 29 %}
-        {% endif %}
-        {% set d = (now().day-1) + (now().hour/24) %}
-        {% set p = (d / days)|float|round(2) * 100 %}
-        {{ p }}
-      unit_of_measurement: "%"
-
- 
-    ds420j_last_boot_fmt:
-      friendly_name: DS420j Last Boot
-      value_template: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
-      icon_template: 'mdi:calendar-clock'
 
