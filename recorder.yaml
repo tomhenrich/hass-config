@@ -1,4 +1,4 @@
-purge_keep_days: 14
+purge_keep_days: 21
 exclude:
   domains:
     - calendar
@@ -12,6 +12,7 @@ exclude:
     - media_player
     - moon
     - number
+    - person
     - scene
     - script
     - stream
@@ -20,87 +21,61 @@ exclude:
     - weather
     - zone
   entity_globs:
-    - binary_sensor.ds420j_drive_*
-    - binary_sensor.ds420j_update*
-    - binary_sensor.ds420j_*smart
-    - binary_sensor.ds420j_*exceeded
-    - binary_sensor.ds420j_*remaining
     - binary_sensor.ecobee*occupancy
     - binary_sensor.home_assistant_operating*
     - binary_sensor.*home_security*
-    - binary_sensor.trashday
-    - button.ds420j_*
-    - button.*_ping
-    - button.*_ping*
-    - button.*_identify
-    - number.fibaro_motion*basic
-    - number.den_light_*on_level
-    - select.*local_protection*
-    - select.*rf_protection*
-    - sensor.airquality*
-    - sensor.ds420j_memory*
-    - sensor.ds420j_cpu*
+    - binary_sensor.gedryer*
+    - binary_sensor.gewasher*
+    - button.master_bedroom_fan_*
+    - input_datetime.time_christmas_tree_*
+    - input_datetime.time_night_*
+    - number.*light_on_level
+    - sensor.canon_mg3600*
     - sensor.ds420j_network*
-    - sensor.owm_*
-    - sensor.*_laundry_time_remaining
-    - sensor.*_laundry_delay_time_remaining
-    - sensor.home_assistant_*_version
-    - sensor.iphone*
-    - sensor.*node_status
-    - sensor.openweather*
-    - sensor.scylla_library_*
+    - sensor.ds420j_volume_*_total_size
+    - sensor.ds420j_volume_*_used_space
+    - sensor.ds420j_volume_*_volume_used
+    - sensor.gedryer*
+    - sensor.gewasher*
+    - sensor.pollen*
   entities:
-    - binary_sensor.den_tablet_ping
+    - automation.check_monthly_data
+    - automation.mainbathroom_light_toggle_ios
+    - automation.mainbedroom_light_toggle
+    - automation.master_bathroom_light_buttons
+    - automation.plex_meta_manager_notifications
+    - binary_sensor.ds420j_security_status
     - binary_sensor.ds420j_update_available
-    - binary_sensor.garage_door_sensor_cover_removed
+    - binary_sensor.doorbell_delay
+    - binary_sensor.enable_thermostat
+    - binary_sensor.garage_door_sensor_low_battery
     - binary_sensor.garage_myq_gateway
-    - binary_sensor.gedryer_laundry_remote_status
-    - binary_sensor.gewasher_laundry_door_lock
-    - binary_sensor.gewasher_laundry_prewash
-    - binary_sensor.gewasher_laundry_remote_status
-    - binary_sensor.gewasher_laundry_timesaver
-    - binary_sensor.gewasher_laundry_tumblecare
-    - binary_sensor.home_assistant_operating_system_update_available
-    - binary_sensor.monthly_data_concern
     - binary_sensor.remote_ui
-    - binary_sensor.sundown
+    - binary_sensor.trash_pickup
     - binary_sensor.trashday
-    - binary_sensor.updater
+    - button.garage_door_sensor_ping
+    - counter.doorbell
     - input_boolean.guest_mode
-    - input_boolean.shutdown_confirm
-    - input_boolean.shutdown_primer
     - input_boolean.vacation_mode
-    - input_button.den_tv_reboot
-    - number.livingroom_light_on_level
-    - sensor.adguard_dns_queries
-    - sensor.adguard_dns_queries_blocked_ratio
-    - sensor.airquality_report
+    - input_boolean.nas_shutdown
+    - input_button.nas_shutdown
     - sensor.date
-    - sensor.den_light_dimmer_power
-    - sensor.ecobee3_humidity
-    - sensor.ecobee_bedroom_temperature
-    - sensor.ecobee_den_temperature
-    - sensor.gedryer_laundry_tumble_status
-    - sensor.gewasher_laundry_rinse_option
-    - sensor.gewasher_laundry_soil_level
-    - sensor.gewasher_laundry_spintime_level
+    - sensor.ds420j_last_boot_time
+    - sensor.den_tv_source
     - sensor.hacs
-    - sensor.inside_temp
-    - sensor.monoprice_energy_outlet_current
-    - sensor.monoprice_energy_outlet_voltage
-    - sensor.monoprice_zwave_on_off_plugin_node_status_2
-    - sensor.month_days
-    - sensor.month_gone
-    - sensor.network_cabinet_temp_humidity
+    - sensor.mqtt_sensor
+    - sensor.my_wall_panel_light
+    - sensor.plex_libraries
+    - sensor.plex_library_data
+    - sensor.plex_movies
+    - sensor.plex_movies_4k
+    - sensor.plex_tv_shows
     - sensor.scylla_ohm
-    - sensor.smart_plug_electric_consumption_kwh
-    - sensor.smart_plug_electric_w
-    - sensor.smart_plug_node_status
-    - sensor.time
     - sensor.trash_service
-    - sensor.washer_leak_sensor_temperature
-    - sensor.weather_report
-    - switch.wake_on_lan
+    - sensor.zigguest_electricity
+    - switch.adguard_protection
+    - switch.dlink_w110
+
   event_types:
     - service_removed
     - service_executed
