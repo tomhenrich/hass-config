@@ -1,23 +1,25 @@
 - id: '1626148652316'
   name: Lights Out
   entities:
-    switch.kitchen_light:
+    light.kitchen_light:
       icon: hass:lightbulb
       friendly_name: Kitchen Light Switch
       state: 'off'
     light.den_light_1:
       supported_color_modes:
       - brightness
-      off_brightness:
+      off_with_transition: false
+      off_brightness: 50
       friendly_name: Den Light 1
-      supported_features: 41
+      supported_features: 40
       state: 'off'
     light.den_light_2:
       supported_color_modes:
       - brightness
-      off_brightness:
+      off_with_transition: false
+      off_brightness: 50
       friendly_name: Den Light 2
-      supported_features: 41
+      supported_features: 40
       state: 'off'
     light.master_bath_light:
       supported_color_modes:
@@ -25,7 +27,7 @@
       friendly_name: Master Bath Light
       supported_features: 32
       state: 'off'
-    switch.master_bedroom_light:
+    light.master_bedroom_light:
       icon: hass:lightbulb
       friendly_name: Master Bedroom Light
       state: 'off'
@@ -35,7 +37,7 @@
       friendly_name: Dining Room Light
       supported_features: 32
       state: 'off'
-    switch.bar_light:
+    light.bar_light:
       device_class: outlet
       icon: hass:lightbulb
       friendly_name: Bar Light
@@ -47,46 +49,28 @@
       device_class: outlet
       friendly_name: 'Wyze: Ilium Outlet'
       state: 'on'
-    switch.entryway_light:
+    light.entryway_light:
       icon: hass:lightbulb
       friendly_name: Entryway Light
       state: 'off'
-    switch.deck_light:
+    light.deck_light:
       icon: mdi:lightbulb
       friendly_name: Deck Light
       state: 'off'
     light.livingroom_light:
       supported_color_modes:
       - brightness
-      off_brightness:
+      off_with_transition: false
+      off_brightness: 64
       friendly_name: Living Room Light
-      supported_features: 41
+      supported_features: 40
+      state: 'off'
+    input_boolean.livingroom_nightlight_status:
+      editable: true
+      icon: mdi:alarm-light
+      friendly_name: 'Living Room: Night Light Status'
       state: 'off'
   icon: hass:sleep
   metadata:
-    light.den_light_1:
-      entity_only: false
-    light.den_light_2:
-      entity_only: false
-    switch.wyze_ilium_outlet:
-      entity_only: false
-    switch.bar_light:
-      entity_only: false
-    switch.deck_light:
-      entity_only: false
-    switch.entryway_light:
-      entity_only: false
-    switch.master_bedroom_light:
-      entity_only: false
-    light.master_bath_light:
-      entity_only: false
-    switch.wyze_basement_outlet:
-      entity_only: false
-    light.dining_room_light:
-      entity_only: false
-    switch.kitchen_light:
-      entity_only: false
-    number.livingroom_light_on_level:
-      entity_only: false
-    light.livingroom_light:
-      entity_only: false
+    input_boolean.livingroom_nightlight_status:
+      entity_only: true
