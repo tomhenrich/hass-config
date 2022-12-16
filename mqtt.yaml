@@ -1,0 +1,2 @@
+sensor:
+  - state_topic: "homeassistant/wallpanel/mywallpanel/battery"
