@@ -16,17 +16,20 @@ cloud:
 
 wake_on_lan:
 
+# Outsource configurations to sub-files:
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
 device_tracker: !include device_tracker.yaml
 group: !include groups.yaml
 media_player: !include media_player.yaml
+mqtt: !include mqtt.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 switch: !include switches.yaml
 recorder: !include recorder.yaml
 sensor: !include sensors.yaml
 template: !include template.yaml
+
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -36,21 +39,23 @@ logger:
   logs:
     homeassistant.components.zha: debug
 
+# Notifications
 telegram_bot:
   - platform: polling
     api_key: !secret telegram_bot_token
     allowed_chat_ids:
       - !secret telegram_chatid_tom
 
-# Example configuration.yaml entry for the notifier
 notify:
   - name: telegram_tom
     platform: telegram
     chat_id: !secret telegram_chatid_tom
 
-neato:
-  client_id: !secret neato_client_id
-  client_secret: !secret neato_client_secret
+rest_command:
+  check_monthly_data:
+    url: !secret my_datausage_source
+    method: GET
+    verify_ssl: false
 
 panel_custom:
   - name: zwave-graph-panel
