@@ -1,1 +1,37 @@
-
+den_tv_reboot:
+  alias: 'Den TV: Reboot'
+  sequence:
+  - service: androidtv.adb_command
+    data:
+      command: reboot
+      entity_id: media_player.den_tv
+  mode: single
+  icon: mdi:television-box
+plex_on_den_tv:
+  alias: Plex on Den TV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.den_tv
+  - service: androidtv.adb_command
+    data:
+      command: am start -a android.intent.action.VIEW -n   com.plexapp.android/com.plexapp.plex.activities.SplashActivity
+    target:
+      entity_id: media_player.den_tv
+  mode: single
+  icon: mdi:plex
+disney_on_den_tv:
+  alias: Disney+ on Den TV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.den_tv
+  - service: androidtv.adb_command
+    data:
+      command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
+    target:
+      entity_id: media_player.den_tv
+  mode: single
+  icon: mdi:rodent
