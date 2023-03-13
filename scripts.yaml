@@ -27,7 +27,8 @@ disney_on_den_tv:
   - service: media_player.turn_on
     data: {}
     target:
-      entity_id: media_player.den_tv
+      entity_id:
+      - media_player.shieldtv
   - service: androidtv.adb_command
     data:
       command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
@@ -35,3 +36,117 @@ disney_on_den_tv:
       entity_id: media_player.den_tv
   mode: single
   icon: mdi:rodent
+turn_off_den_tv:
+  alias: Turn off Den TV
+  sequence:
+  - service: media_player.turn_off
+    data: {}
+    target:
+      entity_id: media_player.den_tv
+  mode: single
+  icon: mdi:power
+plex_on_shield_tv:
+  alias: Plex on Shield TV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      device_id: 064bc9f0fe0bdb58dd782c8c08ba64c0
+  - service: media_player.select_source
+    data:
+      source: com.plexapp.android
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: HDMI2
+    target:
+      entity_id: media_player.den_tv_wifi
+  mode: single
+  icon: mdi:plex
+disney_on_shieldtv:
+  alias: Disney+ on ShieldTV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: HDMI2
+    target:
+      entity_id: media_player.den_tv_wifi
+  mode: single
+  icon: mdi:rodent
+shieldtv_reboot:
+  alias: 'Shield TV: Reboot'
+  sequence:
+  - service: androidtv.adb_command
+    data:
+      command: reboot
+    target:
+      device_id: 064bc9f0fe0bdb58dd782c8c08ba64c0
+  mode: single
+  icon: mdi:television-box
+netflix_on_shield_tv:
+  alias: Netflix on Shield TV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      device_id: 064bc9f0fe0bdb58dd782c8c08ba64c0
+  - service: media_player.select_source
+    data:
+      source: com.netflix.ninja
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: HDMI2
+    target:
+      entity_id: media_player.den_tv_wifi
+  mode: single
+  icon: mdi:netflix
+prime_video_on_shield_tv:
+  alias: Prime Video on Shield TV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      device_id: 064bc9f0fe0bdb58dd782c8c08ba64c0
+  - service: media_player.select_source
+    data:
+      source: com.amazon.amazonvideo.livingroom
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: HDMI2
+    target:
+      entity_id: media_player.den_tv_wifi
+  mode: single
+  icon: mdi:video-image
+hbo_on_shieldtv:
+  alias: HBO on ShieldTV
+  sequence:
+  - service: media_player.turn_on
+    data: {}
+    target:
+      entity_id: media_player.shield_tv
+  - service: media_player.select_source
+    data:
+      source: com.hbo.hbonow
+    target:
+      entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: HDMI2
+    target:
+      entity_id: media_player.den_tv_wifi
+  mode: single
+  icon: mdi:alpha-h-box
