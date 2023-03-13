@@ -35,21 +35,14 @@
       - condition: trigger
         id: singlepress
       sequence:
-      - service: script.plex_on_den_tv
+      - service: script.plex_on_shield_tv
         data: {}
     - conditions:
       - condition: trigger
         id: longpress
       sequence:
-      - service: media_player.turn_on
+      - service: script.disney_on_shieldtv
         data: {}
-        target:
-          entity_id: media_player.den_tv
-      - service: androidtv.adb_command
-        data:
-          command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
-        target:
-          entity_id: media_player.den_tv
   mode: restart
 - id: '1632860503837'
   alias: 'Living Room: Light - Dimmer Button'
@@ -144,6 +137,16 @@
       hours: 0
       minutes: 5
       seconds: 0
+  - platform: state
+    entity_id:
+    - climate.ecobee3
+    from: 'off'
+    to: heat
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: turned_on
   condition: []
   action:
   - choose:
@@ -166,30 +169,39 @@
         target:
           entity_id: input_boolean.barn_door_protocol
         data: {}
-      - service: notify.mobile_app_iphone
+      - service: notify.telegram_tom
         data:
-          message: Furnace has been turned off.
           title: Barn Door Protocol Activated
+          message: Furnace has been turned off.
     - conditions:
       - condition: trigger
         id: doorsclosed
       - condition: state
-        entity_id: input_boolean.barn_door_protocol
         state: 'on'
+        entity_id: input_boolean.barn_door_protocol
       sequence:
-      - device_id: 3a4702e5f54b52ded08ab1b7002dcab0
-        domain: climate
-        entity_id: climate.ecobee3
-        type: set_hvac_mode
-        hvac_mode: heat
+      - service: ecobee.resume_program
+        data:
+          entity_id: climate.ecobee3
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.barn_door_protocol
         data: {}
-      - service: notify.mobile_app_iphone
+      - service: notify.telegram_tom
         data:
-          message: Furnace has resumed heat.
-          title: Barn Door Protocol Deactivated
+          title: Barn Door Protocol
+          message: Furnace has resumed previous schedule.
+    - conditions:
+      - condition: trigger
+        id: turned_on
+      - condition: state
+        entity_id: input_boolean.barn_door_protocol
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.barn_door_protocol
     default: []
   mode: restart
 - id: '1635292786302'
@@ -223,6 +235,10 @@
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
         entity_id: light.livingroom_light
         domain: light
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
       - condition: state
         entity_id: sun.sun
         state: below_horizon
@@ -325,12 +341,27 @@
     subtype: button_1
   condition:
   - condition: state
-    entity_id: binary_sensor.doorbell_delay
-    state: 'off'
+    entity_id: timer.doorbell_pause
+    state: idle
   action:
-  - service: notify.mobile_app_iphone
+  - service: notify.telegram_tom
     data:
-      message: Doorbell pressed!
+      title: Doorbell pressed!
+      message: Doorbell has been rung.
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.doorbell_pause
+  - if:
+    - condition: state
+      entity_id: binary_sensor.den_tv_active
+      state: 'on'
+      alias: Confirm Den TV is active
+    then:
+    - service: notify.den_tv_notifications
+      data:
+        title: Doorbell
+        message: Doorbell has been rung!
   mode: single
 - id: '1635605604406'
   alias: 'Notify: Washer Leak'
@@ -363,7 +394,7 @@
     at: input_datetime.time_christmas_tree_on
     id: tree_on
   - platform: time
-    at: input_datetime.timer_christmas_tree_off
+    at: input_datetime.time_christmas_tree_off
     id: tree_off
   condition: []
   action:
@@ -625,14 +656,13 @@
   alias: Check Monthly Data
   description: ''
   trigger:
-  - platform: time_pattern
-    minutes: /1
-  condition:
-  - condition: template
-    value_template: '{{ now().minute % states("input_number.check_data")|int == 0
-      }}'
+  - platform: template
+    value_template: '{{ states(''sensor.time'')[-2:]|int % states(''input_number.data_usage_refresh'')|int
+      == 0 }}'
+    alias: Time matches input
+  condition: []
   action:
-  - service: rest_command.check_monthly_data
+  - service: rest_command.data_usage_refresh
     data: {}
   - delay:
       hours: 0
@@ -641,8 +671,9 @@
       milliseconds: 0
   - service: homeassistant.update_entity
     data: {}
+    alias: Update template entities
     target:
-      entity_id: sensor.monthly_data_report
+      entity_id: sensor.data_usage_report
   mode: single
 - id: '1669779259047'
   alias: Wallpanel Charging
@@ -658,7 +689,7 @@
       minutes: 1
       seconds: 0
     alias: Low Battery
-    below: 45
+    below: 60
     id: low_battery
   - type: battery_level
     platform: device
@@ -682,7 +713,7 @@
       - service: switch.turn_on
         data: {}
         target:
-          entity_id: switch.dlink_w110
+          entity_id: switch.den_tablet_outlet_switch_2
     - conditions:
       - condition: trigger
         id: charged_battery
@@ -690,5 +721,63 @@
       - service: switch.turn_off
         data: {}
         target:
-          entity_id: switch.dlink_w110
+          entity_id:
+          - switch.den_tablet_outlet_switch_2
+  mode: single
+- id: '1678293411132'
+  alias: Day Cycle
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  condition: []
+  action:
+  - service: input_boolean.toggle
+    data: {}
+    target:
+      entity_id: input_boolean.day_cycle
+  mode: single
+- id: '1678398450428'
+  alias: Den TV Source Switching
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - media_player.den_tv_wifi
+    attribute: source
+    to: Netflix
+    id: netflix
+  - platform: state
+    entity_id:
+    - media_player.den_tv_wifi
+    attribute: source
+    to: Prime Video (FireTV)
+    id: primevideo
+  - platform: state
+    entity_id:
+    - media_player.den_tv_wifi
+    attribute: source
+    id: hbomax
+    to: com.hbo.hbonow
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: netflix
+      sequence:
+      - service: script.netflix_on_shield_tv
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: primevideo
+      sequence:
+      - service: script.prime_video_on_shield_tv
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: hbomax
+      sequence:
+      - service: script.hbo_on_shieldtv
+        data: {}
   mode: single
