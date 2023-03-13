@@ -24,24 +24,22 @@ views:
           grid-template-columns: 35% auto
           grid-template-rows: auto
           grid-template-areas: |
-            "header header"
             "sidebar main"
           grid-gap: 0
           mediaquery:
             '(max-width: 600px)':
               grid-template-columns: 100%
               grid-template-areas: |
-                "header"
                 "sidebar"
                 "main"
         cards:
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(2, minmax(min-content, 50%))
-              grid-gap: 0
+          - type: vertical-stack
             cards:
-              - type: horizontal-stack
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: min-content auto
+                  grid-template-rows: auto
                 cards:
                   - type: custom:mushroom-title-card
                     title: >-
@@ -61,35 +59,71 @@ views:
                         }
                 view_layout:
                   grid-column: span 2
-              - type: custom:mushroom-template-card
-                primary: Inside
-                secondary: '{{ states(config.entity) }}'
-                layout: horizontal
-                tap_action:
-                  action: none
-                hold_action:
-                  action: more-info
-                entity: sensor.ecobee3_temperature
-                icon: mdi:home-thermometer-outline
-                icon_color: |
-                  {% if states("climate.ecobee3") == "heat" %} var(--rgb-red)
-                  {% endif %}
-              - type: custom:mushroom-template-card
-                entity: sensor.outside_temp
-                icon: mdi:thermometer
-                icon_color: |
-                  {% if states(config.entity)|float >=90 %} var(--rgb-red)
-                  {% endif %}
-                primary: Outside
-                secondary: >-
-                  {{ states(config.entity) }} {{ state_attr(config.entity,
-                  "unit_of_measurement") }}
-                tap_action:
-                  action: navigate
-                  navigation_path: weather
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: 50% 50%
+                  grid-template-rows: auto
+                cards:
+                  - type: custom:mushroom-template-card
+                    primary: Inside
+                    secondary: >-
+                      {{ states(config.entity)|int }}{{
+                      state_attr(config.entity, "unit_of_measurement") }}
+                    layout: horizontal
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: more-info
+                    entity: sensor.ecobee3_temperature
+                    icon: mdi:home-thermometer-outline
+                    icon_color: >
+                      {% if states("climate.ecobee3") == "heat" %}
+                      var(--rgb-red)
+
+                      {% endif %}
+                    badge_icon: >-
+                      {{ "mdi:fire" if states("binary_sensor.furnace_running")
+                      == "on" }}
+                    badge_color: var(--rgb-red)
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent;
+                        }
+                  - type: custom:mushroom-template-card
+                    entity: weather.ecobee3
+                    icon: >
+                      {% set temp = state_attr(config.entity, "temperature")|int
+                      %}
+
+                      {% if temp >= 90 or temp <= 32 %} mdi:thermometer-alert
+
+                      {% else %} mdi:thermometer
+
+                      {% endif %}
+                    icon_color: >
+                      {% set temp = state_attr(config.entity, "temperature")|int
+                      %}
+
+                      {% if temp >= 90 %} var(--rgb-red)
+
+                      {% elif temp <= 32 %} var(--rgb-blue)
+
+                      {% endif %}
+                    primary: Outside
+                    secondary: >-
+                      {{ state_attr(config.entity, "temperature") }}{{
+                      state_attr(config.entity, "temperature_unit") }}
+                    tap_action:
+                      action: navigate
+                      navigation_path: weather
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent;
+                        }
               - type: conditional
-                view_layout:
-                  grid-column: span 2
                 conditions:
                   - entity: input_boolean.barn_door_protocol
                     state: 'on'
@@ -108,8 +142,6 @@ views:
                       double_tap_action:
                         action: none
               - type: custom:mushroom-template-card
-                view_layout:
-                  grid-column: span 2
                 entity: sensor.air_quality
                 primary: Air Quality
                 secondary: '{{ states(config.entity) }}'
@@ -122,45 +154,51 @@ views:
                   {% else %} white
                   {% endif %}
                 tap_action:
-                  action: more-info
+                  action: none
                 badge_color: >
                   {% set aqi = states(config.entity) %} {% if aqi == "Hazardous"
                   %} #931621 {% elif aqi == "Very Unhealthy" %} #46237A {% endif
                   %}
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                    }
               - type: custom:mushroom-template-card
-                view_layout:
-                  grid-column: span 2
-                entity: sensor.trash_service
-                primary: '{{ state_attr(config.entity,"desc") }}'
-                secondary: '{{ state_attr(config.entity,"when") }}'
-                icon: '{{ state_attr("binary_sensor.trash_pickup","icon") }}'
-                icon_color: |
-                  {% set prox = state_attr(config.entity,"prox")|float %}
-                  {% if prox == 0 %} var(--rgb-green)
-                  {% elif prox == 1 %} var(--rgb-white)
-                  {% endif %}
+                entity: sensor.trash_pickup
+                primary: >
+                  {% set types =
+                  state_attr(config.entity,"pickup_types")|list|count %}
+
+                  {{ iif( types == 1, "Trash Pickup", "Trash & Recycling") }}
+                secondary: >
+                  {{ states(config.entity)|as_timestamp|timestamp_custom('%A, %B
+                  %-d') }}
+                icon: >
+                  {% set types =
+                  state_attr(config.entity,"pickup_types")|list|count %}
+
+                  {{ iif( types == 1, "mdi:delete", "mdi:recycle") }}
+                icon_color: >
+                  {% set pickup = states(config.entity)|as_timestamp %} {% set
+                  delta = ((pickup - now()|as_timestamp)/(60*60*24))|round(0,
+                  'ceil') %} {% if delta == 0 %} var(--rgb-blue) {% elif delta
+                  == 1 %} var(--rgb-white) {% endif %}
                 tap_action:
                   action: none
-                badge_icon: |
-                  {% set prox = state_attr(config.entity,"prox")|float %}
-                  {% if prox == 0 %} mdi:check-bold
-                  {% elif prox == 1 %} mdi:exclamation-thick
-                  {% endif %}
-                badge_color: |
-                  {% set prox = state_attr(config.entity,"prox")|float %}
-                  {% if prox == 0 %} var(--rgb-white)
-                  {% elif prox == 1 %} var(--rgb-blue)
-                  {% endif %}
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                    }
             view_layout:
               grid-area: sidebar
           - type: vertical-stack
-            view_layout:
-              grid-area: main
             cards:
               - type: custom:layout-card
                 layout_type: custom:grid-layout
                 layout:
-                  grid-template-columns: min-content min-content min-content min-content
+                  grid-template-columns: min-content min-content min-content min-content min-content
                   mediaquery:
                     '(max-width: 600px)':
                       grid-template-columns: repeat(2,50%)
@@ -263,24 +301,51 @@ views:
                   - type: custom:mushroom-light-card
                     entity: light.bar_light
                     name: Bar
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
                   - type: custom:mushroom-light-card
                     entity: light.den_light_2
                     name: Den Corner
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
                   - type: custom:mushroom-light-card
                     entity: light.kitchen_light
                     name: Kitchen
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
                   - type: custom:mushroom-light-card
                     entity: light.porch_light
                     name: Porch
-                  - type: custom:mushroom-light-card
-                    entity: light.deck_light
-                    name: Deck
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
                   - type: custom:mushroom-light-card
                     entity: light.entryway_light
                     name: Entryway
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
                   - type: custom:mushroom-light-card
                     entity: light.dining_room_light
                     name: Dining
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
               - type: custom:mushroom-chips-card
                 chips:
                   - type: entity
@@ -335,9 +400,13 @@ views:
                     tap_action:
                       action: navigate
                       navigation_path: plex-status
-                    picture: ''
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent
+                        }
                   - type: custom:mushroom-template-card
-                    entity: sensor.monthly_data_report
+                    entity: sensor.data_usage_report
                     primary: Comcast Data Usage
                     secondary: '{{ states(config.entity) }}%'
                     icon: mdi:database
@@ -345,15 +414,17 @@ views:
                       action: navigate
                       navigation_path: /lovelace/monthly-data
                     picture: >-
-                      {% set concern = state_attr("sensor.monthly_data_report",
-                      "concern")|int > 0 %} {% set color =
-                      iif(concern,"eab700","ffffff") %}
+                      {% set color = "ffffff" %}
                       http://192.168.1.200/tiles/pie.php?val={{
                       states(config.entity) }}&slice={{ color }}
                     fill_container: false
-                    badge_color: ''
-                    badge_icon: ''
-                    icon_color: ''
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent
+                        }
+            view_layout:
+              grid-area: main
   - theme: Campfire - Dark
     path: openings
     title: Openings
@@ -376,6 +447,46 @@ views:
                   action: none
                 hold_action:
                   action: more-info
+          - type: custom:mushroom-template-card
+            entity: cover.garage_door
+            icon: >
+              {% set garage = states(config.entity) %} {% if garage == 'open' %}
+              mdi:garage-open-variant {% elif garage == 'opening' %}
+              mdi:transfer-up {% elif garage == 'closed' %} mdi:garage-variant
+              {% elif garage == 'closing' %} mdi:transfer-down {% else %}
+              mdi:garage-variant {% endif %}
+            icon_color: >
+              {% set garage = states(config.entity) %} {% if garage == 'open' %}
+              var(--rgb-blue) {% else %} white {% endif %}
+            primary: Garage
+            secondary: '{{ states(config.entity)|capitalize }}'
+            tap_action:
+              action: none
+            hold_action:
+              action: call-service
+              service: honeycomb
+              service_data:
+                buttons:
+                  - icon: break
+                  - icon: mdi:transfer-down
+                    color_type: card
+                    color: white
+                    tap_action:
+                      action: call-service
+                      service: cover.close_cover
+                      service_data:
+                        entity_id: cover.garage_door
+                  - icon: mdi:transfer-up
+                    color_type: card
+                    color: white
+                    tap_action:
+                      action: call-service
+                      service: cover.open_cover
+                      service_data:
+                        entity_id: cover.garage_door
+                  - icon: break
+                  - icon: break
+                  - icon: break
       - type: custom:auto-entities
         card:
           type: entities
@@ -413,13 +524,6 @@ views:
         cards:
           - type: custom:mushroom-entity-card
             entity: light.bar_light
-            icon_color: orange
-            layout: horizontal
-            secondary_info: none
-            tap_action:
-              action: toggle
-          - type: custom:mushroom-entity-card
-            entity: light.deck_light
             icon_color: orange
             layout: horizontal
             secondary_info: none
@@ -665,16 +769,18 @@ views:
               - entity: automation.living_room_christmas_tree_timer
                 state: 'on'
             card:
-              type: horizontal-stack
+              type: vertical-stack
               cards:
-                - type: custom:mushroom-entity-card
-                  entity: input_datetime.time_christmas_tree_on
-                  name: Tree On
-                  icon_color: light-green
-                - type: custom:mushroom-entity-card
-                  entity: input_datetime.time_christmas_tree_off
-                  name: Tree Off
-                  icon_color: red
+                - type: horizontal-stack
+                  cards:
+                    - type: custom:mushroom-entity-card
+                      entity: input_datetime.time_christmas_tree_on
+                      name: Tree On
+                      icon_color: light-green
+                    - type: custom:mushroom-entity-card
+                      entity: input_datetime.time_christmas_tree_off
+                      name: Tree Off
+                      icon_color: red
         view_layout:
           position: sidebar
   - theme: Campfire - Dark
@@ -690,145 +796,24 @@ views:
         cards:
           - type: custom:mushroom-title-card
             title: ''
-            subtitle: Plex Status
-          - type: custom:mushroom-template-card
-            entity: sensor.plex_ping
-            primary: >-
-              {{ "Online" if states("binary_sensor.plex_ping") == "on" else
-              "Offline" }}
-            icon: mdi:plex
-            secondary: >-
-              {{ states("sensor.plex_streams")|int }} Stream{{
-              iif(states("sensor.plex_streams")|int!=1,"s","") }}
-            badge_icon: ''
-            badge_color: ''
-            icon_color: >-
-              {{ "green" if states("binary_sensor.plex_ping") == 'on' else "red"
-              }}
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-chips-card
-            chips:
-              - type: conditional
-                conditions:
-                  - entity: sensor.plex_streams_direct_play
-                    state_not: '0'
-                chip:
-                  type: template
-                  entity: sensor.plex_streams_direct_play
-                  icon: '{{ state_attr(config.entity,"icon") }}'
-                  content: >
-                    {% set val = states(config.entity)|int %} {{ val }} direct
-                    play{% if(val==0 or val>1) %}s{% endif %}
-                  icon_color: >
-                    {% set val = states(config.entity)|int %} {% if(val >= 5) %}
-                    var(--rgb-red) {% else %} var(--rgb-blue) {% endif %}
-                  tap_action:
-                    action: more-info
-              - type: conditional
-                conditions:
-                  - entity: sensor.plex_streams_direct_stream
-                    state_not: '0'
-                chip:
-                  type: template
-                  entity: sensor.plex_streams_direct_stream
-                  icon: '{{ state_attr(config.entity,"icon") }}'
-                  content: >
-                    {% set val = states(config.entity)|int %} {{ val }} direct
-                    stream{% if(val==0 or val>1) %}s{% endif %}
-                  icon_color: >
-                    {% set val = states(config.entity)|int %} {% if(val >= 5) %}
-                    var(--rgb-red) {% else %} var(--rgb-blue) {% endif %}
-                  tap_action:
-                    action: more-info
-              - type: conditional
-                conditions:
-                  - entity: sensor.plex_streams_transcode
-                    state_not: '0'
-                chip:
-                  type: template
-                  entity: sensor.plex_streams_transcode
-                  icon: '{{ state_attr(config.entity,"icon") }}'
-                  content: >
-                    {% set val = states(config.entity)|int %} {{ val }}
-                    transcode{% if(val==0 or val>1) %}s{% endif %}
-                  icon_color: >
-                    {% set val = states(config.entity)|int %} {% if(val >= 5) %}
-                    var(--rgb-red) {% else %} var(--rgb-yellow) {% endif %}
-                  tap_action:
-                    action: more-info
-          - type: custom:uptime-card
-            entity: binary_sensor.plex_ping
-            icon: mdi:server
-            title_template: Uptime
-            hours_to_show: 48
-            icon_adaptive_color: true
-            ok: 'on'
-            ko: 'off'
-            alias:
-              ok: Up
-              ko: Down
-            show:
-              icon: false
-              status: false
-            bar:
-              amount: 36
-            color:
-              ok: green
-              ko: red
-              half: '#eab700'
-            tap_action:
-              action: more-info
-          - type: horizontal-stack
-            cards:
-              - type: custom:mushroom-chips-card
-                chips:
-                  - type: template
-                    icon: mdi:movie
-                    content: '{{ states("sensor.plex_movies") }} movies'
-                    entity: sensor.plex_movies
-                    tap_action:
-                      action: none
-                  - type: template
-                    entity: sensor.plex_shows
-                    icon: mdi:television
-                    content: >-
-                      {{ state_attr("sensor.plex_shows","seasons") }} seasons of
-                      {{ states("sensor.plex_shows") }} shows
-                    tap_action:
-                      action: none
-      - type: vertical-stack
-        cards:
-          - type: custom:mushroom-title-card
-            title: ''
             subtitle: NAS Status
           - type: custom:mushroom-chips-card
             chips:
               - type: template
                 entity: binary_sensor.ds420j_online
                 icon: mdi:nas
-                content: >-
-                  {{
-                  iif(states("binary_sensor.ds420j_online")=="on","Online","Offline")
-                  }}
-                icon_color: >-
-                  {{
-                  iif(states("binary_sensor.ds420j_online")=="on","green","red")
-                  }}
+                content: '{{ iif(states(config.entity)=="on","Online","Offline") }}'
+                icon_color: '{{ iif(states(config.entity)=="on","green","red") }}'
               - type: template
                 entity: binary_sensor.ds420j_update_available
                 icon: >-
                   {{
-                  iif(states("binary_sensor.ds420j_update_available")=="on","mdi:package-up","mdi:package-check")
+                  iif(states(config.entity)=="on","mdi:package-up","mdi:package-check")
                   }}
                 content: >-
-                  {{
-                  iif(states("binary_sensor.ds420j_update_available")=="on","Update
-                  Available","Up to date") }}
-                icon_color: >-
-                  {{
-                  iif(states("binary_sensor.ds420j_update_available")=="on","orange","green")
-                  }}
+                  {{ iif(states(config.entity)=="on","Update Available","Up to
+                  date") }}
+                icon_color: '{{ iif(states(config.entity)=="on","orange","green") }}'
           - square: false
             columns: 3
             type: grid
@@ -847,73 +832,65 @@ views:
               - type: custom:mushroom-entity-card
                 name: Temp
                 entity: sensor.ds420j_temperature
-          - type: grid
-            columns: 3
-            square: false
-            cards:
-              - type: vertical-stack
-                cards:
-                  - type: custom:mushroom-chips-card
-                    chips:
-                      - type: template
-                        entity: sensor.ds420j_drive_1_status
-                        icon: >-
-                          {{ state_attr("sensor.ds420j_drive_1_status","icon")
-                          }}
-                        content: Drive 1 {{ states("sensor.ds420j_drive_1_status") }}
-                        icon_color: >-
-                          {{
-                          iif(states("sensor.ds420j_drive_1_status")=="normal","green","red")
-                          }}
-                  - type: custom:mini-graph-card
-                    entities:
-                      - sensor.ds420j_drive_1_temperature
-                    show:
-                      name: false
-                      icon: false
-                    font_size: 55
-              - type: vertical-stack
-                cards:
-                  - type: custom:mushroom-chips-card
-                    chips:
-                      - type: template
-                        entity: sensor.ds420j_drive_2_status
-                        icon: >-
-                          {{ state_attr("sensor.ds420j_drive_2_status","icon")
-                          }}
-                        content: Drive 2 {{ states("sensor.ds420j_drive_2_status") }}
-                        icon_color: >-
-                          {{
-                          iif(states("sensor.ds420j_drive_2_status")=="normal","green","red")
-                          }}
-                  - type: custom:mini-graph-card
-                    entities:
-                      - sensor.ds420j_drive_2_temperature
-                    show:
-                      name: false
-                      icon: false
-                    font_size: 55
-              - type: vertical-stack
-                cards:
-                  - type: custom:mushroom-chips-card
-                    chips:
-                      - type: template
-                        entity: sensor.ds420j_drive_3_status
-                        icon: >-
-                          {{ state_attr("sensor.ds420j_drive_3_status","icon")
-                          }}
-                        content: Drive 3 {{ states("sensor.ds420j_drive_3_status") }}
-                        icon_color: >-
-                          {{
-                          iif(states("sensor.ds420j_drive_3_status")=="normal","green","red")
-                          }}
-                  - type: custom:mini-graph-card
-                    entities:
-                      - sensor.ds420j_drive_3_temperature
-                    show:
-                      name: false
-                      icon: false
-                    font_size: 55
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: template
+                entity: sensor.ds420j_drive_1_status
+                icon: '{{ state_attr(config.entity,"icon") }}'
+                content: Drive 1 {{ states(config.entity) }}
+                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
+              - type: template
+                entity: sensor.ds420j_drive_2_status
+                icon: '{{ state_attr(config.entity,"icon") }}'
+                content: Drive 2 {{ states(config.entity) }}
+                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
+              - type: template
+                entity: sensor.ds420j_drive_3_status
+                icon: '{{ state_attr(config.entity,"icon") }}'
+                content: Drive 3 {{ states(config.entity) }}
+                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
+          - type: custom:mini-graph-card
+            entities:
+              - entity: sensor.ds420j_drive_1_temperature
+                name: Drive 1
+              - entity: sensor.ds420j_drive_2_temperature
+                name: Drive 2
+              - entity: sensor.ds420j_drive_3_temperature
+                name: Drive 3
+            name: Drive Temps
+            smoothing: false
+            hours_to_show: 48
+            points_per_hour: 2
+            show:
+              header: false
+              name: true
+              icon: false
+              state: false
+            tap_action:
+              action: none
+          - type: custom:uptime-card
+            entity: binary_sensor.ds420j_online
+            icon: mdi:server
+            title_template: Uptime
+            hours_to_show: 48
+            icon_adaptive_color: true
+            ok: 'on'
+            ko: 'off'
+            alias:
+              ok: Up
+              ko: Down
+            show:
+              icon: false
+              status: false
+            bar:
+              amount: 36
+              height: 10
+            color:
+              ok: green
+              ko: red
+              half: '#eab700'
+            tap_action:
+              action: more-info
           - type: custom:mushroom-template-card
             entity: sensor.ds420j_volume_1_total_size
             primary: Usage
@@ -936,8 +913,8 @@ views:
             card:
               type: entities
               entities:
-                - entity: input_button.nas_shutdown
-                  name: 'Confirm: Power off NAS?'
+                - entity: button.ds420j_shutdown
+                  name: 'Confirm: Shut down NAS'
       - type: vertical-stack
         cards:
           - type: custom:mushroom-title-card
@@ -949,7 +926,7 @@ views:
                 cards:
                   - type: custom:mini-graph-card
                     entities:
-                      - sensor.scylla_ohm_cpu_load
+                      - sensor.scylla_cpu_load
                     name: CPU Load
                     show:
                       header: false
@@ -959,7 +936,7 @@ views:
                 cards:
                   - type: custom:mini-graph-card
                     entities:
-                      - sensor.scylla_ohm_cpu_temp
+                      - sensor.scylla_cpu_temp
                     name: CPU Temp
                     show:
                       header: false
@@ -981,12 +958,91 @@ views:
               status: false
             bar:
               amount: 36
+              height: 10
             color:
               ok: green
               ko: red
               half: '#eab700'
             tap_action:
               action: more-info
+      - type: vertical-stack
+        cards:
+          - type: custom:mushroom-title-card
+            title: ''
+            subtitle: UPS Status
+          - type: custom:mini-graph-card
+            entities:
+              - sensor.ups_battery_charge
+            name: Battery Charge
+            show:
+              header: false
+              labels: true
+              name: true
+              icon: false
+            lower_bound: ~0
+            upper_bound: 100
+          - type: custom:uptime-card
+            entity: sensor.ups_status
+            icon: mdi:server
+            title_template: Uptime
+            hours_to_show: 48
+            icon_adaptive_color: true
+            ok: Online
+            ko: 'off'
+            alias:
+              ok: Up
+              ko: Down
+            show:
+              icon: false
+              status: false
+            bar:
+              amount: 36
+              height: 10
+            color:
+              ok: green
+              ko: red
+              half: '#eab700'
+            tap_action:
+              action: more-info
+          - type: custom:apexcharts-card
+            graph_span: 48h
+            update_interval: 30min
+            apex_config:
+              chart:
+                height: 200px
+              grid:
+                show: false
+              xaxis:
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+            header:
+              show: true
+              show_states: true
+              title: Runtime
+            series:
+              - entity: sensor.ups_battery_runtime
+                transform: return x / 60;
+                group_by:
+                  func: avg
+                  duration: 15m
+                opacity: 1
+                stroke_width: 2
+                name: Runtime
+                type: line
+                show:
+                  legend_value: false
+                  in_header: false
+                fill_raw: last
+                yaxis_id: Minutes
+            yaxis:
+              - id: Minutes
+                show: true
+                decimals: 0
+                opposite: true
+                min: ~30
+                max: ~90
   - theme: Campfire - Dark
     path: batteries
     icon: hass:battery-charging-70
@@ -1039,119 +1095,163 @@ views:
     badges: []
     cards:
       - type: custom:layout-card
-        layout:
-          grid-template-columns: repeat(2, 50%)
-          mediaquery:
-            '(max-width: 600px)':
-              grid-template-columns: 100%
         cards:
-          - type: custom:mushroom-template-card
-            entity: sensor.monthly_data_gb
-            primary: >-
-              {{states(config.entity)}} {{ state_attr(config.entity,
-              'unit_of_measurement') }}
-            secondary: Used this month
-            icon: mdi:cloud
-            icon_color: >-
-              {{ iif( states('binary_sensor.monthly_data_concern')=="on",
-              "red","blue")      }}
-            tap_action:
-              action: none
-            hold_action:
-              action: none
-          - type: custom:mushroom-template-card
-            entity: sensor.monthly_data_report
-            primary: >-
-              {{states(config.entity)|round(1)}}{{ state_attr(config.entity,
-              'unit_of_measurement') }}
-            secondary: of monthly Comcast data cap
-            icon: mdi:percent
-            icon_color: >-
-              {{ iif( states('binary_sensor.monthly_data_concern')=="on",
-              "red","blue")      }}
-            tap_action:
-              action: none
-            hold_action:
-              action: none
-          - type: custom:mushroom-entity-card
-            entity: sensor.monthly_data_report
-            name: Last Updated
-            icon_color: disabled
-            secondary_info: last-updated
-          - type: custom:mushroom-entity-card
-            entity: input_number.check_data
-            name: Set Refresh Interval
-            icon_color: disabled
-          - type: custom:apexcharts-card
-            header:
-              show: true
-              title: Data Usage
-            yaxis:
-              - id: total
-                decimals: 1
-              - id: delta
-                opposite: true
-                decimals: 1
-            series:
-              - entity: sensor.monthly_data_gb
-                name: Total
-                extend_to: now
-                type: area
-                color: orange
-                opacity: 0.1
-                stroke_width: 5
-                yaxis_id: total
-                show:
-                  legend_value: false
-              - entity: sensor.monthly_data_gb
-                name: Per Hour
-                extend_to: now
-                type: column
-                color: red
-                stroke_width: 2
-                group_by:
-                  func: delta
-                  duration: 1h
-                yaxis_id: delta
-                show:
-                  legend_value: false
-            graph_span: 4d
-            apex_config:
-              chart:
-                height: 250px
-          - type: custom:apexcharts-card
-            header:
-              show: true
-              title: Percent of Monthly Cap vs Time of Month
-            color_list:
-              - orange
-              - lightgrey
-            series:
-              - entity: sensor.monthly_data_report
-                name: Percentage
-                extend_to: now
-                type: area
-                stroke_width: 5
-                opacity: 0.1
-              - entity: sensor.month_gone
-                type: line
-                show:
-                  in_chart: true
-                name: Monthly Progress
-                color: white
-                stroke_width: 3
-            graph_span: 4d
-            yaxis:
-              - min: 0
-                max: ~100
-            apex_config:
-              chart:
-                height: 250px
-              fill:
-                colors:
-                  - '#1A73E8'
-                  - '#B32824'
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(3, 33%)
+              mediaquery:
+                '(max-width: 600px)':
+                  grid-template-columns: 100%
+              width: 100%
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.data_usage_report
+                primary: 1200 GB
+                secondary: Max per month
+                icon: mdi:information
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                icon_color: white
+                name: 1200 GB
+              - type: custom:mushroom-template-card
+                entity: sensor.data_usage_gb
+                primary: >-
+                  {{states(config.entity)}} {{ state_attr(config.entity,
+                  'unit_of_measurement') }}
+                secondary: Used this month
+                icon: mdi:cloud
+                icon_color: blue
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+              - type: custom:mushroom-template-card
+                entity: sensor.data_usage_report
+                primary: >-
+                  {{states(config.entity)|round(1)}}{{ state_attr(config.entity,
+                  'unit_of_measurement') }}
+                secondary: of monthly Comcast data cap
+                icon: mdi:percent
+                icon_color: blue
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+              - type: custom:mushroom-entity-card
+                entity: sensor.month_gone
+                icon_color: disabled
+                secondary_info: name
+                primary_info: state
+                name: Into this month
+                icon: mdi:calendar-arrow-right
+              - type: custom:mushroom-entity-card
+                entity: input_number.data_usage_refresh
+                name: Set Refresh Interval
+                icon_color: disabled
+              - type: custom:mushroom-entity-card
+                entity: sensor.data_usage_report
+                name: Last Updated
+                icon_color: disabled
+                secondary_info: last-updated
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: 50% 50%
+              mediaquery:
+                '(max-width: 600px)':
+                  grid-template-columns: 100%
+            cards:
+              - type: custom:apexcharts-card
+                header:
+                  show: true
+                  title: Hourly Data Usage
+                yaxis:
+                  - id: delta
+                    decimals: 1
+                    opposite: true
+                    min: 0
+                  - id: day
+                    show: false
+                    min: 0
+                    max: 1
+                    decimals: 0
+                    apex_config:
+                      tickAmount: 1
+                      labels:
+                        formatter: |
+                          EVAL:function(value) {
+                            if (value == 1) return "ON";
+                            return "OFF";
+                          }
+                series:
+                  - entity: sensor.data_usage_per_hour
+                    name: Per Hour
+                    extend_to: now
+                    type: column
+                    color: orange
+                    yaxis_id: delta
+                    show:
+                      legend_value: false
+                    group_by:
+                      duration: 1h
+                  - entity: input_boolean.day_cycle
+                    transform: 'return x == "on" ? 1 : 0;'
+                    color: '#ffffff'
+                    group_by:
+                      duration: 1d
+                    opacity: 0.1
+                    stroke_width: 0
+                    name: Day
+                    type: area
+                    show:
+                      legend_value: false
+                      in_header: false
+                    fill_raw: last
+                    curve: stepline
+                    yaxis_id: day
+                graph_span: 2d
+                apex_config:
+                  chart:
+                    height: 250px
+              - type: custom:apexcharts-card
+                header:
+                  show: true
+                  title: vs Time of Month
+                yaxis:
+                  - id: delta
+                    decimals: 1
+                    opposite: true
+                series:
+                  - entity: sensor.data_usage_report
+                    name: '% of Cap'
+                    extend_to: now
+                    type: line
+                    color: orange
+                    yaxis_id: delta
+                    group_by:
+                      duration: 6hr
+                  - entity: sensor.month_gone
+                    name: '% of Month'
+                    extend_to: now
+                    curve: smooth
+                    type: line
+                    color: white
+                    yaxis_id: delta
+                    group_by:
+                      duration: 6hr
+                graph_span: 5d
+                apex_config:
+                  chart:
+                    height: 250px
+            view_layout:
+              grid-column: span 2
         layout_type: custom:grid-layout
+        layout:
+          layout_type: custom:grid-layout
+          width: 100%
   - theme: Campfire - Dark
     title: Plex
     subview: true
@@ -1177,7 +1277,7 @@ views:
                   "Offline" }}
                 icon: mdi:plex
                 secondary: >-
-                  {{ states("sensor.plex_streams")|int }} Stream{{
+                  {{ states("sensor.plex_streams")|int }} stream{{
                   iif(states("sensor.plex_streams")|int!=1,"s","") }}
                 badge_icon: ''
                 badge_color: ''
@@ -1254,11 +1354,33 @@ views:
                   icon: false
                   status: false
                 bar:
-                  amount: 36
+                  amount: 48
+                  height: 10
                 color:
                   ok: green
                   ko: red
                   half: '#eab700'
+                tap_action:
+                  action: none
+              - type: custom:uptime-card
+                entity: binary_sensor.plex_streaming
+                icon: mdi:server
+                title_template: Streaming
+                hours_to_show: 48
+                icon_adaptive_color: true
+                ok: 'on'
+                ko: 'off'
+                show:
+                  icon: false
+                  status: false
+                  average: false
+                bar:
+                  amount: 48
+                  height: 10
+                color:
+                  ok: darkgreen
+                  ko: black
+                  half: green
                 tap_action:
                   action: more-info
               - type: horizontal-stack
@@ -1267,71 +1389,27 @@ views:
                     chips:
                       - type: template
                         icon: mdi:movie
-                        content: '{{ states("sensor.plex_movies") }} Movies'
-                        entity: sensor.plex_movies
+                        content: '{{ state_attr(config.entity, "movies") }} Movies'
+                        entity: sensor.plex_library_data
                         tap_action:
                           action: none
                       - type: template
-                        entity: sensor.plex_tv_shows
+                        entity: sensor.plex_library_data
                         icon: mdi:television
-                        content: '{{ states("sensor.plex_tv_shows") }} TV Shows'
+                        content: '{{ state_attr(config.entity, "shows") }} TV Shows'
                         tap_action:
                           action: none
-          - type: custom:apexcharts-card
-            stacked: true
-            header:
-              show: true
-              title: Simultaneous Plex Streams
-            color_list:
-              - DeepSkyBlue
-              - RebeccaPurple
-              - orange
-            series:
-              - entity: sensor.plex_streams_direct_play
-                name: Direct Play
-                extend_to: now
-                type: column
-                show:
-                  legend_value: false
-                group_by:
-                  func: max
-                  duration: 6h
-              - entity: sensor.plex_streams_direct_stream
-                name: Direct Stream
-                extend_to: now
-                type: column
-                show:
-                  legend_value: false
-                group_by:
-                  func: max
-                  duration: 6h
-              - entity: sensor.plex_streams_transcode
-                name: Transcodes
-                extend_to: now
-                type: column
-                show:
-                  legend_value: false
-                group_by:
-                  func: max
-                  duration: 6h
-            graph_span: 4d
-            yaxis:
-              - decimals: 0
-                apex_config:
-                  tickAmount: 1
-            apex_config:
-              chart:
-                height: 250px
   - theme: Campfire - Dark
     subview: true
     path: weather
-    title: Outside Conditions
+    title: Climate Conditions
+    type: custom:grid-layout
     badges: []
     cards:
       - type: vertical-stack
         cards:
           - type: custom:mushroom-template-card
-            entity: sensor.airvisual
+            entity: sensor.air_quality
             primary: Air Quality
             secondary: '{{ states(config.entity) }}'
             icon: '{{ state_attr(config.entity,"icon") }}'
@@ -1344,9 +1422,7 @@ views:
               {% endif %}
             tap_action:
               action: more-info
-            badge_color: >
-              {% set aqi = states(config.entity) %} {% if aqi == "Hazardous" %}
-              #931621 {% elif aqi == "Very Unhealthy" %} #46237A {% endif %}
+            badge_color: ''
           - type: custom:mushroom-entity-card
             entity: sensor.outside_condition
           - type: conditional
@@ -1361,43 +1437,142 @@ views:
               icon_color: light-green
               tap_action:
                 action: none
-          - type: conditional
-            conditions:
-              - entity: sensor.pollen_grass
-                state_not: '0'
-            card:
-              type: custom:mushroom-entity-card
-              entity: sensor.pollen_grass
-              icon_color: orange
-              tap_action:
-                action: none
-          - type: conditional
-            conditions:
-              - entity: sensor.pollen_trees
-                state_not: '0'
-            card:
-              type: custom:mushroom-entity-card
-              entity: sensor.pollen_trees
-              icon_color: orange
-              tap_action:
-                action: none
-          - type: conditional
-            conditions:
-              - entity: sensor.pollen_weeds
-                state_not: '0'
-            card:
-              type: custom:mushroom-entity-card
-              entity: sensor.pollen_weeds
-              icon_color: orange
-              tap_action:
-                action: none
-      - type: entities
-        entities:
-          - entity: input_number.enable_thermostat_control
-            name: 'Outside temp below:'
-            secondary_info: none
-        title: Enable Thermostat Control when
-        show_header_toggle: false
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 50% 50%
+          grid-template-rows: auto
+          grid-gap: 0
+          mediaquery:
+            '(max-width: 600px)':
+              grid-template-columns: 100%
+        cards:
+          - type: custom:apexcharts-card
+            graph_span: 36h
+            update_interval: 30min
+            apex_config:
+              chart:
+                height: 200px
+              grid:
+                show: false
+              xaxis:
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+            experimental:
+              color_threshold: true
+            header:
+              show: true
+              show_states: true
+              colorize_states: true
+              title: Heating
+            series:
+              - entity: sensor.inside_temp_average
+                color: orange
+                opacity: 1
+                stroke_width: 4
+                name: Inside
+                type: line
+                show:
+                  legend_value: false
+                fill_raw: last
+                yaxis_id: Temperature
+              - entity: sensor.outside_temp
+                color: white
+                opacity: 1
+                stroke_width: 4
+                name: Outside
+                type: line
+                show:
+                  legend_value: false
+                fill_raw: last
+                yaxis_id: Temperature
+              - entity: sensor.weather_report
+                attribute: feels_like
+                color: lightgrey
+                opacity: 1
+                stroke_width: 2
+                name: Feels Like
+                type: line
+                show:
+                  legend_value: false
+                fill_raw: last
+                yaxis_id: Temperature
+              - entity: binary_sensor.furnace_running
+                transform: 'return x == "on" ? 1 : 0;'
+                color: '#660000'
+                group_by:
+                  func: max
+                  duration: 30m
+                opacity: 1
+                stroke_width: 0
+                name: Heating
+                type: area
+                show:
+                  legend_value: false
+                  in_header: false
+                fill_raw: last
+                curve: stepline
+                yaxis_id: State
+            yaxis:
+              - id: Temperature
+                show: true
+                min: ~60
+                max: ~80
+                align_to: 5
+                decimals: 0
+                opposite: true
+              - id: State
+                show: true
+                min: 0
+                max: 1
+                decimals: 0
+                apex_config:
+                  tickAmount: 1
+                  labels:
+                    formatter: |
+                      EVAL:function(value) {
+                        if (value == 1) return "ON";
+                        return "OFF";
+                      }
+          - type: custom:apexcharts-card
+            graph_span: 36h
+            update_interval: 30m
+            apex_config:
+              chart:
+                height: 200px
+              grid:
+                show: false
+            header:
+              show: true
+              title: Air Quality
+            series:
+              - entity: sensor.airvisual_data
+                name: AQI
+                yaxis_id: aqi
+                stroke_width: 3
+                type: line
+                color: blue
+                group_by:
+                  duration: 10m
+                  func: avg
+              - entity: sensor.pollen_data
+                name: Pollen
+                yaxis_id: pollen
+                stroke_width: 1
+                type: line
+                color: white
+            yaxis:
+              - id: aqi
+                min: 0
+                decimals: 0
+                align_to: 25
+              - id: pollen
+                min: 0
+                max: 5
+                decimals: 0
+                show: false
   - theme: Campfire - Dark
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
@@ -1406,17 +1581,41 @@ views:
     type: panel
     badges: []
     cards:
-      - type: custom:auto-entities
-        card:
-          type: grid
-          columns: 2
-          square: false
-        card_param: cards
-        filter:
-          include:
-            - domain: light
-              options:
-                type: custom:mushroom-light-card
-          exclude:
-            - state: unavailable
-        show_empty: true
+      - type: vertical-stack
+        cards:
+          - type: custom:auto-entities
+            card:
+              type: grid
+              columns: 2
+              square: false
+            card_param: cards
+            filter:
+              include:
+                - domain: light
+                  options:
+                    type: custom:mushroom-light-card
+              exclude:
+                - state: unavailable
+            show_empty: true
+            sort:
+              method: friendly_name
+  - theme: Campfire - Dark
+    title: Climate
+    path: climate
+    icon: mdi:thermostat
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+    badges: []
+    cards:
+      - type: custom:thermostat-card
+        entity: climate.ecobee3
+        no_card: false
+        highlight_tap: true
+        title: ecobee3
+        step: 1
+      - type: custom:mushroom-climate-card
+        entity: climate.ecobee3
+        show_temperature_control: true
+        hvac_modes:
+          - heat
+        name: Thermostat
