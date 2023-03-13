@@ -1,43 +1,9 @@
 ##########################################################
-## Time of Day
-##########################################################
-
-
-
-##########################################################
 ## Template Sensors
 ##########################################################
 
-
-- platform: command_line
-  name: "Plex Ping"
-  command: 'response=$(curl -LIk 10.0.0.202:32400 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
-  device_class: connectivity
-  scan_interval: 60
-  payload_on: 'ON'
-  payload_off: 'OFF'
-
-
-- platform: template
-  sensors:
-
-    trashday:
-      friendly_name: Trash Pickup
-      value_template: >
-        {{ state_attr('sensor.trash_service','prox')|int == 0 }}
-      attribute_templates:
-        type: >
-          {{ state_attr('sensor.trash_service','desc') }}
-        proximity: >
-          {{ state_attr('sensor.trash_service','prox') }}
-        date: >
-          {{ state_attr('sensor.trash_service','when') }}
-      icon_template: >
-        {% if state_attr('sensor.trash_service','type') == 'trash' %}
-          mdi:delete
-        {% else %}
-          mdi:recycle
-        {% endif %}
+#- platform: template
+#  sensors:
 
 #    laundry_washer:
 #      friendly_name: "Washing Machine"
@@ -52,31 +18,30 @@
 #      icon_template: >
 #        mdi:washing-machine
 
-    gewasher_status:
-      friendly_name: Washer Running
-      value_template: >
-        {{ states('sensor.gewasher_laundry_machine_state') == "Run" }}
-    gedryer_status:
-      friendly_name: Dryer Running
-      value_template: >
-        {{ states('sensor.gedryer_laundry_machine_state') == "Run" }}
 
+##########################################################
+## Trendlines
+##########################################################
 
-    monthly_data_concern:
-      friendly_name: Data Cap Issue
-      value_template: >
-        {{ states('sensor.monthly_data_usage')|float > states('sensor.month_gone')|float }}
-      icon_template: >
-        {% if is_state('binary_sensor.monthly_data_concern','on') %}
-          mdi:alert-circle-outline
-        {% else %}
-          mdi:thumb-up
-        {% endif %}
 
 
 ##########################################################
 ## Network Devices
 ##########################################################
+
+- platform: command_line
+  name: "Plex Ping"
+  command: 'response=$(curl -LIk 192.168.1.202:32400 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
+  device_class: connectivity
+  scan_interval: 60
+  payload_on: 'ON'
+  payload_off: 'OFF'
+
+- platform: ping
+  host: !secret shield_ip
+  name: Shield Online
+  scan_interval: 3600
+  count: 2
 
 - platform: ping
   host: !secret nas_host
@@ -89,36 +54,3 @@
   name: Raspberry Pi Zero Online
   scan_interval: 3600
   count: 2
-
-- platform: ping
-  host: "10.0.0.4"
-  name: den_tablet_ping
-  scan_interval: 30
-  count: 1
-
-##########################################################
-## Presence Detection
-##########################################################
-
-- platform: bayesian
-  prior: 0.5
-  name: 'Tom Presence'
-  probability_threshold: 0.8
-  observations:
-    - entity_id: 'device_tracker.iphone_chasm_11'
-      # likelihood i'm home if this is true:
-      prob_given_true: 0.9
-      # likelihood this shows as home when i'm not:
-      prob_given_false: 0.1
-      platform: 'state'
-      to_state: 'home'
-    - entity_id: 'device_tracker.keys'
-      prob_given_true: 0.7
-      prob_given_false: 0.2
-      platform: 'state'
-      to_state: 'home'
-    - entity_id: 'sensor.iphone_ssid'
-      prob_given_true: 0.9
-      prob_given_false: 0.1
-      platform: 'state'
-      to_state: 'Aether'
