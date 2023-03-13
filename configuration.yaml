@@ -4,6 +4,9 @@ default_config:
 
 homeassistant:
   customize: !include customize.yaml
+  customize_domain:
+    climate:
+      precision: 1.0
   allowlist_external_dirs:
     - /config
 
@@ -52,7 +55,7 @@ notify:
     chat_id: !secret telegram_chatid_tom
 
 rest_command:
-  check_monthly_data:
+  data_usage_refresh:
     url: !secret my_datausage_source
     method: GET
     verify_ssl: false
