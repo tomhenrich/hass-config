@@ -4,14 +4,29 @@
 #
 ####################
 
+#- trigger:
+#  - platform: state
+#    entity_id: button.doorbell
+#  binary_sensor:
+#    name: doorbell_delay
+#    state: "{{ trigger.platform == 'state' }}"
+#    auto_off:
+#      seconds: 10
+
 - trigger:
-  - platform: state
-    entity_id: button.doorbell
-  binary_sensor:
-    name: doorbell_delay
-    state: "{{ trigger.platform == 'state' }}"
-    auto_off:
-      seconds: 10
+    - platform: time_pattern
+      minutes: "/20"
+  sensor:
+    - name: "Month Gone"
+      unique_id: month_gone
+      state: >-
+        {% set today = now() %}
+        {% set dt = today %}
+        {% set days = (dt.replace(month=dt.month % 12 + 1, day=1) - timedelta(days=1)).day %}
+        {% set progress = (today.day - 1) + today.hour / 24 %}
+        {{ ((progress / days) * 100)|round(1) }}
+      unit_of_measurement: "%"
+      icon: "mdi:percent"
 
 ####################
 #
@@ -20,10 +35,29 @@
 ####################
 
 - sensor:
-  - name: Den TV Source
-    availability: "{{ not is_state('media_player.den_tv', 'unavailable') }}"
+  - name: Trash Pickup
     state: >
-      {% set source = state_attr('media_player.den_tv', 'source')|default('off', true) %}
+      {% set current = states("sensor.current_pickup")|as_timestamp %}
+      {% set next = states("sensor.next_pickup")|as_timestamp %}
+      {% if now()|as_timestamp > current %}
+        {{ states("sensor.next_pickup") }}
+      {% else %}
+        {{ states("sensor.current_pickup") }}
+      {% endif %}
+    icon: 'mdi:delete'
+    attributes:
+      pickup_types: >
+        {% if now()|as_timestamp > states("sensor.current_pickup")|as_timestamp %}
+          {{ state_attr("sensor.next_pickup","pickup_types") }}
+        {% else %}
+          {{ state_attr("sensor.current_pickup","pickup_types") }}
+        {% endif %}
+    device_class: date
+
+  - name: Den TV Source
+    availability: "{{ not is_state('media_player.den_tv_wifi', 'unavailable') }}"
+    state: >
+      {% set source = state_attr('media_player.den_tv_wifi', 'source')|default('off', true) %}
       {% if source == "com.amazon.tv.launcher" %} Launcher
       {% elif source == "com.hbo.hbonow" %} HBO
       {% elif source == "Prime Video (FireTV)" %} Prime Video
@@ -34,70 +68,172 @@
       {% endif %}
     icon: 'mdi:import'
 
-  - name: "Monthly Data GB"
+  - name: Shield TV Source
+    availability: "{{ not is_state('media_player.shield_tv', 'unavailable') }}"
+    state: >
+      {% set source = state_attr('media_player.shield_tv', 'source')|default('off', true) %}
+      {% if source == "com.amazon.tv.launcher" %} Launcher
+      {% elif source == "com.hbo.hbonow" %} HBO
+      {% elif source == "Prime Video (FireTV)" %} Prime Video
+      {% elif source == "com.cbs.ott" %} Paramount+
+      {% elif source == "com.amcplus.amcfiretv" %} AMC+
+      {% elif source == "com.showtime.showtimeanytime" %} Showtime
+      {% else %} {{ source }}
+      {% endif %}
+    icon: 'mdi:import'
+
+
+  #### CALCULATING MONTHLY DATA USAGE ####
+
+#  - name: "Month Gone"
+#    unique_id: month_gone
+#    state: >-
+#      {% set today = now() %}
+#      {% set dt = today %}
+#      {% set days = (dt.replace(month=dt.month % 12 + 1, day=1) - timedelta(days=1)).day %}
+#      {% set progress = (today.day - 1) + today.hour / 24 %}
+#      {{ ((progress / days) * 100)|round(1) }}
+#    unit_of_measurement: "%"
+#    icon: "mdi:percent"
+
+  - name: "Data Usage GB"
+    unique_id: data_usage_gb
+    state: >-
+      {% if states('sensor.data_usage_report') != 'unavailable' %}
+        {{ state_attr("sensor.data_usage_report", "gb")|float }}
+      {% else %}
+        {{ states("sensor.data_usage_report") }}
+      {% endif %}
     unit_of_measurement: "GB"
     state_class: total_increasing
-    state: >-
-      {{ state_attr("sensor.monthly_data_report", "gb")|float }}
     icon: "mdi:cloud"
 
-  - name: "Month Gone"
-    unit_of_measurement: "%"
-    state: >-
-      {{ state_attr("sensor.monthly_data_report", "pct_of_month")|float }}
-    icon: "mdi:percent"
+
+  #### ENVIRONMENTAL SENSORS ####
+
+  - name: Air Quality Value
+    unique_id: airquality_value
+    availability: "{{ not is_state('sensor.airvisual_data', 'unavailable') }}"
+    state: >
+      {{ states("sensor.airvisual_data")|int }}
+    device_class: aqi
+
+  - name: Air Quality
+    unique_id: airquality
+    availability: "{{ not is_state('sensor.airvisual_data', 'unavailable') }}"
+    state: >
+      {% if is_state("sensor.airvisual_data", "unavailable") %}
+        {{ state("sensor.airquality") }}
+      {% else %}
+        {% set aqi = states('sensor.airvisual_data')|int %}
+        {% if aqi > 300 %} Hazardous
+        {% elif aqi > 200 %} Very Unhealthy
+        {% elif aqi > 100 %} Unhealthy
+        {% elif aqi > 50 %} Moderate
+        {% else %} Good
+        {% endif %}
+      {% endif %}
+    attributes:
+      contaminant_id: >
+        {{ state_attr('sensor.airvisual_data','mainus') }}
+      contaminant: >
+        {% set main_pollutant = state_attr('sensor.airvisual_data','mainus') %}
+        {% if main_pollutant == "co" %} Carbon Monoxide
+        {% elif main_pollutant == "n2" %} Nitrogen Dioxide
+        {% elif main_pollutant == "o3" %} Ozone
+        {% elif main_pollutant == "p1" %} PM10
+        {% elif main_pollutant == "p2" %} PM2.5
+        {% elif main_pollutant == "s2" %} Sulfur Dioxide
+        {% else %} Unknown
+        {% endif %}
+    icon: >
+      {% set aqi = this.state %}
+      {% if aqi == "Good" %} mdi:emoticon
+      {% elif aqi == "Moderate" %} mdi:emoticon-neutral-outline
+      {% elif aqi == "Unhealthy" %} mdi:emoticon-frown-outline
+      {% elif aqi == "Very Unhealthy" %} mdi:alert
+      {% elif aqi == "Hazardous" %} mdi:skull
+      {% else %} mdi:help-circle-outline
+      {% endif %}
+
+  - name: "Pollen: Grass Index"
+    unique_id: pollen_grass
+    state: >
+        {{ state_attr('sensor.pollen_data', 'grassIndex') | int }}
+    icon: "mdi:grass"
+
+  - name: "Pollen: Tree Index"
+    unique_id: pollen_trees
+    state: >
+        {{ state_attr('sensor.pollen_data', 'treeIndex') | int }}
+    icon: "mdi:tree"
+
+  - name: "Pollen: Weed Index"
+    unique_id: pollen_weeds
+    state: >
+        {{ state_attr('sensor.pollen_data', 'weedIndex') | int }}
+    icon: "mdi:spa"
 
   - name: Outside Condition
     unique_id: outside_condition
     state: >
+      {% if states('sensor.weather_report') != 'unavailable' %}
         {{ state_attr("sensor.weather_report", "condition") }}
+      {% else %}
+        Unknown
+      {% endif %}
     icon: >
-      {% set code = state_attr("sensor.weather_report", "condition_icon") %}
-      {% if code == "09d" %} mdi:weather-rainy
-      {% elif code == "10d" %} mdi:weather-rainy
-      {% elif code == "11d" %} mdi:weather-lightning-rainy
-      {% elif code == "13d" %} mdi:weather-snowy-rainy
-      {% elif code == "50d" %} mdi:weather-dust
-      {% elif code == "01d" %} mdi:weather-sunny
-      {% elif code == "01n" %} mdi:weather-night
-      {% elif code == "02d" %} mdi:weather-cloudy
-      {% elif code == "02n" %} mdi:weather-night-partly-cloudy
-      {% elif code == "03d" or code == "03n" %} mdi:weather-partly-cloudy
-      {% elif code == "04d" or code == "04n" %} mdi:weather-partly-cloudy
-      {% else %} mdi:weather-fog
+      {% if states('sensor.weather_report') != 'unavailable' %}
+        {% set code = state_attr("sensor.weather_report", "condition_icon") %}
+        {% if code == "09d" %} mdi:weather-rainy
+          {% elif code == "10d" %} mdi:weather-rainy
+          {% elif code == "11d" %} mdi:weather-lightning-rainy
+          {% elif code == "13d" %} mdi:weather-snowy-rainy
+          {% elif code == "50d" %} mdi:weather-dust
+          {% elif code == "01d" %} mdi:weather-sunny
+          {% elif code == "01n" %} mdi:weather-night
+          {% elif code == "02d" %} mdi:weather-cloudy
+          {% elif code == "02n" %} mdi:weather-night-partly-cloudy
+          {% elif code == "03d" or code == "03n" %} mdi:weather-partly-cloudy
+          {% elif code == "04d" or code == "04n" %} mdi:weather-partly-cloudy
+          {% else %} mdi:weather-fog
+        {% endif %}
+      {% else %}
+        mdi:cloud-question-outline
       {% endif %}
 
   - name: "Outside Temp"
     state: >
-      {{ state_attr("sensor.weather_report", "temp")|float|round(1) }}
+      {% if states('sensor.weather_report') != 'unavailable' %}
+        {{ state_attr("sensor.weather_report", "temp")|int }}
+      {% endif %}
     unit_of_measurement: "°F"
     state_class: measurement
     device_class: temperature
 
-  - name: "Inside Temp"
-    state: >
-      {{ states("sensor.ecobee3_temperature")|int }}
-    unit_of_measurement: "°F"
-    state_class: measurement
-    device_class: temperature
+
+  #### PLEX DATA ####
 
   - name: "Plex Streams: Direct Play"
     unique_id: plex_streams_direct_play
     icon: 'mdi:play-circle'
     state: >
-      {{ state_attr('sensor.plex_streams', 'stream_count_direct_play')|int }}
+      {{ state_attr('sensor.plex_streams', 'stream_count_direct_play') | default(0) }}
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Streams: Direct Stream"
     unique_id: plex_streams_direct_stream
     icon: 'mdi:motion-play-outline'
     state: >
-      {{ state_attr('sensor.plex_streams', 'stream_count_direct_stream')|int }}
+      {{ state_attr('sensor.plex_streams', 'stream_count_direct_stream') | default(0) }}
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Streams: Transcode"
     unique_id: plex_streams_transcode
     icon: 'mdi:server'
     state: >
-      {{ state_attr('sensor.plex_streams', 'stream_count_transcode')|int }}
+      {{ state_attr('sensor.plex_streams', 'stream_count_transcode') | default(0) }}
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Library Data"
     availability: "{{ not is_state('sensor.plex_libraries', 'unavailable') }}"
@@ -127,73 +263,8 @@
           {% endif %}
         {% endfor %}
 
-  - name: Air Quality
-    unique_id: airquality
-    state: >
-      {% if is_state("sensor.airvisual_data", "unavailable") %}
-        {{ state("sensor.airvisual") }}
-      {% else %}
-        {% set aqi = states('sensor.airvisual_data')|int %}
-        {% if aqi > 300 %} Hazardous
-        {% elif aqi > 200 %} Very Unhealthy
-        {% elif aqi > 100 %} Unhealthy
-        {% elif aqi > 50 %} Moderate
-        {% else %} Good
-        {% endif %}
-      {% endif %}
-    icon: >
-      {% set aqi = states('sensor.air_quality') %}
-      {% if aqi == "Good" %} mdi:emoticon
-      {% elif aqi == "Moderate" %} mdi:emoticon-neutral-outline
-      {% elif aqi == "Unhealthy" %} mdi:emoticon-frown-outline
-      {% elif aqi == "Very Unhealthy" %} mdi:alert
-      {% elif aqi == "Hazardous" %} mdi:skull
-      {% else %} mdi:help-circle-outline
-      {% endif %}
-    attributes:
-      contaminant_id: >
-        {{ state_attr('sensor.airvisual_data','mainus') }}
-      contaminant: >
-        {% set main_pollutant = state_attr('sensor.airvisual_data','mainus') %}
-        {% if main_pollutant == "co" %} Carbon Monoxide
-        {% elif main_pollutant == "n2" %} Nitrogen Dioxide
-        {% elif main_pollutant == "o3" %} Ozone
-        {% elif main_pollutant == "p1" %} PM10
-        {% elif main_pollutant == "p2" %} PM2.5
-        {% elif main_pollutant == "s2" %} Sulfur Dioxide
-        {% else %} Unknown
-        {% endif %}
 
-  - name: "Pollen: Grass Index"
-    unique_id: pollen_grass
-    state: >
-        {{ state_attr('sensor.pollen_data', 'grassIndex') | int }}
-    icon: "mdi:grass"
-
-  - name: "Pollen: Tree Index"
-    unique_id: pollen_trees
-    state: >
-        {{ state_attr('sensor.pollen_data', 'treeIndex') | int }}
-    icon: "mdi:tree"
-
-  - name: "Pollen: Weed Index"
-    unique_id: pollen_weeds
-    state: >
-        {{ state_attr('sensor.pollen_data', 'weedIndex') | int }}
-    icon: "mdi:spa"
-
-  - name: "DS420j Last Boot Time"
-    unique_id: ds420j_last_boot_fmt
-    state: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
-    icon: 'mdi:calendar-clock'
-
-  - name: "Scylla CPU Load"
-    unique_id: scylla_ohm_cpu_load
-    state: >
-      {% set ohm = state_attr('sensor.scylla_ohm', 'Children')[1] %}
-      {% set cpu = ohm.Children[2].Children[0].Value | regex_findall_index('\d+.?\d+') | float %}
-      {{ cpu }}
-    unit_of_measurement: "%"
+  #### NETWORK DEVICES ####
 
   - name: "Scylla CPU Load"
     unique_id: scylla_ohm_cpu_load
@@ -211,6 +282,14 @@
       {% set temp = (temp * 1.8) + 32 %}
       {{ temp }}
     unit_of_measurement: "°F"
+    device_class: temperature
+
+  - name: "DS420j Last Boot Time"
+    unique_id: ds420j_last_boot_fmt
+    state: "{{ as_timestamp(states('sensor.ds420j_last_boot')) | timestamp_custom('%b %-d, %H:%M') }}"
+    icon: 'mdi:calendar-clock'
+
+
 
 ####################
 #
@@ -219,15 +298,24 @@
 ####################
 
 - binary_sensor:
+
+  - name: Den TV Active
+    unique_id: den_tv_active
+    state: '{{ states("sensor.den_tv_source") not in ["off", "unavailable"] }}'
+
+  - name: Shield TV Active
+    unique_id: shield_tv_active
+    state: '{{ states("sensor.shield_tv_source") not in ["off", "unavailable"] }}'
+
   - name: Scylla Online
+    unique_id: scylla_online
     state: '{{ states("sensor.scylla_status") not in ["unavailable"] }}'
     device_class: connectivity
 
-  - name: Den TV Active
-    state: '{{ states("sensor.den_tv_source") not in ["off", "unavailable"] }}'
-
   - name: Plex Streaming
+    unique_id: plex_streaming
     state: '{{ states("sensor.plex_streams")|int > 0 }}'
+    availability: '{{ states("sensor.plex_ping") not in ["unavailable"] }}'
 
   - name: Washer Running
     unique_id: washer_status
@@ -239,20 +327,10 @@
     state: "{{ states('sensor.gedryer_laundry_machine_state') == 'Run' }}"
     device_class: running
 
-  - name: Enable Thermostat
+  - name: Furnace Running
+    unique_id: furnace_running
+    availability: "{{ not is_state('climate.ecobee3', 'unavailable') }}"
     state: >
-      {% if is_state("sensor.outside_temp", "unavailable") %}
-        on
-      {% else %}
-        {{ states("sensor.outside_temp")|int <= states("input_number.enable_thermostat_control")|int }}
-      {% endif %}
-
-  - name: Trash Pickup
-    state: >
-      {{ state_attr('sensor.trash_service','prox')|int == 0 }}
-    icon: >
-      {% if state_attr('sensor.trash_service','type') == 'trash' %}
-        mdi:delete
-      {% else %}
-        mdi:recycle
-      {% endif %}
+      {{ state_attr("climate.ecobee3","hvac_action") == "heating" | default("off") }}
+    device_class: running
+ 
