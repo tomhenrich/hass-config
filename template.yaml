@@ -36,22 +36,24 @@
 
 - sensor:
   - name: Trash Pickup
+    availability: "{{ not is_state('sensor.current_pickup', 'unavailable') }}"
     state: >
-      {% set current = states("sensor.current_pickup")|as_timestamp %}
-      {% set next = states("sensor.next_pickup")|as_timestamp %}
-      {% if now()|as_timestamp > current %}
-        {{ states("sensor.next_pickup") }}
-      {% else %}
+      {% if states("sensor.date") <= states("sensor.current_pickup") %}
         {{ states("sensor.current_pickup") }}
+      {% else %}
+        {{ states("sensor.next_pickup") }}
       {% endif %}
-    icon: 'mdi:delete'
     attributes:
       pickup_types: >
-        {% if now()|as_timestamp > states("sensor.current_pickup")|as_timestamp %}
-          {{ state_attr("sensor.next_pickup","pickup_types") }}
-        {% else %}
+        {% if states("sensor.date") <= states("sensor.current_pickup") %}
           {{ state_attr("sensor.current_pickup","pickup_types") }}
+        {% else %}
+          {{ state_attr("sensor.next_pickup","pickup_types") }}
         {% endif %}
+      proximity: >
+        {{ (this.state|as_timestamp - states("sensor.date")|as_timestamp)/86400 }}
+    icon: >
+      {{ iif( this.attributes.pickup_types|count == 2, "mdi:recycle", "mdi:delete") }}
     device_class: date
 
   - name: Den TV Source
@@ -74,7 +76,7 @@
       {% set source = state_attr('media_player.shield_tv', 'source')|default('off', true) %}
       {% if source == "com.amazon.tv.launcher" %} Launcher
       {% elif source == "com.hbo.hbonow" %} HBO
-      {% elif source == "Prime Video (FireTV)" %} Prime Video
+      {% elif source == "Prime Video" %} Prime Video
       {% elif source == "com.cbs.ott" %} Paramount+
       {% elif source == "com.amcplus.amcfiretv" %} AMC+
       {% elif source == "com.showtime.showtimeanytime" %} Showtime
@@ -84,17 +86,6 @@
 
 
   #### CALCULATING MONTHLY DATA USAGE ####
-
-#  - name: "Month Gone"
-#    unique_id: month_gone
-#    state: >-
-#      {% set today = now() %}
-#      {% set dt = today %}
-#      {% set days = (dt.replace(month=dt.month % 12 + 1, day=1) - timedelta(days=1)).day %}
-#      {% set progress = (today.day - 1) + today.hour / 24 %}
-#      {{ ((progress / days) * 100)|round(1) }}
-#    unit_of_measurement: "%"
-#    icon: "mdi:percent"
 
   - name: "Data Usage GB"
     unique_id: data_usage_gb
@@ -106,6 +97,7 @@
       {% endif %}
     unit_of_measurement: "GB"
     state_class: total_increasing
+    device_class: data_size
     icon: "mdi:cloud"
 
 
@@ -215,25 +207,25 @@
   #### PLEX DATA ####
 
   - name: "Plex Streams: Direct Play"
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
     unique_id: plex_streams_direct_play
     icon: 'mdi:play-circle'
     state: >
       {{ state_attr('sensor.plex_streams', 'stream_count_direct_play') | default(0) }}
-    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Streams: Direct Stream"
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
     unique_id: plex_streams_direct_stream
     icon: 'mdi:motion-play-outline'
     state: >
       {{ state_attr('sensor.plex_streams', 'stream_count_direct_stream') | default(0) }}
-    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Streams: Transcode"
+    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
     unique_id: plex_streams_transcode
     icon: 'mdi:server'
     state: >
       {{ state_attr('sensor.plex_streams', 'stream_count_transcode') | default(0) }}
-    availability: "{{ not is_state('sensor.plex_streams', 'unavailable') }}"
 
   - name: "Plex Library Data"
     availability: "{{ not is_state('sensor.plex_libraries', 'unavailable') }}"
@@ -302,10 +294,12 @@
   - name: Den TV Active
     unique_id: den_tv_active
     state: '{{ states("sensor.den_tv_source") not in ["off", "unavailable"] }}'
+    device_class: presence
 
   - name: Shield TV Active
     unique_id: shield_tv_active
     state: '{{ states("sensor.shield_tv_source") not in ["off", "unavailable"] }}'
+    device_class: presence
 
   - name: Scylla Online
     unique_id: scylla_online
