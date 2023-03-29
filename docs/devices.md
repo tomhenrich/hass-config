@@ -44,9 +44,10 @@
 | Outlet       | Plug-In        | Monoprice Outlet 1       | Z-Wave      | Monoprice Plug-In          |
 | Fan          | \-             | Multipass Fan            | RF          | Olibra RF Adapter          |
 | Sensor       | Open/Close     | Multipass Window         | Zigbee      | \-                         |
-| PC           | \-             | Pi Zero W                | Ethernet    | Raspberry Pi Zero W        |
+| PC           | \-             | Pi Zero W                | Wi-Fi       | Raspberry Pi Zero W        |
 | Button       | On/Off         | Plex Button              | Zigbee      | IKEA Tradfri Dimmer        |
 | Switch       | On/Off         | Porch Light              | Z-Wave Plus | Inovelli NZW30             |
+| Media        | TV             | Shield TV                | Ethernet    | Android TV                 |
 | UPS          | \-             | UPS                      | Ethernet    | NPC Back-UPS 650           |
 | Sensor       | Leak           | Washer Leak Sensor       | Zigbee      | Samsung Leak Sensor        |
 | Outlet       | Plug-In        | Wyze Basement            | Z-Wave      | Monoprice Plug-In          |
