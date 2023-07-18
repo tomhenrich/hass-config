@@ -52,16 +52,26 @@ plex_on_shield_tv:
     data: {}
     target:
       device_id: 064bc9f0fe0bdb58dd782c8c08ba64c0
+    enabled: true
   - service: media_player.select_source
     data:
       source: com.plexapp.android
     target:
       entity_id: media_player.shield_tv
-  - service: androidtv.adb_command
-    data:
-      command: HDMI2
-    target:
-      entity_id: media_player.den_tv_wifi
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.den_tv_wifi
+        attribute: source
+        state: com.amazon.tv.inputpreference.service
+        alias: Den TV is already on HDMI2
+    then:
+    - service: androidtv.adb_command
+      data:
+        command: HDMI2
+      target:
+        entity_id: media_player.den_tv_wifi
   mode: single
   icon: mdi:plex
 disney_on_shieldtv:
@@ -76,11 +86,20 @@ disney_on_shieldtv:
       command: am start -a android.intent.action.VIEW -n   com.disney.disneyplus/com.bamtechmedia.dominguez.main.MainActivity
     target:
       entity_id: media_player.shield_tv
-  - service: androidtv.adb_command
-    data:
-      command: HDMI2
-    target:
-      entity_id: media_player.den_tv_wifi
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.den_tv_wifi
+        attribute: source
+        state: com.amazon.tv.inputpreference.service
+        alias: Den TV is already on HDMI2
+    then:
+    - service: androidtv.adb_command
+      data:
+        command: HDMI2
+      target:
+        entity_id: media_player.den_tv_wifi
   mode: single
   icon: mdi:rodent
 shieldtv_reboot:
@@ -105,11 +124,20 @@ netflix_on_shield_tv:
       source: com.netflix.ninja
     target:
       entity_id: media_player.shield_tv
-  - service: androidtv.adb_command
-    data:
-      command: HDMI2
-    target:
-      entity_id: media_player.den_tv_wifi
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.den_tv_wifi
+        attribute: source
+        state: com.amazon.tv.inputpreference.service
+        alias: Den TV is already on HDMI2
+    then:
+    - service: androidtv.adb_command
+      data:
+        command: HDMI2
+      target:
+        entity_id: media_player.den_tv_wifi
   mode: single
   icon: mdi:netflix
 prime_video_on_shield_tv:
@@ -124,11 +152,20 @@ prime_video_on_shield_tv:
       source: com.amazon.amazonvideo.livingroom
     target:
       entity_id: media_player.shield_tv
-  - service: androidtv.adb_command
-    data:
-      command: HDMI2
-    target:
-      entity_id: media_player.den_tv_wifi
+  - if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.den_tv_wifi
+        attribute: source
+        state: com.amazon.tv.inputpreference.service
+        alias: Den TV is already on HDMI2
+    then:
+    - service: androidtv.adb_command
+      data:
+        command: HDMI2
+      target:
+        entity_id: media_player.den_tv_wifi
   mode: single
   icon: mdi:video-image
 hbo_on_shieldtv:
@@ -140,13 +177,21 @@ hbo_on_shieldtv:
       entity_id: media_player.shield_tv
   - service: media_player.select_source
     data:
-      source: com.hbo.hbonow
+      source: com.wbd.stream
     target:
       entity_id: media_player.shield_tv
+  - service: androidtv.adb_command
+    data:
+      command: adb shell am force-stop com.hbo.hbonow
+    target:
+      entity_id: media_player.den_tv_wifi
+    alias: 'Den TV: Kill HBO App'
   - service: androidtv.adb_command
     data:
       command: HDMI2
     target:
       entity_id: media_player.den_tv_wifi
+    alias: 'Den TV: Switch to HDMI2'
+    enabled: false
   mode: single
   icon: mdi:alpha-h-box
