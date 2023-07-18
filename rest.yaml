@@ -1,0 +1,45 @@
+- resource: !secret my_datausage_url
+  scan_interval: 42300
+  sensor:
+    - name: "Data Usage GB"
+      unique_id: data_usage_gb
+      value_template: "{{ value_json.gb|float }}"
+      unit_of_measurement: "GB"
+      state_class: total_increasing
+      device_class: data_size
+      icon: "mdi:cloud"
+      json_attributes:
+        - pct_of_month
+        - pct_of_cap
+        - updated
+
+- resource: !secret my_torrents_filter
+  scan_interval: 60
+  sensor:
+    - name: "Torrents (All)"
+      unique_id: torrents_data_all
+      value_template: "{{ value_json.response.count|int }}"
+      json_attributes_path: "$.response"
+      json_attributes:
+        - "count"
+        - "items"
+
+- resource: !secret my_torrents
+  scan_interval: 60
+  params:
+    filter: active
+  sensor:
+    - name: Torrents Active
+      unique_id: torrents_active
+      value_template: "{{ value_json|count }}"
+      icon: "mdi:progress-download"
+
+- resource: !secret my_torrents
+  scan_interval: 60
+  params:
+    filter: completed
+  sensor:
+    - name: Torrents Complete
+      unique_id: torrents_complete
+      value_template: "{{ value_json|count }}"
+      icon: "mdi:download"
