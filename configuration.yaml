@@ -17,22 +17,22 @@ tts:
 
 cloud:
 
-wake_on_lan:
 
 # Outsource configurations to sub-files:
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
+command_line: !include command_line.yaml
 device_tracker: !include device_tracker.yaml
 group: !include groups.yaml
 media_player: !include media_player.yaml
 mqtt: !include mqtt.yaml
+recorder: !include recorder.yaml
+rest: !include rest.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 switch: !include switches.yaml
-recorder: !include recorder.yaml
 sensor: !include sensors.yaml
 template: !include template.yaml
-
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -54,9 +54,15 @@ notify:
     platform: telegram
     chat_id: !secret telegram_chatid_tom
 
+
 rest_command:
   data_usage_refresh:
     url: !secret my_datausage_source
+    method: GET
+    verify_ssl: false
+
+  tautulli_refresh:
+    url: !secret tautulli_api_streams
     method: GET
     verify_ssl: false
 
