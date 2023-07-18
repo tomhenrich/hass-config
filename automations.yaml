@@ -28,6 +28,12 @@
     type: remote_button_long_press
     subtype: dim_up
     id: longpress
+  - device_id: c41a7cabdaf68d062d0fa206dfe908cb
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: turn_on
+    id: doublepress
   condition: []
   action:
   - choose:
@@ -42,6 +48,12 @@
         id: longpress
       sequence:
       - service: script.disney_on_shieldtv
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: doublepress
+      sequence:
+      - service: script.hbo_on_shieldtv
         data: {}
   mode: restart
 - id: '1632860503837'
@@ -94,6 +106,7 @@
     event: sunrise
     id: sunrise
     offset: -00:30:00
+    alias: 30 min before sunrise
   condition: []
   action:
   - choose:
@@ -171,7 +184,7 @@
         data: {}
       - service: notify.telegram_tom
         data:
-          title: Barn Door Protocol Activated
+          title: '*Barn Door Protocol Activated*'
           message: Furnace has been turned off.
     - conditions:
       - condition: trigger
@@ -189,7 +202,7 @@
         data: {}
       - service: notify.telegram_tom
         data:
-          title: Barn Door Protocol
+          title: '*Barn Door Protocol*'
           message: Furnace has resumed previous schedule.
     - conditions:
       - condition: trigger
@@ -348,6 +361,10 @@
     data:
       title: Doorbell pressed!
       message: Doorbell has been rung.
+  - service: notify.mobile_app_sm_g981v
+    data:
+      message: Doorbell has been rung.
+      title: Doorbell pressed!
   - service: timer.start
     data: {}
     target:
@@ -362,19 +379,20 @@
       data:
         title: Doorbell
         message: Doorbell has been rung!
+    enabled: false
   mode: single
 - id: '1635605604406'
   alias: 'Notify: Washer Leak'
   description: ''
   trigger:
   - platform: state
-    entity_id: binary_sensor.washer_leak_sensor
+    entity_id:
+    - binary_sensor.washer_leak_sensor
     to: 'on'
     for:
       hours: 0
       minutes: 0
-      seconds: 30
-      milliseconds: 0
+      seconds: 10
   condition: []
   action:
   - service: notify.mobile_app_iphone
@@ -571,24 +589,6 @@
     entity_id: light.guest_ceiling
     domain: light
   mode: single
-- id: '1662853310691'
-  alias: 'Plex: Stream Activity'
-  description: ''
-  trigger:
-  - platform: webhook
-    webhook_id: plex-stream-activity
-  condition:
-  - condition: template
-    value_template: '{{ ("media.play".encode() in trigger.data.payload) or ("media.resume".encode()
-      in trigger.data.payload) or ("media.stop".encode() in trigger.data.payload)  or
-      ("media.pause".encode() in trigger.data.payload)  }}'
-  action:
-  - service: homeassistant.update_entity
-    data: {}
-    target:
-      entity_id: sensor.plex_streams
-  mode: queued
-  max: 4
 - id: '1663332587839'
   alias: Living Room Night Light disable
   description: Turn off the night light automation if the brightness changes independently
@@ -615,10 +615,18 @@
     webhook_id: pmm-complete
     id: pmm-complete
     alias: 'Webhook: PMM Completed'
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
   - platform: webhook
     webhook_id: pmm-error
     id: pmm-error
     alias: 'Webhook: PMM Error'
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
   condition: []
   action:
   - choose:
@@ -686,10 +694,10 @@
     domain: sensor
     for:
       hours: 0
-      minutes: 1
+      minutes: 20
       seconds: 0
     alias: Low Battery
-    below: 60
+    below: 40
     id: low_battery
   - type: battery_level
     platform: device
@@ -697,7 +705,7 @@
     entity_id: sensor.my_wall_panel_battery_level
     domain: sensor
     for:
-      hours: 24
+      hours: 8
       minutes: 0
       seconds: 0
     id: charged_battery
@@ -759,7 +767,11 @@
     attribute: source
     id: hbomax
     to: com.hbo.hbonow
-  condition: []
+    enabled: true
+  condition:
+  - condition: state
+    entity_id: binary_sensor.shield_online
+    state: 'on'
   action:
   - choose:
     - conditions:
@@ -780,4 +792,91 @@
       sequence:
       - service: script.hbo_on_shieldtv
         data: {}
+  mode: single
+- id: '1683214595916'
+  alias: Tautulli Stream Activity
+  description: ''
+  trigger:
+  - platform: webhook
+    webhook_id: tautulli-stream
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+  condition: []
+  action:
+  - service: notify.telegram_tom
+    data:
+      title: "{% set action = trigger.json.action %} {% if action == \"play\" %}{%
+        set verb = \"started\" %}{% set icon = \"⏯️\" %} {% elif action == \"pause\"
+        %}{% set verb = \"paused\" %}{% set icon = \"⏸️\" %} {% elif action == \"stop\"
+        %}{% set verb = \"stopped\" %}{% set icon = \"\U0001F6D1\" %} {% elif action
+        == \"resume\" %}{% set verb = \"resumed\" %}{% set icon = \"⏯️\" %} {% else
+        %} {% set verb = action %} {% endif %} \U0001F4FA{{icon}} *Plex: {{ iif(trigger.json.stream.local
+        == \"1\", \"Local\", \"Remote\") }} stream {{ verb }}*"
+      message: "{% set data = trigger.json %} {% set str = data.stream %} {% set action
+        = data.action %} {% set xc = data.transcode %} {% if action == \"play\" %}{%
+        set verb = \"started playing\" %} {% elif action == \"pause\" %}{% set verb
+        = \"paused\" %} {% elif action == \"stop\" %}{% set verb = \"stopped\" %}
+        {% elif action == \"resume\" %}{% set verb = \"resumed\" %} {% else %}{% set
+        verb = action %} {% endif %} {{data.who.user}} {{verb}} \"{{data.what.title}}\"
+        ({{data.what.year}}) {% if action != \"play\" %}at {{data.progress.time}}
+        ({{data.progress.percent}}%){% endif %}\n\n*Player:* {{ trigger.json.who.player
+        }}\n*Time:* {{ now().strftime(\"%-I:%M\") + now().strftime(\"%p\").lower()
+        }}\n\n{% if action == \"play\" or action == \"resume\" %}*Quality Profile:*
+        {{data.stream.quality_profile}}\n{% if data.source.optimized|int == 1 %}*Optimized
+        Version:*\n  {{data.source.optimized_version}}\n\n{% endif %} *Stream Decision:*
+        {{xc.transcode_decision}}{% if xc.transcode_decision|lower == \"transcode\"
+        %}\n  - Video: {{xc.video_decision}} {{str.video_codec|upper}} to {{xc.video_codec|upper}}\n
+        \ - Audio: {{xc.audio_decision}} {{str.audio_codec|upper}} to {{xc.audio_codec|upper}}\n
+        \ - Subs: {{xc.subtitle_decision}}\n  - Bitrate: {{data.source.bitrate}}kbps
+        to {{str.bitrate}}kbps\n  {% endif %}\n{% endif %}"
+  mode: queued
+  max: 4
+- id: '1687635241459'
+  alias: 'Notification: New Torrents Completed'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.torrent_activity_complete
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: sensor.torrent_activity_complete
+      state: unavailable
+      alias: Unavailable
+    - condition: state
+      entity_id: sensor.torrent_activity_complete
+      state: unknown
+      alias: Unknown
+    alias: Status is not Unavailable or Unknown
+  - condition: template
+    value_template: '{{ trigger.to_state.state | int > trigger.from_state.state |
+      int }}'
+    alias: Value has increased
+  action:
+  - service: notify.telegram_tom
+    data:
+      title: Torrent Completed
+      message: 'Number of completed torrents on Scylla has changed from {{trigger.from_state.state}}
+        to {{trigger.to_state.state}}
+
+        '
+  mode: single
+- id: '1689561610055'
+  alias: 'Good Night: Timer Set'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.lights_out_timer
+  condition: []
+  action:
+  - service: scene.turn_on
+    target:
+      entity_id: scene.good_night
+    metadata: {}
   mode: single
