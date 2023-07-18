@@ -29,17 +29,15 @@
 ## Network Devices
 ##########################################################
 
-- platform: command_line
-  name: "Plex Ping"
-  command: 'response=$(curl -LIk 192.168.1.202:32400 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
-  device_class: connectivity
-  scan_interval: 60
-  payload_on: 'ON'
-  payload_off: 'OFF'
-
 - platform: ping
   host: !secret shield_ip
   name: Shield Online
+  scan_interval: 3600
+  count: 2
+
+- platform: ping
+  host: !secret printer_ip
+  name: Printer Online
   scan_interval: 3600
   count: 2
 
