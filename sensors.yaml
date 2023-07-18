@@ -17,7 +17,23 @@
     - 'time'
     - 'date'
 
-  
+- platform: derivative
+  source: sensor.data_usage_gb
+  name: Data Usage Per Hour
+  round: 1
+  unit_time: h
+  time_window: "01:00:00"
+
+- platform: min_max
+  unique_id: inside_temp_average
+  name: Inside Temp Average
+  entity_ids:
+    - sensor.ecobee3_temperature
+    - sensor.ecobee_bedroom_temperature
+    - sensor.ecobee_den_temperature
+  type: mean
+
+
 ####################
 #
 # REST SENSORS
@@ -34,63 +50,23 @@
     - Children
   value_template: "{{ now() }}"
 
-# PLEX SERVER: TAUTULLI STREAMS
-- platform: rest
-  resource: !secret tautulli_api_streams
-  name: "Plex Streams"
-# scan every 10 minutes
-  scan_interval: 600
-  json_attributes_path: "$.response.data"
-  json_attributes:
-    - stream_count_direct_play
-    - stream_count_direct_stream
-    - stream_count_transcode
-  value_template: '{{ value_json.response.data.stream_count }}'
-  state_class: measurement
 
-# PLEX SERVER: TAUTULLI LIBRARIES
 - platform: rest
-  resource: !secret tautulli_api_libs
-  name: "Plex Libraries"
-# scan every 24 hours
-  scan_interval: 86400
-  json_attributes_path: "$.response"
+  resource: !secret my_trashservice_url
+  name: "Trash Pickup Data"
+  unique_id: trash_pickup_data
+  icon: mdi:delete
+  scan_interval: 3600
   json_attributes:
-    - data
-  value_template: '{{ value_json.response.result }}'
+    - current
+    - next
+  value_template: '{{ value_json.updated }}'
 
-# TRASH PICKUP SERVICE
-- platform: rest
-  resource: !secret my_trashpickup_url
-  name: "Trash Service"
-# scan every 6 hours
-  scan_interval: 21600
-  json_attributes:
-    - date
-    - desc
-    - type
-    - prox
-    - when
-  value_template: "{{ value_json.desc }}"
-
-# ROUTER-BASED DATA MONITOR
-- platform: rest
-  resource: !secret my_datausage_url
-  name: "Monthly Data Report"
-  scan_interval: 42300
-  json_attributes:
-    - pct_of_month
-    - gb
-    - pct_of_cap
-    - concern
-    - updated
-  value_template: "{{ value_json.pct_of_cap|float }}"
-  unit_of_measurement: "%"
-  state_class: total_increasing
 
 # AIR QUALITY MONITOR sourced from AirVisual
 - platform: rest
-  resource: !secret my_airquality_url
+  resource: !secret my_aqi_url
+  unique_id: airquality_api
   name: "AirVisual Data"
   scan_interval: 3600
   json_attributes_path: "$.data.current.pollution"
@@ -101,9 +77,31 @@
   value_template: '{{ value_json.data.current.pollution.aqius }}'
   device_class: aqi
 
+- platform: rest
+  resource: !secret sunrise_today_url
+  unique_id: sunrise_api_today
+  name: Sunrise Data Today
+  scan_interval: 14400
+  value_template: '{{ value_json.status }}'
+  json_attributes_path: "$.results"
+  json_attributes:
+    - sunrise
+    - sunset
+- platform: rest
+  resource: !secret sunrise_tmrw_url
+  unique_id: sunrise_api_tmrw
+  name: Sunrise Data Tomorrow
+  scan_interval: 14400
+  value_template: '{{ value_json.status }}'
+  json_attributes_path: "$.results"
+  json_attributes:
+    - sunrise
+    - sunset
+
 # WEATHER REPORT sourced from OpenWeatherMap
 - platform: rest
   resource: !secret my_weather_url
+  unique_id: weather_api
   name: Weather Report
   scan_interval: 1800
   json_attributes:
@@ -112,21 +110,5 @@
     - condition
     - condition_icon
   value_template: '{{ value_json.condition }}'
-
-# POLLEN REPORT sourced from tomorrow.io
-- platform: rest
-  resource: !secret my_pollen_url
-  name: Pollen Data
-  scan_interval: 3600
-  json_attributes_path: "$.data.timelines[0].intervals[0].values"
-  json_attributes:
-    - grassIndex
-    - treeIndex
-    - weedIndex
-  value_template: >
-    {% set grass = value_json.data.timelines[0].intervals[0]['values']['grassIndex'] %}
-    {% set trees = value_json.data.timelines[0].intervals[0]['values']['treeIndex'] %}
-    {% set weeds = value_json.data.timelines[0].intervals[0]['values']['weedIndex'] %}
-    {{ max(grass,trees,weeds) }}
 
 
