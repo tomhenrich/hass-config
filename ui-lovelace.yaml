@@ -1,5 +1,5 @@
 views:
-  - theme: Campfire - Dark
+  - theme: Fluent Orange
     title: Home
     path: home
     visible:
@@ -17,7 +17,6 @@ views:
           grid-gap: 10px
     type: panel
     icon: mdi:home-circle-outline
-    badges: []
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout
@@ -36,47 +35,33 @@ views:
         cards:
           - type: vertical-stack
             cards:
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: min-content auto
-                  grid-template-rows: auto
-                cards:
-                  - type: custom:mushroom-title-card
-                    title: >-
-                      {{ now().strftime("%-I:%M") + now().strftime("%p").lower()
-                      }}
-                  - type: custom:mushroom-template-card
-                    entity: sensor.date
-                    primary: '{{ now().strftime("%A") }}'
-                    secondary: '{{ now().strftime("%B %-d") }}'
-                    tap_action:
-                      action: none
-                    fill_container: true
-                    card_mod:
-                      style: |
-                        ha-card {
-                          --ha-card-background: transparent;
-                        }
-                view_layout:
-                  grid-column: span 2
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: 50% 50%
-                  grid-template-rows: auto
+              - type: custom:mushroom-template-card
+                entity: sensor.date
+                primary: '{{ now().strftime("%-I:%M") + now().strftime("%p").lower() }}'
+                secondary: '{{ now().strftime("%A") }}, {{ now().strftime("%B %-d") }}'
+                tap_action:
+                  action: none
+                fill_container: true
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                      padding-bottom: 0 !important;
+                    }
+                    @media (min-width: 600px) {
+                      ha-card {
+                      --card-primary-font-size: 4rem;
+                      --card-secondary-font-size: 1.5rem;
+                      --card-primary-line-height: 1.25;
+                      --card-secondary-line-height: 1.5;
+                      }
+                    }
+              - type: horizontal-stack
                 cards:
                   - type: custom:mushroom-template-card
-                    primary: Inside
-                    secondary: >-
-                      {{ states(config.entity)|int }}{{
-                      state_attr(config.entity, "unit_of_measurement") }}
-                    layout: horizontal
-                    tap_action:
-                      action: none
-                    hold_action:
-                      action: more-info
                     entity: sensor.ecobee3_temperature
+                    primary: Inside
+                    secondary: '{{ states(config.entity)|int }}°'
                     icon: mdi:home-thermometer-outline
                     icon_color: >
                       {% if states("climate.ecobee3") == "heat" %}
@@ -84,105 +69,142 @@ views:
 
                       {% endif %}
                     badge_icon: >-
-                      {{ "mdi:fire" if states("binary_sensor.furnace_running")
-                      == "on" }}
-                    badge_color: var(--rgb-red)
+                      {{ "mdi:fan" if states("binary_sensor.furnace_running") ==
+                      "on" }} 
+                    badge_color: var(--rgb-grey)
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/climate
+                    hold_action:
+                      action: more-info
                     card_mod:
                       style: |
                         ha-card {
+                          --card-secondary-font-size: 1.5rem;
+                          --card-secondary-font-weight: bold;
                           --ha-card-background: transparent;
+                          --card-secondary-line-height: 1;
                         }
+                        @media (min-width: 600px) {
+                          ha-card {
+                          --card-secondary-font-size: 2.5rem;
+                          }
+                        }
+                        {% if states("binary_sensor.furnace_running") == "on" %}
+                        mushroom-badge-icon {
+                          animation: spin 2s linear infinite;
+                        }
+                        @keyframes spin {
+                          from {transform:rotate(0deg);}
+                          to {transform:rotate(360deg);}
+                        }
+                        {% endif %}
                   - type: custom:mushroom-template-card
                     entity: weather.ecobee3
-                    icon: >
-                      {% set temp = state_attr(config.entity, "temperature")|int
-                      %}
-
-                      {% if temp >= 90 or temp <= 32 %} mdi:thermometer-alert
-
-                      {% else %} mdi:thermometer
-
-                      {% endif %}
-                    icon_color: >
-                      {% set temp = state_attr(config.entity, "temperature")|int
-                      %}
-
-                      {% if temp >= 90 %} var(--rgb-red)
-
-                      {% elif temp <= 32 %} var(--rgb-blue)
-
-                      {% endif %}
                     primary: Outside
-                    secondary: >-
-                      {{ state_attr(config.entity, "temperature") }}{{
-                      state_attr(config.entity, "temperature_unit") }}
+                    secondary: '{{ state_attr(config.entity, "temperature")|int }}°'
+                    icon: ''
                     tap_action:
                       action: navigate
                       navigation_path: weather
                     card_mod:
                       style: |
                         ha-card {
+                          --card-secondary-font-size: 1.5rem;
+                          --card-secondary-font-weight: bold;
                           --ha-card-background: transparent;
+                          --card-secondary-line-height: 1;
                         }
-              - type: conditional
-                conditions:
-                  - entity: input_boolean.barn_door_protocol
-                    state: 'on'
-                card:
-                  type: custom:mushroom-chips-card
-                  chips:
-                    - type: entity
-                      entity: input_boolean.barn_door_protocol
-                      content_info: name
-                      name: Barn Door Protocol active
-                      icon_color: var(--rgb-red)
-                      tap_action:
-                        action: none
-                      hold_action:
-                        action: none
-                      double_tap_action:
-                        action: none
-              - type: custom:mushroom-template-card
-                entity: sensor.air_quality
-                primary: Air Quality
-                secondary: >
-                  {% set ts =
-                  state_attr("sensor.airvisual_data","ts")|as_datetime %} {{
-                  states(config.entity) }} as of ~{{ relative_time(ts) }} ago
-                icon: '{{ state_attr(config.entity,"icon") }}'
-                icon_color: |
-                  {% set aqi = states(config.entity) %}
-                  {% if aqi == 'Good' %} var(--rgb-green)
-                  {% elif aqi == 'Moderate' %} #EAB700
-                  {% elif aqi == 'Unhealthy' %} #F4B4B9
-                  {% else %} white
-                  {% endif %}
-                tap_action:
-                  action: none
-                badge_color: >
-                  {% set aqi = states(config.entity) %} {% if aqi == "Hazardous"
-                  %} #931621 {% elif aqi == "Very Unhealthy" %} #46237A {% endif
-                  %}
+                        @media (min-width: 600px) {
+                          ha-card {
+                          --card-secondary-font-size: 2.5rem;
+                          }
+                        }
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: weather
+                    entity: weather.ecobee3
+                    show_conditions: true
+                    show_temperature: false
+                    tap_action:
+                      action: none
+                  - type: template
+                    entity: sensor.todays_high
+                    content: >-
+                      {{states("sensor.todays_high")}}°/{{states("sensor.todays_low")}}°
+                    icon: mdi:swap-vertical-bold
+                    tap_action:
+                      action: none
                 card_mod:
                   style: |
                     ha-card {
-                      --ha-card-background: transparent;
+                      --chip-box-shadow: none;
+                      --chip-background: none;
+                    }
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: template
+                    entity: sensor.air_quality
+                    content: 'Air Quality: {{ states(config.entity) }}'
+                    icon: '{{ state_attr(config.entity,"icon") }}'
+                    icon_color: '{{ state_attr(config.entity, "color") }}'
+                    tap_action:
+                      action: more-info
+                  - type: template
+                    entity: sensor.allergy_index_today
+                    content: >-
+                      Allergy Index:
+                      {{state_attr(config.entity,"rating")|replace("/Medium","/Med")|replace("Medium/","Med/")}}
+                    icon: >-
+                      {% set trend =
+                      state_attr("sensor.allergy_index_forecasted_average",
+                      "trend")|lower %} {% if( trend == 'increasing' ) %}
+                      mdi:trending-up {% elif(trend == 'subsiding') %}
+                      mdi:trending-down {% else %} mdi:circle {% endif %}
+                    icon_color: >-
+                      {% set rating = state_attr(config.entity,'rating')|lower
+                      %}
+
+                      {%
+                          set ratings = {
+                            'low': 'green',
+                            'low/medium': '#EAB700',
+                            'medium': 'yellow',
+                            'medium/high': 'orange',
+                            'high': 'red'
+                          }
+                      %}
+
+                      {{ ratings[rating] }}
+                    tap_action:
+                      action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      --chip-box-shadow: none;
+                      --chip-background: none;
                     }
               - type: custom:mushroom-template-card
                 entity: sensor.trash_pickup
-                primary: |
-                  {{ states(config.entity) }}
-                secondary: >
-                  {% set prox = state_attr(config.entity,'proximity') %} {%
-                  if(prox == 0) %} Today {% elif(prox == 1) %} Tomorrow {% else
-                  %} {{ state_attr(config.entity, 'date') }} {% endif %}
-                icon: '{{ state_attr(config.entity,"icon") }}'
+                primary: '{{ states(config.entity) }}'
+                secondary: '{{ state_attr(config.entity, "date") }}'
+                icon: '{{ state_attr(config.entity, "icon") }}'
                 icon_color: >
                   {% set prox = state_attr(config.entity,'proximity') %} {%
-                  if(prox == 0) %} var(--rgb-blue) {% elif(prox == 1) %} white
-                  {% endif %}
+                  if(prox == 0) %} var(--rgb-info-color) {% elif(prox == 1) %}
+                  var(--rgb-warning-color) {% else %}
+                  var(--primary-background-color) {% endif %}
                 tap_action:
                   action: none
+                hold_action:
+                  action: more-info
+                double_tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.refresh_trash_data
+                  data:
+                    skip_condition: true
                 card_mod:
                   style: |
                     ha-card {
@@ -195,81 +217,31 @@ views:
               - type: custom:layout-card
                 layout_type: custom:grid-layout
                 layout:
-                  grid-template-columns: min-content min-content min-content min-content min-content
+                  grid-template-columns: repeat(2, 50%)
                   mediaquery:
-                    '(max-width: 600px)':
-                      grid-template-columns: repeat(2,50%)
-                cards:
-                  - type: conditional
-                    conditions:
-                      - entity: binary_sensor.chest_freezer
-                        state: 'on'
-                    card:
-                      type: custom:mushroom-template-card
-                      primary: Big Freezer
-                      secondary: Open
-                      icon: '{{ state_attr(config.entity, "icon") }}'
-                      icon_color: red
-                      entity: binary_sensor.chest_freezer
-                      tap_action:
-                        action: none
-                      multiline_secondary: false
-                      style: |
-                        ha-card {
-                          background: transparent;
-                        }
-                  - type: conditional
-                    conditions:
-                      - entity: binary_sensor.chest_freezer_2
-                        state: 'on'
-                    card:
-                      type: custom:mushroom-template-card
-                      primary: Small Freezer
-                      secondary: Open
-                      icon: '{{ state_attr(config.entity, "icon") }}'
-                      icon_color: red
-                      entity: binary_sensor.chest_freezer_2
-                      tap_action:
-                        action: none
-                      multiline_secondary: false
-                      style: |
-                        ha-card {
-                          background: transparent;
-                        }
-              - type: custom:mushroom-chips-card
-                chips:
-                  - type: entity
-                    entity: sensor.date
-                    icon_color: white
-                    name: Lights
-                    content_info: name
-                    tap_action:
-                      action: navigate
-                      navigation_path: /lovelace/lights
-                    hold_action:
-                      action: none
-                    double_tap_action:
-                      action: none
-                    icon: mdi:lightbulb-group-outline
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: repeat(4,25%)
-                  mediaquery:
-                    '(max-width: 600px)':
-                      grid-template-columns: repeat(2,50%)
+                    '(min-width: 600px)':
+                      grid-template-columns: repeat(3,33%)
                 cards:
                   - type: custom:mushroom-light-card
                     entity: light.bar_light
                     name: Bar
+                    secondary_info: none
+                    icon: mdi:lightbulb
                     card_mod:
                       style: |
                         ha-card {
                           border-radius: 14px
                         }
-                  - type: custom:mushroom-light-card
+                  - type: custom:mushroom-template-card
                     entity: light.den_light_2
-                    name: Den Corner
+                    primary: Den Corner
+                    icon: mdi:lightbulb
+                    icon_color: >-
+                      {{ "var(--icon-primary-color)"
+                      if(states(config.entity)=="on") }}
+                    badge_icon: mdi:cog
+                    hold_action:
+                      action: more-info
                     card_mod:
                       style: |
                         ha-card {
@@ -278,6 +250,8 @@ views:
                   - type: custom:mushroom-light-card
                     entity: light.kitchen_light
                     name: Kitchen
+                    secondary_info: none
+                    icon: mdi:lightbulb
                     card_mod:
                       style: |
                         ha-card {
@@ -286,6 +260,8 @@ views:
                   - type: custom:mushroom-light-card
                     entity: light.porch_light
                     name: Porch
+                    secondary_info: none
+                    icon: mdi:lightbulb
                     card_mod:
                       style: |
                         ha-card {
@@ -294,14 +270,39 @@ views:
                   - type: custom:mushroom-light-card
                     entity: light.entryway_light
                     name: Entryway
+                    secondary_info: none
+                    icon: mdi:lightbulb
                     card_mod:
                       style: |
                         ha-card {
                           border-radius: 14px
                         }
-                  - type: custom:mushroom-light-card
+                  - type: custom:mushroom-template-card
                     entity: light.dining_room_light
-                    name: Dining
+                    primary: Dining Room
+                    icon: mdi:lightbulb
+                    icon_color: >-
+                      {{ "var(--icon-primary-color)"
+                      if(states(config.entity)=="on") }}
+                    badge_icon: mdi:cog
+                    hold_action:
+                      action: more-info
+                    card_mod:
+                      style: |
+                        ha-card {
+                          border-radius: 14px
+                        }
+                  - type: custom:mushroom-template-card
+                    entity: light.livingroom_light
+                    primary: Living Room
+                    icon: mdi:lightbulb
+                    icon_color: >-
+                      {{ "var(--icon-primary-color)"
+                      if(states(config.entity)=="on") }}
+                    badge_icon: mdi:cog
+                    hold_action:
+                      action: more-info
+                    badge_color: ''
                     card_mod:
                       style: |
                         ha-card {
@@ -309,178 +310,247 @@ views:
                         }
               - type: custom:mushroom-chips-card
                 chips:
-                  - type: entity
-                    entity: zone.home
-                    icon_color: white
-                    name: Network
-                    content_info: name
-                    icon: mdi:lan-connect
+                  - type: template
+                    entity: binary_sensor.garage_door_sensor
+                    content: >-
+                      Garage: {{
+                      iif(states(config.entity)=="on","Open","Closed") }}
+                    tap_action:
+                      action: none
+                    icon: >-
+                      {{ iif(states(config.entity)=="on", "mdi:garage-open",
+                      "mdi:garage") }}
+                    icon_color: '{% var(--rgb-red) if(is_state(entity, "on")) %}'
+                  - type: template
+                    entity: sensor.plex_libraries
+                    content: '{{state_attr(config.entity, "movies")}} movies on Plex'
+                    icon: mdi:movie
+                    tap_action:
+                      action: none
+                  - type: template
+                    tap_action:
+                      action: call-service
+                      service: switch.toggle
+                      target:
+                        entity_id: switch.den_tablet_outlet_switch_2
+                    icon: >-
+                      {{
+                      iif(states(config.entity)=="on","mdi:battery-charging-60","mdi:battery-60")
+                      }}
+                    entity: switch.den_tablet_outlet_switch_2
+                    content: >-
+                      Tablet {{ iif(states(config.entity)=="on","charging","on
+                      battery") }}
+                    icon_color: |-
+                      {{
+                        iif(states(config.entity)=="on","var(--rgb-info-color)","var(--rgb-warning-color)")
+                      }}
+                  - type: conditional
+                    conditions:
+                      - entity: binary_sensor.chest_freezer
+                        state: 'on'
+                    chip:
+                      type: entity
+                      entity: binary_sensor.chest_freezer
+                      name: Big Freezer Open
+                      content_info: name
+                      icon_color: accent
+                      tap_action:
+                        action: none
+                  - type: conditional
+                    conditions:
+                      - entity: binary_sensor.chest_freezer_2
+                        state: 'on'
+                    chip:
+                      type: entity
+                      entity: binary_sensor.chest_freezer_2
+                      name: Smaller Freezer Open
+                      content_info: name
+                      icon_color: accent
+                      tap_action:
+                        action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      --chip-box-shadow: none;
+                      --chip-background: none;
+                    }
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                cards:
+                  - type: custom:stack-in-card
+                    mode: vertical
+                    cards:
+                      - type: custom:mushroom-template-card
+                        entity: sensor.data_usage_gb
+                        icon: >-
+                          {% if(states('binary_sensor.monthly_data_concern') ==
+                          'on') %}
+                            mdi:alert
+                          {% else %}
+                            mdi:download
+                          {% endif %}
+                        icon_color: >-
+                          {% if(states('binary_sensor.monthly_data_concern') ==
+                          'on') %}
+                            var(--rgb-warning-color)
+                          {% endif %}
+                        primary: Monthly Data Cap
+                        secondary: >-
+                          {{ state_attr(config.entity,"pct_of_cap")|round(0) }}%
+                          used
+                        tap_action:
+                          action: navigate
+                          navigation_path: /lovelace/monthly-data
+                        hold_action:
+                          action: none
+                        card_mod:
+                          style: |
+                            ha-card {
+                              padding-bottom: 0 !important;
+                            }
+                      - type: custom:bar-card
+                        tap_action:
+                          action: none
+                        hold_action:
+                          action: none
+                        card_mod:
+                          style: |
+                            ha-card > div {
+                              padding: .5rem 0 0 0;
+                            }
+                        height: 4px
+                        color: orange
+                        entities:
+                          - entity: sensor.data_usage_gb
+                            attribute: pct_of_cap
+                            name: Data Usage
+                          - entity: sensor.month_gone
+                            name: Month
+                            color: grey
+                            height: 2px
+                        positions:
+                          icon: 'off'
+                          indicator: 'off'
+                          name: 'off'
+                          value: 'off'
+                  - type: custom:mushroom-template-card
+                    entity: binary_sensor.plex_ping
+                    icon: mdi:plex
+                    icon_color: >-
+                      {% if states("binary_sensor.plex_streaming")|bool == true
+                      %}
+                        var(--rgb-info-color)
+                      {% elif states(config.entity) == "on" %}
+                        var(--primary-background-color)
+                      {% else %}
+                        var(--rgb-warning-color)
+                      {% endif %}
+                    primary: Plex
+                    secondary: >-
+                      {% if states("binary_sensor.plex_streaming")|bool == true
+                      %}
+                        Streaming
+                      {% elif states(config.entity) == "on" %}
+                        Online
+                      {% else %}
+                        Offline
+                      {% endif %}
+                    badge_icon: >-
+                      {{ iif(states(config.entity) == "on", "mdi:check-bold",
+                      "mdi:alert") }}
+                    badge_color: '{{ iif(states(config.entity) == "on", "green", "red") }}'
                     tap_action:
                       action: none
                     hold_action:
-                      action: none
-                    double_tap_action:
-                      action: none
-              - type: custom:layout-card
-                layout_type: custom:grid-layout
-                layout:
-                  grid-template-columns: min-content min-content min-content
-                  mediaquery:
-                    '(max-width: 600px)':
-                      grid-template-columns: 100%
-                cards:
-                  - type: custom:mushroom-template-card
-                    entity: binary_sensor.plex_online
-                    primary: Plex
-                    secondary: |-
-                      {% if states(config.entity) == "on" %}
-                        Online
-                      {% elif states(config.entity) == "off" %}
-                        Online
-                      {% else %}
-                        {{ states(config.entity) | title }}
-                      {% endif %}
-                    icon: mdi:plex
-                    icon_color: >-
-                      {% if states(config.entity) == "off" or
-                      states(config.entity) == "unavailable" or
-                      states("sensor.plex_scylla") == "unavailable" %}
-                        var(--rgb-red)
-                      {% elif states("binary_sensor.plex_streaming")|bool ==
-                      true %}
-                        var(--rgb-blue)
-                      {% else %}
-                        white
-                      {% endif %}
-                    badge_icon: |-
-                      {% if states(config.entity) == "on" %}
-                        mdi:thumb-up
-                      {% else %}
-                        mdi:alert
-                      {% endif %}
-                    badge_color: |-
-                      {% if states(config.entity) == "on" %}
-                        var(--rgb-green)
-                      {% elif states(config.entity) == "unavailable" %}
-                        var(--rgb-yellow)
-                      {% else %}
-                        var(--rgb-red)
-                      {% endif %}
-                    fill_container: true
-                    tap_action:
                       action: none
                     card_mod:
                       style: |
                         ha-card {
                           --ha-card-background: transparent;
                         }
-                  - type: custom:mushroom-template-card
-                    entity: sensor.data_usage_gb
-                    primary: Comcast Data Usage
-                    secondary: '{{ state_attr(config.entity,"pct_of_cap") }}%'
-                    icon: mdi:database
-                    tap_action:
-                      action: navigate
-                      navigation_path: /lovelace/monthly-data
-                    picture: >-
-                      {% set color = "ffffff" %}
-                      http://192.168.1.200/tiles/pie.php?val={{
-                      state_attr(config.entity,"pct_of_cap") }}&slice={{ color
-                      }}
-                    fill_container: false
-                    card_mod:
-                      style: |
-                        ha-card {
-                          --ha-card-background: transparent
-                        }
+                layout:
+                  grid-template-columns: repeat(4,max-content)
+                  mediaquery:
+                    '(max-width: 600px)':
+                      grid-template-columns: 100%
+                card_mod:
+                  style: |
+                    ha-card {
+                      align-items: center;
+                    }
             view_layout:
               grid-area: main
-  - theme: Campfire - Dark
-    path: openings
+  - path: openings
     title: Openings
     icon: ''
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
       - user: 03dd7450aa7f4d0e8df8ed730df485b1
-    badges: []
     cards:
-      - type: vertical-stack
-        cards:
-          - type: custom:mushroom-cover-card
-            entity: cover.garage_door
-            show_buttons_control: true
-          - type: custom:mushroom-chips-card
-            chips:
-              - type: entity
-                entity: cover.garage_door
-                content_info: last-changed
-                tap_action:
-                  action: none
-                hold_action:
-                  action: more-info
-              - type: template
-                double_tap_action:
-                  action: none
-                entity: cover.garage_door
-                content: >-
-                  {{
-                  as_timestamp(states.cover.garage_door.last_changed)|timestamp_custom("%B
-                  %-d, %-I:%M %p") }}
-                tap_action:
-                  action: none
-                hold_action:
-                  action: none
       - type: entities
         entities:
           - entity: binary_sensor.front_door
           - entity: binary_sensor.back_door
           - entity: binary_sensor.garage_door_sensor
             name: Garage Door
+          - entity: binary_sensor.exterior_openings
         title: Doors
         show_header_toggle: false
         state_color: true
-  - theme: Campfire - Dark
-    title: Homelab
+    theme: Fluent Orange
+  - title: Homelab
     path: homelab
     icon: mdi:nas
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
     type: custom:vertical-layout
-    badges: []
     cards:
       - type: vertical-stack
         cards:
-          - type: custom:mushroom-title-card
-            title: ''
-            subtitle: Plex Status
-            title_tap_action:
+          - type: custom:mushroom-template-card
+            entity: binary_sensor.plex_ping
+            primary: Plex Status
+            secondary: |-
+              {% if states(config.entity) == "on" %}
+                Online
+              {% elif states(config.entity) == "off" %}
+                Online
+              {% else %}
+                {{ states(config.entity) | title }}
+              {% endif %}
+            icon: mdi:plex
+            icon_color: >-
+              {% if states(config.entity) == "off" or states(config.entity) ==
+              "unavailable" or states("sensor.plex_scylla") == "unavailable" %}
+                var(--rgb-red)
+              {% else %}
+                var(--rgb-green)
+              {% endif %}
+            fill_container: false
+            tap_action:
               action: none
+            card_mod:
+              style: |
+                ha-card {
+                  --ha-card-background: transparent;
+                }
           - type: custom:mushroom-chips-card
             chips:
               - type: template
-                entity: binary_sensor.plex_online
-                icon: mdi:plex
-                content: '{{ iif(states(config.entity)=="on","Online","Offline") }}'
-                icon_color: '{{ iif(states(config.entity)=="on","green","red") }}'
+                entity: binary_sensor.plex_streaming
+                content: >-
+                  {% set streams = state_attr(config.entity,'local')|int +
+                  state_attr(config.entity,'remote')|int %}{{streams}} stream{{
+                  iif(streams|int != 1, "s","") }}
                 tap_action:
                   action: none
-              - type: conditional
-                conditions:
-                  - entity: sensor.plex_scylla
-                    state_not: '0'
-                chip:
-                  type: template
-                  entity: sensor.plex_scylla
-                  content: >-
-                    {{ states(config.entity) }} stream{{
-                    iif(states(config.entity)|int > 1, "s","") }}
-                  tap_action:
-                    action: none
           - type: custom:uptime-card
-            entity: binary_sensor.plex_online
-            icon: mdi:server
+            entity: binary_sensor.plex_ping
             title_template: Uptime
-            hours_to_show: 48
+            duration:
+              quantity: 48
+              unit: hour
             icon_adaptive_color: true
             ok: 'on'
             ko: 'off'
@@ -499,87 +569,91 @@ views:
               half: '#eab700'
             tap_action:
               action: none
+          - type: horizontal-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.charybdis_ping
+                    state: 'on'
+                card:
+                  type: custom:apexcharts-card
+                  graph_span: 12h
+                  update_interval: 2min
+                  apex_config:
+                    chart:
+                      height: 100px
+                    grid:
+                      show: false
+                    xaxis:
+                      axisBorder:
+                        show: false
+                      axisTicks:
+                        show: false
+                  yaxis:
+                    - decimals: 0
+                      min: 0
+                      max: 100
+                      apex_config:
+                        tickAmount: 4
+                  header:
+                    show: true
+                    show_states: true
+                  series:
+                    - entity: sensor.charybdis_cpu_load
+                      group_by:
+                        func: avg
+                        duration: 5min
+                      stroke_width: 2
+                      name: Charybdis CPU
+                      type: line
+                      show:
+                        legend_value: false
+                        in_header: true
+                      fill_raw: last
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.charybdis_ping
+                    state_not: 'on'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Charybdis Offline
+                  secondary: ''
+                  icon: mdi:lan-disconnect
+                  entity: binary_sensor.charybdis_ping
+                  icon_color: red
       - type: vertical-stack
         cards:
           - type: custom:mushroom-title-card
             title: ''
             subtitle: NAS Status
-          - type: custom:mushroom-chips-card
-            chips:
-              - type: template
-                entity: binary_sensor.ds420j_online
-                icon: mdi:nas
-                content: '{{ iif(states(config.entity)=="on","Online","Offline") }}'
-                icon_color: '{{ iif(states(config.entity)=="on","green","red") }}'
-              - type: template
-                entity: binary_sensor.ds420j_update_available
-                icon: >-
-                  {{
-                  iif(states(config.entity)=="on","mdi:package-up","mdi:package-check")
-                  }}
-                content: >-
-                  {{ iif(states(config.entity)=="on","Update Available","Up to
-                  date") }}
-                icon_color: '{{ iif(states(config.entity)=="on","orange","green") }}'
-          - square: false
-            columns: 3
-            type: grid
-            cards:
-              - type: custom:mushroom-template-card
-                primary: Last Boot
-                entity: sensor.ds420j_last_boot
-                secondary: >-
-                  {{ as_timestamp(states(config.entity)) |
-                  timestamp_custom("%Y-%m-%-d %-I:%M %p") }}
-                icon_color: grey
-                icon_type: none
-              - type: custom:mushroom-entity-card
-                name: CPU
-                entity: sensor.ds420j_cpu_load_total
-              - type: custom:mushroom-entity-card
-                name: Temp
-                entity: sensor.ds420j_temperature
-          - type: custom:mushroom-chips-card
-            chips:
-              - type: template
-                entity: sensor.ds420j_drive_1_status
-                icon: '{{ state_attr(config.entity,"icon") }}'
-                content: Drive 1 {{ states(config.entity) }}
-                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
-              - type: template
-                entity: sensor.ds420j_drive_2_status
-                icon: '{{ state_attr(config.entity,"icon") }}'
-                content: Drive 2 {{ states(config.entity) }}
-                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
-              - type: template
-                entity: sensor.ds420j_drive_3_status
-                icon: '{{ state_attr(config.entity,"icon") }}'
-                content: Drive 3 {{ states(config.entity) }}
-                icon_color: '{{ iif(states(config.entity)=="normal","green","red") }}'
-          - type: custom:mini-graph-card
-            entities:
-              - entity: sensor.ds420j_drive_1_temperature
-                name: Drive 1
-              - entity: sensor.ds420j_drive_2_temperature
-                name: Drive 2
-              - entity: sensor.ds420j_drive_3_temperature
-                name: Drive 3
-            name: Drive Temps
-            smoothing: false
-            hours_to_show: 48
-            points_per_hour: 2
-            show:
-              header: false
-              name: true
-              icon: false
-              state: false
-            tap_action:
+            title_tap_action:
               action: none
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: template
+                entity: sensor.ds420j_cpu_load_total
+                icon: mdi:chip
+                content: 'CPU: {{ states(config.entity) }}%'
+                icon_color: ''
+                tap_action:
+                  action: more-info
+              - type: template
+                entity: sensor.ds420j_temperature
+                icon: mdi:thermometer
+                content: >-
+                  Temp: {{ states(config.entity) }}{{ state_attr(config.entity,
+                  "unit_of_measurement") }}
+                tap_action:
+                  action: more-info
           - type: custom:uptime-card
             entity: binary_sensor.ds420j_online
             icon: mdi:server
             title_template: Uptime
-            hours_to_show: 48
+            duration:
+              quantity: 48
+              unit: hour
             icon_adaptive_color: true
             ok: 'on'
             ko: 'off'
@@ -598,80 +672,53 @@ views:
               half: '#eab700'
             tap_action:
               action: more-info
-          - type: custom:mushroom-template-card
-            entity: sensor.ds420j_volume_1_total_size
-            primary: Usage
-            secondary: >-
-              {{ states("sensor.ds420j_volume_1_used_space")|round(2) }} of {{
-              states("sensor.ds420j_volume_1_total_size")|round(2) }} {{
-              state_attr("sensor.ds420j_volume_1_total_size",
-              "unit_of_measurement") }} ({{
-              states("sensor.ds420j_volume_1_volume_used") }}{{
-              state_attr("sensor.ds420j_volume_1_volume_used",
-              "unit_of_measurement") }})
-            icon_type: none
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: input_boolean.nas_shutdown
+                primary: Initiate NAS Shutdown
+                icon_color: '{{ iif(states(config.entity) == "on","red", "white") }}'
+                secondary: >-
+                  {{ iif(states(config.entity) == "on", "Tap to disable",
+                  "Long-press to enable") }} shutdown switch
+                tap_action:
+                  action: call-service
+                  service: input_boolean.turn_off
+                  target:
+                    entity_id: input_boolean.nas_shutdown
+                hold_action:
+                  action: toggle
+                icon: '{{ state_attr(config.entity, "icon") }}'
+                badge_icon: '{{ mdi:alert if(states(config.entity) == "on") }}'
+                badge_color: red
+                double_tap_action:
+                  action: none
+              - type: conditional
+                conditions:
+                  - entity: input_boolean.nas_shutdown
+                    state: 'on'
+                card:
+                  type: custom:mushroom-entity-card
+                  name: Hold to confirm
+                  secondary_info: none
+                  icon_color: red
+                  tap_action:
+                    action: none
+                  hold_action:
+                    action: call-service
+                    service: input_button.press
+                    target:
+                      entity_id: input_button.nas_shutdown
+                  entity: button.ds420j_shutdown
+                  double_tap_action:
+                    action: none
+                  icon: mdi:power-standby
           - type: entities
             entities:
-              - entity: input_boolean.nas_shutdown
-          - type: conditional
-            conditions:
-              - entity: input_boolean.nas_shutdown
-                state: 'on'
-            card:
-              type: entities
-              entities:
-                - entity: button.ds420j_shutdown
-                  name: 'Confirm: Shut down NAS'
-      - type: vertical-stack
-        cards:
-          - type: custom:mushroom-title-card
-            title: ''
-            subtitle: Scylla Status
-          - type: horizontal-stack
-            cards:
-              - type: vertical-stack
-                cards:
-                  - type: custom:mini-graph-card
-                    entities:
-                      - sensor.scylla_cpu_load
-                    name: CPU Load
-                    show:
-                      header: false
-                      name: true
-                      icon: false
-              - type: vertical-stack
-                cards:
-                  - type: custom:mini-graph-card
-                    entities:
-                      - sensor.scylla_cpu_temp
-                    name: CPU Temp
-                    show:
-                      header: false
-                      name: true
-                      icon: false
-          - type: custom:uptime-card
-            entity: binary_sensor.scylla_online
-            icon: mdi:server
-            title_template: Uptime
-            hours_to_show: 48
-            icon_adaptive_color: true
-            ok: 'on'
-            ko: 'off'
-            alias:
-              ok: Up
-              ko: Down
-            show:
-              icon: false
-              status: false
-            bar:
-              amount: 36
-              height: 10
-            color:
-              ok: green
-              ko: red
-              half: '#eab700'
-            tap_action:
-              action: more-info
+              - entity: sensor.ds420j_volume_1_total_size
+              - entity: sensor.ds420j_volume_1_used_space
+              - entity: sensor.ds420j_volume_1_volume_used
+            show_header_toggle: false
       - type: vertical-stack
         cards:
           - type: custom:mushroom-title-card
@@ -692,7 +739,9 @@ views:
             entity: sensor.ups_status
             icon: mdi:server
             title_template: Uptime
-            hours_to_show: 48
+            duration:
+              quantity: 48
+              unit: hour
             icon_adaptive_color: true
             ok: Online
             ko: 'off'
@@ -711,339 +760,786 @@ views:
               half: '#eab700'
             tap_action:
               action: more-info
-          - type: custom:apexcharts-card
-            graph_span: 48h
-            update_interval: 30min
-            apex_config:
-              chart:
-                height: 200px
-              grid:
-                show: false
-              xaxis:
-                axisBorder:
-                  show: false
-                axisTicks:
-                  show: false
-            header:
-              show: true
-              show_states: true
-              title: Runtime (Minutes)
-            series:
-              - entity: sensor.ups_battery_runtime
-                transform: return x / 60;
-                group_by:
-                  func: avg
-                  duration: 30min
-                opacity: 1
-                stroke_width: 2
-                name: Runtime
-                type: line
-                show:
-                  legend_value: false
-                  in_header: false
-                fill_raw: last
-                yaxis_id: Minutes
-            yaxis:
-              - id: Minutes
-                show: true
-                decimals: 0
-                opposite: true
-                min: ~30
-                max: ~90
-  - theme: Campfire - Dark
-    path: lights
+    theme: Fluent Orange
+  - path: lights
     title: Lights
-    type: sidebar
-    badges: []
+    type: panel
     cards:
-      - type: grid
-        cards:
-          - type: custom:mushroom-entity-card
-            entity: light.bar_light
-            icon_color: orange
-            layout: horizontal
-            secondary_info: none
-            tap_action:
-              action: toggle
-          - type: custom:mushroom-entity-card
-            entity: light.porch_light
-            icon_color: orange
-            layout: horizontal
-            secondary_info: none
-            name: Porch
-            tap_action:
-              action: toggle
-          - type: custom:mushroom-entity-card
-            entity: light.kitchen_light
-            layout: horizontal
-            secondary_info: none
-            name: Kitchen
-            tap_action:
-              action: toggle
-            icon_color: orange
-          - type: custom:mushroom-entity-card
-            entity: light.entryway_light
-            secondary_info: none
-            layout: horizontal
-            icon_color: orange
-            name: Entryway
-            tap_action:
-              action: toggle
-        square: false
-        columns: 3
-      - square: false
-        columns: 2
-        type: grid
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 30% auto
+          grid-template-rows: auto
+          grid-template-areas: |
+            "sidebar main"
+          grid-gap: 0
+          mediaquery:
+            '(max-width: 600px)':
+              grid-template-columns: 100%
+              grid-template-areas: |
+                "sidebar"
+                "main"
         cards:
           - type: vertical-stack
             cards:
-              - type: custom:mushroom-light-card
-                entity: light.den_lights
-                name: Den
-                layout: horizontal
-                secondary_info: none
-                show_brightness_control: true
-                collapsible_controls: true
+              - type: custom:mushroom-template-card
+                icon: mdi:timer
+                entity: automation.porch_light_on_timer
+                icon_color: '{{ "var(--rgb-info)" if( states(config.entity)=="on" ) }}'
+                primary: Porch Light Timer
+                secondary: '{{ states(config.entity)|title }}'
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 14px
+                    }
+                badge_icon: ''
+              - type: custom:mushroom-template-card
+                icon: mdi:lightbulb-night-outline
+                entity: automation.living_room_nightlight
+                icon_color: '{{ "var(--rgb-info)" if( states(config.entity)=="on" ) }}'
+                primary: Living Room Night Light
+                secondary: '{{ states(config.entity)|title }}'
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 14px
+                    }
+              - type: custom:mushroom-template-card
+                entity: automation.living_room_christmas_tree_timer
+                icon: mdi:pine-tree
+                badge_icon: mdi:cog
+                primary: Christmas Tree Timer
+                secondary: '{{ states(config.entity)|title }}'
                 tap_action:
                   action: toggle
                 hold_action:
-                  action: more-info
-                double_tap_action:
                   action: none
-              - type: custom:mushroom-chips-card
-                chips:
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Low
-                    content_info: name
-                    icon: mdi:lightbulb-on-30
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 30
-                        entity_id: light.den_lights
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Med
-                    content_info: name
-                    icon: mdi:lightbulb-on-60
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 60
-                        entity_id: light.den_lights
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: High
-                    content_info: name
-                    icon: mdi:lightbulb-on
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 100
-                        entity_id: light.den_lights
+                icon_color: '{{ "var(--rgb-info)" if( states(config.entity)=="on" ) }}'
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 14px
+                    }
+              - type: custom:mushroom-template-card
+                icon: mdi:string-lights
+                badge_icon: mdi:cog
+                primary: Outside Christmas Lights Timer
+                secondary: '{{ states(config.entity)|title }}'
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: none
+                icon_color: '{{ "var(--rgb-info)" if( states(config.entity)=="on" ) }}'
+                entity: automation.christmas_lights_timer
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 14px
+                    }
+              - type: custom:mushroom-template-card
+                icon: mdi:home-export-outline
+                badge_icon: ''
+                primary: Vacation Mode
+                secondary: '{{ states(config.entity)|title }}'
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: none
+                icon_color: '{{ "var(--rgb-info)" if( states(config.entity)=="on" ) }}'
+                entity: input_boolean.vacation_mode
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 14px
+                    }
           - type: vertical-stack
             cards:
-              - type: custom:mushroom-light-card
-                entity: light.dining_room_light
-                name: Dining Room
-                layout: horizontal
-                secondary_info: none
-                show_brightness_control: true
-                collapsible_controls: true
-                tap_action:
-                  action: toggle
-                hold_action:
-                  action: more-info
-                double_tap_action:
-                  action: none
-              - type: custom:mushroom-chips-card
-                chips:
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Low
-                    content_info: name
-                    icon: mdi:lightbulb-on-30
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 30
-                        entity_id: light.dining_room_light
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Med
-                    content_info: name
-                    icon: mdi:lightbulb-on-60
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 60
-                        entity_id: light.dining_room_light
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: High
-                    content_info: name
-                    icon: mdi:lightbulb-on
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 100
-                        entity_id: light.dining_room_light
-          - type: vertical-stack
-            cards:
-              - type: custom:mushroom-light-card
-                entity: light.livingroom_light
-                name: Living Room
-                layout: horizontal
-                secondary_info: none
-                show_brightness_control: true
-                collapsible_controls: true
-                tap_action:
-                  action: toggle
-                hold_action:
-                  action: more-info
-                double_tap_action:
-                  action: none
-              - type: custom:mushroom-chips-card
-                chips:
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Low
-                    content_info: name
-                    icon: mdi:lightbulb-on-30
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 30
-                        entity_id: light.livingroom_light
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: Med
-                    content_info: name
-                    icon: mdi:lightbulb-on-60
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 60
-                        entity_id: light.livingroom_light
-                  - type: entity
-                    entity: zone.home
-                    icon_color: disabled
-                    name: High
-                    content_info: name
-                    icon: mdi:lightbulb-on
-                    tap_action:
-                      action: call-service
-                      service: light.turn_on
-                      data:
-                        brightness_pct: 100
-                        entity_id: light.livingroom_light
-      - type: vertical-stack
-        cards:
-          - type: custom:mushroom-title-card
-            title: Options
-          - type: custom:mushroom-entity-card
-            entity: automation.living_room_nightlight
-            icon: mdi:lightbulb-night-outline
-            secondary_info: none
-            tap_action:
-              action: toggle
-            hold_action:
-              action: none
-          - type: custom:mushroom-entity-card
-            entity: automation.porch_light_on_timer
-            name: Porch Light Timer
-            fill_container: false
-            icon: mdi:lightbulb-night-outline
-            tap_action:
-              action: toggle
-            hold_action:
-              action: none
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: switch.monoprice_1
-            name: Christmas Tree
-            icon_color: green
-            hold_action:
-              action: none
-            double_tap_action:
-              action: none
-            tap_action:
-              action: toggle
-          - type: custom:mushroom-entity-card
-            entity: automation.living_room_christmas_tree_timer
-            name: Christmas Tree Timer
-            icon: mdi:pine-tree
-            secondary_info: none
-            tap_action:
-              action: toggle
-            hold_action:
-              action: none
-            icon_color: light-green
-        view_layout:
-          position: sidebar
-      - type: vertical-stack
-        cards:
-          - type: conditional
-            conditions:
-              - entity: automation.living_room_christmas_tree_timer
-                state: 'on'
-            card:
-              type: vertical-stack
-              cards:
-                - type: horizontal-stack
+              - type: custom:auto-entities
+                card:
+                  type: custom:layout-card
+                  layout_type: custom:grid-layout
+                  layout:
+                    grid-template-columns: repeat(3, 33.333%)
+                    grid-template-rows: auto
+                    grid-gap: 0
+                    mediaquery:
+                      '(max-width: 600px)':
+                        grid-template-columns: 100%
+                card_param: cards
+                filter:
+                  include:
+                    - group: light.controllable_lights_on_off
+                      options:
+                        type: custom:mushroom-light-card
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-radius: 14px
+                            }
+                    - entity_id: switch.monoprice_1
+                      options:
+                        type: custom:mushroom-light-card
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-radius: 14px
+                            }
+                  exclude: []
+                show_empty: true
+              - type: custom:auto-entities
+                card:
+                  type: custom:layout-card
+                  layout_type: custom:grid-layout
+                  layout:
+                    grid-template-columns: repeat(3,33.333%)
+                    grid-template-rows: auto
+                    grid-gap: 0
+                    mediaquery:
+                      '(max-width: 600px)':
+                        grid-template-columns: 100%
+                card_param: cards
+                filter:
+                  include:
+                    - group: light.controllable_lights_dimmable
+                      options:
+                        type: custom:mushroom-template-card
+                        badge_icon: mdi:cog
+                        icon: mdi:lightbulb
+                        icon_color: '{{ "var(--rgb-orange)" if( states(entity) == "on" ) }}'
+                        primary: '{{state_attr(entity,"friendly_name")}}'
+                        secondary: '{{states(entity)|title}}'
+                        hold_action:
+                          action: more-info
+                        card_mod:
+                          style: |
+                            ha-card {
+                              border-radius: 14px
+                            }
+                  exclude:
+                    - entity_id: light.den_light_1
+                show_empty: true
+              - type: conditional
+                conditions:
+                  - entity: automation.living_room_christmas_tree_timer
+                    state: 'on'
+                card:
+                  type: custom:layout-card
+                  layout_type: custom:grid-layout
+                  layout:
+                    grid-template-columns: 50% 50%
+                    grid-template-rows: auto
+                  mediaquery:
+                    '(max-width: 600px)':
+                      grid-template-columns: 100%
                   cards:
-                    - type: custom:mushroom-entity-card
+                    - type: custom:time-picker-card
                       entity: input_datetime.time_christmas_tree_on
-                      name: Tree On
-                      icon_color: light-green
-                    - type: custom:mushroom-entity-card
+                      hour_mode: 12
+                      layout:
+                        name: header
+                        align_controls: center
+                        thin: true
+                        embedded: false
+                      hide:
+                        icon: true
+                        seconds: true
+                      name: 'Tree On At:'
+                      minute_step: 15
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --tpc-elements-background-color: orange !important;
+                            --tpc-text-color: black !important;
+                            --tpc-accent-color: orange !important;
+                            border-radius: 14px
+                          }
+                    - type: custom:time-picker-card
                       entity: input_datetime.time_christmas_tree_off
-                      name: Tree Off
-                      icon_color: red
-        view_layout:
-          position: sidebar
-      - type: vertical-stack
+                      hour_mode: 12
+                      layout:
+                        name: header
+                        align_controls: center
+                        thin: true
+                        embedded: false
+                      hide:
+                        icon: true
+                        seconds: true
+                      name: 'Tree Off At:'
+                      minute_step: 15
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --tpc-elements-background-color: orange !important;
+                            --tpc-text-color: black !important;
+                            --tpc-accent-color: orange !important;
+                            border-radius: 14px
+                          }
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: automation.christmas_lights_timer
+                    state: 'on'
+                card:
+                  type: custom:layout-card
+                  layout_type: custom:grid-layout
+                  layout:
+                    grid-template-columns: 50% 50%
+                    grid-template-rows: auto
+                  mediaquery:
+                    '(max-width: 600px)':
+                      grid-template-columns: 100%
+                  cards:
+                    - type: custom:time-picker-card
+                      hour_mode: 12
+                      layout:
+                        name: header
+                        align_controls: center
+                        thin: true
+                        embedded: false
+                      hide:
+                        icon: true
+                        seconds: true
+                      name: 'Griswold Lights On At:'
+                      minute_step: 15
+                      entity: input_datetime.christmas_lights_on
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --tpc-elements-background-color: orange !important;
+                            --tpc-text-color: black !important;
+                            --tpc-accent-color: orange !important;
+                            border-radius: 14px
+                          }
+                    - type: custom:time-picker-card
+                      hour_mode: 12
+                      layout:
+                        name: header
+                        align_controls: center
+                        thin: true
+                        embedded: false
+                      hide:
+                        icon: true
+                        seconds: true
+                      minute_step: 15
+                      entity: input_datetime.christmas_lights_off
+                      name: 'Griswold Lights Off At:'
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --tpc-elements-background-color: orange !important;
+                            --tpc-text-color: black !important;
+                            --tpc-accent-color: orange !important;
+                            border-radius: 14px
+                          }
+            view_layout:
+              grid-area: main
+    theme: Fluent Orange
+  - title: Climate
+    path: climate
+    icon: ''
+    visible:
+      - user: 1adcbfbd5637444bacb8239bc794bb4a
+      - user: 03dd7450aa7f4d0e8df8ed730df485b1
+      - user: 25121d6fff8247f5b3c8b55198ff4705
+    type: panel
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 35% auto
+          grid-template-rows: auto
+          grid-template-areas: |
+            "sidebar main"
+          grid-gap: 0
+          mediaquery:
+            '(max-width: 600px)':
+              grid-template-columns: 100%
+              grid-template-areas: |
+                "sidebar"
+                "main"
         cards:
-          - type: custom:mushroom-entity-card
-            entity: automation.good_night_timer_set
-            name: Good Night Timer
-            icon: mdi:sleep
-            tap_action:
-              action: toggle
-          - type: conditional
-            conditions:
-              - entity: automation.good_night_timer_set
-                state: 'on'
-            card:
-              type: entity
-              entity: timer.lights_out_timer
-              state_color: true
-              attribute: duration
-              name: Lights out in…
-  - theme: Campfire - Dark
-    path: batteries
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-title-card
+                title: Thermostat Controls
+                card_mod:
+                  style: |
+                    ha-card {
+                      --title-font-size: 2rem;
+                      --title-font-weight: bold;
+                    }
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-template-card
+                    primary: Current Status
+                    secondary: >
+                      {% if( states(entity) == "heat" ) %} Heat On {% else %} {{
+                      states("climate.ecobee3")|title }} {% endif %}
+                    icon: >
+                      {% if( states(entity) == "heat" ) %} mdi:fire {% else %}
+                      mdi:fire-off {% endif %}
+                    icon_color: >
+                      {% if( states(entity) == "heat" ) %} var(--rgb-red) {%
+                      endif %}
+                    entity: climate.ecobee3
+                    tap_action:
+                      action: none
+                    badge_icon: |-
+                      {% if( state_attr(entity, "hvac_action") !== "idle" ) %} 
+                      mdi:fan
+                      {% endif %}
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent;
+                          --card-secondary-font-size: 1.25rem;
+                        }
+                  - type: custom:mushroom-chips-card
+                    chips:
+                      - type: conditional
+                        conditions:
+                          - condition: state
+                            entity: climate.ecobee3
+                            state: heat
+                        chip:
+                          type: template
+                          icon: mdi:fan
+                          icon_color: |-
+                            {% if(states(config.entity) == 'on') %}
+                            red
+                            {% else %}
+                            var(--rgb-disabled)
+                            {% endif %}
+                          entity: binary_sensor.furnace_running
+                          content: >-
+                            {% if(states(config.entity) == 'on') %} Running {%
+                            else %} Idle {% endif %}
+              - type: custom:mushroom-template-card
+                primary: Current Temp
+                secondary: '{{ state_attr(entity,"current_temperature")|round(0) }}°'
+                icon: mdi:thermometer
+                entity: climate.ecobee3
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                      --card-secondary-font-size: 1.25rem;
+                    }
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.ecobee3
+                    state: heat
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Target
+                  secondary: '{{ state_attr(entity,"temperature")|round(0) }}°'
+                  icon: mdi:target
+                  entity: climate.ecobee3
+                  tap_action:
+                    action: none
+                  card_mod:
+                    style: |
+                      ha-card {
+                        --ha-card-background: transparent;
+                        --card-secondary-font-size: 1.25rem;
+                      }
+            view_layout:
+              grid-area: sidebar
+          - type: vertical-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.ecobee3
+                    state: 'off'
+                card:
+                  type: custom:mushroom-template-card
+                  primary: Thermostat
+                  secondary: Turn On
+                  icon: mdi:power
+                  entity: climate.ecobee3
+                  icon_color: var(--rgb-blue)
+                  tap_action:
+                    action: call-service
+                    service: climate.set_hvac_mode
+                    target:
+                      device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+                    data:
+                      hvac_mode: heat
+                  card_mod:
+                    style: |
+                      ha-card {
+                        --card-secondary-font-size: 1.25rem;
+                      }
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.ecobee3
+                    state: heat
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: custom:mushroom-template-card
+                      primary: Thermostat
+                      secondary: Turn Off
+                      icon: mdi:power
+                      entity: climate.ecobee3
+                      icon_color: var(--rgb-red)
+                      tap_action:
+                        action: call-service
+                        service: climate.set_hvac_mode
+                        target:
+                          device_id: 3a4702e5f54b52ded08ab1b7002dcab0
+                        data:
+                          hvac_mode: 'off'
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --card-secondary-font-size: 1.25rem;
+                          }
+                    - type: custom:mushroom-climate-card
+                      entity: climate.ecobee3
+                      show_temperature_control: true
+                      secondary_info: none
+                      fill_container: false
+                      primary_info: name
+                      icon: 'null'
+                      icon_type: none
+                      name: 'Set Temperature To:'
+                      tap_action:
+                        action: none
+                      hold_action:
+                        action: none
+                    - type: custom:mushroom-chips-card
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --chip-box-shadow: none;
+                            --chip-background: none;
+                          }
+                      chips:
+                        - type: template
+                          tap_action:
+                            action: none
+                          entity: climate.ecobee3
+                          content: 'Current Mode:'
+                        - type: template
+                          tap_action:
+                            action: none
+                          entity: climate.ecobee3
+                          icon: mdi:home
+                          icon_color: >
+                            {% if( is_state_attr(config.entity, 'climate_mode',
+                            'Home') ) %}
+                              var(--rgb-blue)
+                            {% else %}
+                              var(--rgb-disabled)
+                            {% endif %}
+                          content: Home
+                        - type: template
+                          tap_action:
+                            action: none
+                          entity: climate.ecobee3
+                          icon: mdi:home-export-outline
+                          icon_color: >
+                            {% if( is_state_attr(config.entity, 'climate_mode',
+                            'Away') ) %}
+                              var(--rgb-blue)
+                            {% else %}
+                              var(--rgb-disabled)
+                            {% endif %}
+                          content: Away
+                        - type: template
+                          tap_action:
+                            action: none
+                          entity: climate.ecobee3
+                          icon: mdi:sleep
+                          icon_color: >
+                            {% if( is_state_attr(config.entity, 'climate_mode',
+                            'Sleep') ) %}
+                              var(--rgb-blue)
+                            {% else %}
+                              var(--rgb-disabled)
+                            {% endif %}
+                          content: Sleep
+                        - type: template
+                          tap_action:
+                            action: none
+                          entity: climate.ecobee3
+                          icon: mdi:beach
+                          icon_color: >
+                            {% if( is_state_attr(config.entity, 'climate_mode',
+                            'Vacation') ) %}
+                              var(--rgb-blue)
+                            {% else %}
+                              var(--rgb-disabled)
+                            {% endif %}
+                          content: Vacation
+            view_layout:
+              grid-area: main
+    theme: Fluent Orange
+  - path: monthly-data
+    title: Monthly Data
+    subview: true
+    type: panel
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 25% 75%
+          grid-template-rows: auto
+          grid-template-areas: |
+            "sidebar main"
+          grid-gap: 0
+          mediaquery:
+            '(max-width: 600px)':
+              grid-template-columns: 100%
+              grid-template-areas: |
+                "sidebar"
+                "main"
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: null
+                primary: Monthly Data Cap
+                secondary: 1200 GB
+                icon: mdi:information
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.data_usage_gb
+                secondary: used this month
+                primary: >-
+                  {{states(config.entity)|round(1)}} {{
+                  state_attr(config.entity, 'unit_of_measurement') }}
+                icon: mdi:cloud
+                icon_color: var(--rgb-info-color)
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                      --card-primary-font-size: 2rem;
+                      --card-primary-line-height: 1;
+                    }
+              - type: custom:stack-in-card
+                mode: vertical
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                    }
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: sensor.data_usage_gb
+                    primary: '{{ state_attr(config.entity,"pct_of_cap")|round(1) }}%'
+                    secondary: of available data used
+                    icon: mdi:percent
+                    icon_color: var(--rgb-info-color)
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent;
+                          --card-primary-font-size: 2rem;
+                          --card-primary-line-height: 1;
+                        }
+                  - type: custom:bar-card
+                    height: 12px
+                    color: var(--info-color)
+                    entities:
+                      - entity: sensor.data_usage_gb
+                        attribute: pct_of_cap
+                        name: Data Usage
+                    positions:
+                      icon: 'off'
+                      indicator: 'off'
+                      name: 'off'
+                      value: 'off'
+              - type: custom:stack-in-card
+                mode: vertical
+                card_mod:
+                  style: |
+                    ha-card {
+                      --ha-card-background: transparent;
+                    }
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: sensor.month_gone
+                    primary: '{{ states(config.entity)|round(1) }}%'
+                    secondary: into the month
+                    name: Into this month
+                    icon: mdi:calendar-arrow-right
+                    icon_color: white
+                    card_mod:
+                      style: |
+                        ha-card {
+                          --ha-card-background: transparent;
+                          --card-primary-font-size: 2rem;
+                          --card-primary-line-height: 1;
+                        }
+                  - type: custom:bar-card
+                    height: 12px
+                    color: white
+                    entities:
+                      - entity: sensor.month_gone
+                        name: Month
+                    positions:
+                      icon: 'off'
+                      indicator: 'off'
+                      name: 'off'
+                      value: 'off'
+            view_layout:
+              grid-area: sidebar
+          - type: vertical-stack
+            view_layout:
+              grid-area: main
+            cards:
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: 50% 50%
+                  mediaquery:
+                    '(max-width: 600px)':
+                      grid-template-columns: 100%
+                cards:
+                  - type: custom:apexcharts-card
+                    header:
+                      show: true
+                      title: Hourly Data Usage
+                    yaxis:
+                      - id: delta
+                        decimals: 1
+                        opposite: true
+                        min: 0
+                      - id: day
+                        show: false
+                        min: 0
+                        max: 1
+                        decimals: 0
+                        apex_config:
+                          tickAmount: 1
+                          labels:
+                            formatter: |
+                              EVAL:function(value) {
+                                if (value == 1) return "ON";
+                                return "OFF";
+                              }
+                    series:
+                      - entity: sensor.data_usage_per_hour
+                        name: Per Hour
+                        extend_to: now
+                        type: column
+                        color: var(--info-color)
+                        yaxis_id: delta
+                        show:
+                          legend_value: false
+                        group_by:
+                          duration: 1h
+                      - entity: input_boolean.day_cycle
+                        transform: 'return x == "on" ? 1 : 0;'
+                        color: '#666'
+                        group_by:
+                          duration: 1d
+                        opacity: 0.5
+                        stroke_width: 0
+                        name: Day
+                        type: area
+                        show:
+                          legend_value: false
+                          in_header: false
+                        fill_raw: last
+                        curve: stepline
+                        yaxis_id: day
+                    graph_span: 5d
+                    apex_config:
+                      chart:
+                        height: 250px
+                  - type: custom:apexcharts-card
+                    header:
+                      show: true
+                      title: vs Time of Month
+                    yaxis:
+                      - id: delta
+                        decimals: 1
+                        opposite: true
+                      - id: day
+                        show: false
+                        min: 0
+                        max: 1
+                        decimals: 0
+                        apex_config:
+                          tickAmount: 1
+                          labels:
+                            formatter: |
+                              EVAL:function(value) {
+                                if (value == 1) return "ON";
+                                return "OFF";
+                              }
+                    series:
+                      - entity: input_boolean.day_cycle
+                        transform: 'return x == "on" ? 1 : 0;'
+                        color: '#666'
+                        group_by:
+                          duration: 1d
+                        opacity: 0.5
+                        stroke_width: 0
+                        name: Day
+                        type: area
+                        show:
+                          legend_value: false
+                          in_header: false
+                        fill_raw: last
+                        curve: stepline
+                        yaxis_id: day
+                      - entity: sensor.data_usage_gb
+                        attribute: pct_of_cap
+                        unit: '%'
+                        name: '% of Cap'
+                        extend_to: now
+                        type: line
+                        color: var(--info-color)
+                        yaxis_id: delta
+                        group_by:
+                          duration: 4hr
+                      - entity: sensor.month_gone
+                        name: '% of Month'
+                        extend_to: now
+                        curve: smooth
+                        type: line
+                        stroke_width: 2
+                        color: white
+                        yaxis_id: delta
+                        group_by:
+                          duration: 12hr
+                    graph_span: 5d
+                    apex_config:
+                      chart:
+                        height: 250px
+    theme: Fluent Orange
+  - path: batteries
     icon: hass:battery-charging-70
     visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
     type: custom:horizontal-layout
-    badges: []
     cards:
       - type: custom:auto-entities
         card:
@@ -1096,248 +1592,61 @@ views:
           exclude: []
         sort:
           method: friendly_name
-  - theme: Campfire - Dark
-    path: monthly-data
-    title: Monthly Data
-    subview: true
-    type: panel
-    badges: []
-    cards:
-      - type: custom:layout-card
-        cards:
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(3, 33%)
-              mediaquery:
-                '(max-width: 600px)':
-                  grid-template-columns: 100%
-              width: 100%
-            cards:
-              - type: custom:mushroom-template-card
-                entity: sensor.data_usage_gb
-                primary: 1200 GB
-                secondary: Max per month
-                icon: mdi:information
-                tap_action:
-                  action: none
-                hold_action:
-                  action: none
-                icon_color: white
-                name: 1200 GB
-              - type: custom:mushroom-template-card
-                entity: sensor.data_usage_gb
-                primary: >-
-                  {{states(config.entity)}} {{ state_attr(config.entity,
-                  'unit_of_measurement') }}
-                secondary: Used this month
-                icon: mdi:cloud
-                icon_color: blue
-                tap_action:
-                  action: none
-                hold_action:
-                  action: none
-              - type: custom:mushroom-template-card
-                entity: sensor.data_usage_gb
-                primary: '{{state_attr(config.entity, ''pct_of_cap'')|round(1)}}%'
-                secondary: of monthly Comcast data cap
-                icon: mdi:percent
-                icon_color: blue
-                tap_action:
-                  action: none
-                hold_action:
-                  action: none
-              - type: custom:mushroom-entity-card
-                entity: sensor.month_gone
-                icon_color: disabled
-                secondary_info: name
-                primary_info: state
-                name: Into this month
-                icon: mdi:calendar-arrow-right
-              - type: custom:mushroom-entity-card
-                entity: input_number.data_usage_refresh
-                name: Set Refresh Interval
-                icon_color: disabled
-              - type: custom:mushroom-entity-card
-                entity: sensor.data_usage_gb
-                name: Last Updated
-                icon_color: disabled
-                secondary_info: last-updated
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: 50% 50%
-              mediaquery:
-                '(max-width: 600px)':
-                  grid-template-columns: 100%
-            cards:
-              - type: custom:apexcharts-card
-                header:
-                  show: true
-                  title: Hourly Data Usage
-                yaxis:
-                  - id: delta
-                    decimals: 1
-                    opposite: true
-                    min: 0
-                  - id: day
-                    show: false
-                    min: 0
-                    max: 1
-                    decimals: 0
-                    apex_config:
-                      tickAmount: 1
-                      labels:
-                        formatter: |
-                          EVAL:function(value) {
-                            if (value == 1) return "ON";
-                            return "OFF";
-                          }
-                series:
-                  - entity: sensor.data_usage_per_hour
-                    name: Per Hour
-                    extend_to: now
-                    type: column
-                    color: orange
-                    yaxis_id: delta
-                    show:
-                      legend_value: false
-                    group_by:
-                      duration: 1h
-                  - entity: input_boolean.day_cycle
-                    transform: 'return x == "on" ? 1 : 0;'
-                    color: '#ffffff'
-                    group_by:
-                      duration: 1d
-                    opacity: 0.1
-                    stroke_width: 0
-                    name: Day
-                    type: area
-                    show:
-                      legend_value: false
-                      in_header: false
-                    fill_raw: last
-                    curve: stepline
-                    yaxis_id: day
-                graph_span: 2d
-                apex_config:
-                  chart:
-                    height: 250px
-              - type: custom:apexcharts-card
-                header:
-                  show: true
-                  title: vs Time of Month
-                yaxis:
-                  - id: delta
-                    decimals: 1
-                    opposite: true
-                series:
-                  - entity: sensor.data_usage_gb
-                    attribute: pct_of_cap
-                    unit: '%'
-                    name: '% of Cap'
-                    extend_to: now
-                    type: line
-                    color: orange
-                    yaxis_id: delta
-                    group_by:
-                      duration: 6hr
-                  - entity: sensor.month_gone
-                    name: '% of Month'
-                    extend_to: now
-                    curve: smooth
-                    type: line
-                    color: white
-                    yaxis_id: delta
-                    group_by:
-                      duration: 6hr
-                graph_span: 5d
-                apex_config:
-                  chart:
-                    height: 250px
-            view_layout:
-              grid-column: span 2
-        layout_type: custom:grid-layout
-        layout:
-          layout_type: custom:grid-layout
-          width: 100%
-  - theme: Campfire - Dark
-    visible:
+  - visible:
       - user: 1adcbfbd5637444bacb8239bc794bb4a
     title: Lights (Admin)
     path: lights-admin
     type: panel
-    badges: []
-    cards:
-      - type: vertical-stack
-        cards:
-          - type: custom:auto-entities
-            card:
-              type: grid
-              columns: 2
-              square: false
-            card_param: cards
-            filter:
-              include:
-                - domain: light
-                  options:
-                    type: custom:mushroom-light-card
-              exclude:
-                - state: unavailable
-            show_empty: true
-            sort:
-              method: friendly_name
-  - theme: Campfire - Dark
-    title: Climate
-    path: climate
-    icon: mdi:thermostat
-    visible:
-      - user: 1adcbfbd5637444bacb8239bc794bb4a
-      - user: 03dd7450aa7f4d0e8df8ed730df485b1
-    badges: []
-    cards:
-      - type: custom:thermostat-card
-        entity: climate.ecobee3
-        no_card: false
-        highlight_tap: true
-        title: ecobee3
-        step: 1
-      - type: custom:mushroom-climate-card
-        entity: climate.ecobee3
-        show_temperature_control: true
-        hvac_modes:
-          - heat
-        name: Thermostat
-  - title: Home (Phone View)
-    path: home-phone
-    theme: Campfire - Dark
-    type: panel
-    visible:
-      - user: 1adcbfbd5637444bacb8239bc794bb4a
-    badges: []
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout
         layout:
-          grid-template-columns: 100%
+          grid-template-columns: 40% auto
           grid-template-rows: auto
+          grid-template-areas: |
+            "icon info"
+            "icon bar"
           grid-gap: 0
         cards:
-          - type: vertical-stack
-            cards:
-              - type: custom:mushroom-title-card
-                title: Lights
-              - type: custom:mushroom-light-card
-                entity: light.kitchen_light
-              - type: custom:mushroom-light-card
-                entity: light.master_bedroom_light
-                name: Bedroom Lamp
-              - type: custom:mushroom-light-card
-                entity: light.bar_light
-          - type: vertical-stack
-            cards:
-              - type: custom:mushroom-template-card
-                primary: '{{states(config.entity)}}'
-                secondary: '{{ state_attr(config.entity, "date") }}'
-                icon: '{{ state_attr(config.entity, "icon") }}'
-                entity: sensor.trash_pickup
+          - type: custom:mushroom-template-card
+            entity: sensor.monthly_data_concern
+            icon: >-
+              {{ iif(states(config.entity) == "on", "mdi:alert", "mdi:download")
+              }}
+            icon_color: '{{ var(--rgb-warning-color) if(states(config.entity) == "on") }}'
+            primary: null
+            view_layout:
+              grid-area: icon
+          - type: custom:mushroom-template-card
+            entity: sensor.data_usage_gb
+            primary: Monthly Data Cap
+            icon: null
+            view_layout:
+              grid-area: info
+          - type: custom:bar-card
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card > div {
+                  padding: .5rem 0 0 0;
+                }
+            height: 4px
+            color: orange
+            entities:
+              - entity: sensor.data_usage_gb
+                attribute: pct_of_cap
+                name: Data Usage
+              - entity: sensor.month_gone
+                name: Month
+                color: grey
+                height: 2px
+            positions:
+              icon: 'off'
+              indicator: 'off'
+              name: 'off'
+              value: 'off'
+            view_layout:
+              grid-area: bar
