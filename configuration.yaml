@@ -9,6 +9,7 @@ homeassistant:
       precision: 1.0
   allowlist_external_dirs:
     - /config
+  time_zone: America/Denver
 
 
 # Text to speech
@@ -36,11 +37,7 @@ template: !include template.yaml
 
 frontend:
   themes: !include_dir_merge_named themes
-          
-logger:
-  default: error
-  logs:
-    homeassistant.components.zha: debug
+
 
 # Notifications
 telegram_bot:
@@ -56,15 +53,12 @@ notify:
 
 
 rest_command:
-  data_usage_refresh:
-    url: !secret my_datausage_source
+  plex_refresh_movies:
+    url: !secret plex_api_scan_movies
     method: GET
-    verify_ssl: false
-
-  tautulli_refresh:
-    url: !secret tautulli_api_streams
+  plex_refresh_tv:
+    url: !secret plex_api_scan_tv
     method: GET
-    verify_ssl: false
 
 panel_custom:
   - name: zwave-graph-panel
@@ -80,3 +74,26 @@ panel_custom:
       # grouping - pick one: z-wave, ungrouped
       grouping: z-wave
 
+zha:
+  zigpy_config:
+    ota:
+      ikea_provider: false
+      ledvance_provider: false
+      otau_directory: /config/peanutplugfirmware
+
+logger:
+  default: warning
+  logs:
+    homeassistant.core: warning
+    homeassistant.components.zha: debug
+    bellows.zigbee.application: info
+    bellows.ezsp: info
+    zigpy: debug
+    zigpy_cc: info
+    zigpy_deconz.zigbee.application: info
+    zigpy_deconz.api: info
+    zigpy_xbee.zigbee.application: info
+    zigpy_xbee.api: info
+    zigpy_zigate: info
+    zigpy_znp: info
+    zhaquirks: info
