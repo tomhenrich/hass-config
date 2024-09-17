@@ -1,41 +1,117 @@
-- resource: !secret my_datausage_url
-  scan_interval: 42300
-  sensor:
-    - name: "Data Usage GB"
-      unique_id: data_usage_gb
-      value_template: "{{ value_json.gb|float }}"
-      unit_of_measurement: "GB"
-      state_class: total_increasing
-      device_class: data_size
-      icon: "mdi:cloud"
-      json_attributes:
-        - pct_of_month
-        - pct_of_cap
-        - updated
-
-- resource: !secret my_torrents_filter
+- resource: !secret charybdis_ohm
   scan_interval: 60
   sensor:
-    - name: "Torrents (All)"
-      unique_id: torrents_data_all
-      value_template: "{{ value_json.response.count|int }}"
-      json_attributes_path: "$.response"
-      json_attributes:
-        - "count"
-        - "items"
+    name: Charybdis CPU Load
+    unique_id: charybdis_ohm_cpu_load
+    unit_of_measurement: '%'
+    value_template: >
+      {% set ohm = value_json.Children[0].Children[1] %}
+      {% for C1 in ohm.Children %}
+        {% if(C1.Text == "Load") %}
+          {% for C2 in C1.Children %}
+            {% if(C2.Text == "CPU Total") %}
+              {{ C2.Value | regex_findall_index('\d+.?\d+') | float }}
+            {% endif %}
+          {% endfor  %}
+        {% endif %}
+      {% endfor  %}
 
-- resource: !secret my_torrents
-  scan_interval: 60
+
+- resource: !secret openweather_api
+  scan_interval: 3600
+  sensor:
+    - name: OpenWeather AQI
+      unique_id: openweather_aqi
+      value_template: '{{ value_json.list[0].main.aqi }}'
+      json_attributes_path: $.list[0]
+      json_attributes:
+        - dt
+
+- resource: !secret iqair_api
+  scan_interval: 3600
+  sensor:
+    - name: IQAir AQI
+      unique_id: iqair_aqi
+      device_class: aqi
+      value_template: '{{ value_json.data.current.pollution.aqius }}'
+      json_attributes_path: $.data.current.pollution
+      json_attributes:
+        - ts
+
+
+
+####################
+#
+#   PLEX/TAUTULLI
+#
+####################
+
+- resource: !secret plex_api_sessions
+  headers:
+    Content-Type: 'application/json; charset=utf-8'
+    Accept: 'application/json'
   params:
-    filter: active
+    X-Plex-Token: !secret plex_api_token
+  scan_interval: 60
   sensor:
-    - name: Torrents Active
-      unique_id: torrents_active
-      value_template: "{{ value_json|count }}"
-      icon: "mdi:progress-download"
+    - name: Plex Stream Data
+      unique_id: plex_activity
+      value_template: '{{ value_json.MediaContainer["size"] }}'
+      json_attributes:
+        - MediaContainer
+
+- resource: !secret tautulli_activity
+  scan_interval: 60
+  method: POST
+  headers:
+    Content-Type: application/json
+  sensor:
+    - name: Tautulli Stream Data
+      unique_id: tautulli_activity
+      value_template: "{{ value_json.response.data.stream_count|int }}"
+      json_attributes_path: "$.response.data"
+      json_attributes:
+        - stream_count
+        - sessions
+        - stream_count_direct_play
+        - stream_count_direct_stream
+        - stream_count_transcode
+        - total_bandwidth
+        - lan_bandwidth
+        - wan_bandwidth
+
+#- resource: !secret tautulli_api
+#  scan_interval: 86400
+#  headers:
+#   Content-Type: application/json
+#  params:
+#    apikey: !secret tautulli_key
+#    cmd: refresh_libraries_list
+#  sensor:
+#    - name: Tautulli Libraries Refresh
+#      unique_id: tautulli_library_refresh
+#      value_template: "{{ value_json.response.result }}"
+#      icon: "mdi:plex"
+
+
+#- resource: !secret tautulli_api
+#  scan_interval: 86400
+#  headers:
+#   Content-Type: application/json
+#  params:
+#    apikey: !secret tautulli_key
+#    cmd: get_libraries
+#  sensor:
+#    - name: Tautulli Libraries
+#      unique_id: tautulli_library_data
+#      value_template: "{{ value_json.response.result }}"
+#      icon: "mdi:plex"
+#      json_attributes:
+#        - response
+
 
 - resource: !secret my_torrents
-  scan_interval: 60
+  scan_interval: 600
   params:
     filter: completed
   sensor:
