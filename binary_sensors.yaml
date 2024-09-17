@@ -18,37 +18,3 @@
 #      icon_template: >
 #        mdi:washing-machine
 
-
-##########################################################
-## Trendlines
-##########################################################
-
-
-
-##########################################################
-## Network Devices
-##########################################################
-
-- platform: ping
-  host: !secret shield_ip
-  name: Shield Online
-  scan_interval: 3600
-  count: 2
-
-- platform: ping
-  host: !secret printer_ip
-  name: Printer Online
-  scan_interval: 3600
-  count: 2
-
-- platform: ping
-  host: !secret nas_host
-  name: DS420j Online
-  scan_interval: 3600
-  count: 2
-
-- platform: ping
-  host: !secret pizero_host
-  name: Raspberry Pi Zero Online
-  scan_interval: 3600
-  count: 2
