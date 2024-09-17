@@ -1,92 +1,63 @@
 purge_keep_days: 32
 exclude:
   domains:
-    - calendar
-    - camera
-    - cast
+    - conversation
     - device_tracker
+    - event
     - fan
-    - input_datetime
-    - plex
-    - media_player
-    - moon
-    - number
+    - notify
     - person
+    - remote
     - scene
     - script
-    - stream
+    - stt
     - sun
-    - timer
+    - tts
     - update
     - weather
     - zone
   entity_globs:
+    - automation.*light_toggle*
     - binary_sensor.ecobee_*_occupancy
     - binary_sensor.home_assistant_operating*
     - binary_sensor.*home_security*
-    - button.master_bedroom_fan_*
-    - input_datetime.time_christmas_tree_*
-    - input_datetime.time_night_*
+    - button.master_bedroom_fan*
+    - input_datetime.time_christmas_tree*
+    - input_datetime.time_night*
     - number.*light_on_level
     - sensor.canon_mg3600*
     - sensor.ds420j_cpu*
+    - sensor.ds420j_last*
     - sensor.ds420j_network*
-    - sensor.ds420j_volume_*_total_size
-    - sensor.ds420j_volume_*_used_space
-    - sensor.ds420j_volume_*_volume_used
-    - sensor.gedryer*
-    - sensor.gewasher*
     - sensor.pollen*
     - sensor.*_battery
     - sensor.*_battery_level
     - sensor.*_node_status
+    - button.garage_door_sensor_idle_home_security_*
   entities:
-    - automation.data_usage_refresh
     - automation.day_cycle
     - automation.den_lights_dimmer_button
-    - automation.mainbathroom_light_toggle_ios
-    - automation.mainbedroom_light_toggle
     - automation.master_bathroom_light_buttons
     - automation.plex_meta_manager_notifications
-    - binary_sensor.den_tv_active
     - binary_sensor.ds420j_security_status
     - binary_sensor.ds420j_update_available
     - binary_sensor.doorbell_delay
-    - binary_sensor.dryer_running
-    - binary_sensor.enable_thermostat
     - binary_sensor.garage_door_sensor_low_battery
-    - binary_sensor.garage_myq_gateway
     - binary_sensor.remote_ui
     - binary_sensor.rpi_power_status
-    - binary_sensor.shield_tv_active
     - binary_sensor.tautulli_running
-    - binary_sensor.trash_pickup
-    - binary_sensor.trashday
+    - binary_sensor.next_recycling_pickup
+    - binary_sensor.next_trash_pickup
     - button.garage_door_sensor_ping
-    - button.master_bedroom_fan_start_dimmer
-    - button.master_bedroom_fan_stop_actions
     - counter.doorbell
     - input_boolean.guest_mode
     - input_boolean.livingroom_nightlight_status
     - input_boolean.nas_shutdown
     - input_boolean.vacation_mode
     - input_button.nas_shutdown
-    - input_datetime.time_christmas_tree_off
-    - input_datetime.time_christmas_tree_on
-    - input_datetime.time_night_end
-    - input_datetime.time_night_start
-    - input_datetime.trash_pickup_override
-    - input_number.data_usage_refresh
-    - input_number.plex_movie_4k_library_id
-    - input_number.plex_movie_library_id
-    - input_number.plex_tv_library_id
     - input_select.christmas_tree_on_type
-    - input_select.trash_pickup_override
     - sensor.date
-    - sensor.den_tv_source
     - sensor.disk_use_percent
-    - sensor.ds420j_last_boot
-    - sensor.ds420j_last_boot_time
     - sensor.fibaro_motion_1_battery_level
     - sensor.fibaro_motion_1_node_status
     - sensor.fibaro_motion_2_battery_level
@@ -97,17 +68,8 @@ exclude:
     - sensor.my_wall_panel_light
     - sensor.network_in_eth0
     - sensor.network_out_eth0
-    - sensor.next_pickup
-    - sensor.outside_condition
-    - sensor.outside_temp
-    - sensor.plex_libraries
-    - sensor.plex_library_data
-    - sensor.plex_movies
-    - sensor.plex_movies_4k
-    - sensor.plex_tv_shows
     - sensor.scylla_ohm
     - sensor.time
-    - sensor.trash_pickup
     - sensor.ups_input_voltage
     - sensor.ups_load
     - sensor.ups_load_shutdown_timer
