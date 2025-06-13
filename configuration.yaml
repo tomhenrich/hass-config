@@ -38,7 +38,6 @@ template: !include template.yaml
 frontend:
   themes: !include_dir_merge_named themes
 
-
 # Notifications
 telegram_bot:
   - platform: polling
@@ -74,12 +73,27 @@ panel_custom:
       # grouping - pick one: z-wave, ungrouped
       grouping: z-wave
 
+ios:
+  actions:
+    - name: Pause Tautulli
+      background_color: "#000000" # Requires `use_custom_colors`
+      label:
+        text: "Mute Tautulli"
+        color: "#ffffff" # Requires `use_custom_colors`
+      icon:
+        icon: mdi:pause-circle
+        color: "#ffffff"
+      show_in_carplay: true
+      show_in_watch: false
+      use_custom_colors: true
+
 zha:
   zigpy_config:
+    network:
+      channel: 15 # What channel the radio should try to use.
+      channels: [15, 20, 25] # Channel mask
     ota:
-      ikea_provider: false
-      ledvance_provider: false
-      otau_directory: /config/peanutplugfirmware
+      otau_directory: /config/zigpy_ota
 
 logger:
   default: warning
