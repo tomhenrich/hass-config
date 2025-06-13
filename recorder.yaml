@@ -76,6 +76,7 @@ exclude:
     - sensor.ups_low_battery_runtime
     - sensor.zigguest_electricity
     - switch.adguard_protection
+    - sensor.weekday
   event_types:
     - service_removed
     - service_executed
