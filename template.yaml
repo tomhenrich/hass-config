@@ -35,8 +35,23 @@
         forecast: "{{ forecastdata['weather.ecobee3'].forecast }}"
           
 - trigger:
+    - platform: time
+      at: "00:00:01"
+    - platform: homeassistant
+      event: start
+  sensor:
+    - name: "Weekday"
+      unique_id: weekday
+      state: "{{ now().weekday() }}"
+      icon: "mdi:calendar"
+      attributes:
+        day: "{{ now().strftime('%A') }}"
+
+- trigger:
     - platform: time_pattern
       minutes: "/15"
+    - platform: homeassistant
+      event: start
   sensor:
     - name: "Month Gone"
       unique_id: month_gone
@@ -51,6 +66,20 @@
       state_class: total_increasing
 
 
+- trigger:
+    - platform: time
+      at: "00:00:00"
+    - platform: homeassistant
+      event: start
+  sensor:
+    name: Days This Month
+    unique_id: days_this_month
+    state: >
+      {% set today = now() %}
+      {% set days = (today.replace(month=today.month % 12 + 1, day=1) - timedelta(days=1)).day %}
+      {{ days }}
+
+
 ####################
 #
 #   STANDARD SENSORS
@@ -59,72 +88,37 @@
 
 - sensor:
 
-  - name: Download This Month (GB)
-    unique_id: download_this_month_gb
-    icon: mdi:arrow-down-bold-box
-    availability: "{{ states('sensor.rbr50_download_this_month')|int(-1) >= 0 }}"
-    state: >
-      {% if states('sensor.rbr50_download_this_month')|is_number %}
-        {{ (states("sensor.rbr50_download_this_month")|float / 1000)|round(4) }}
-      {% else %}
-        this.state
-      {% endif %}
-    unit_of_measurement: "GB"
-    state_class: total_increasing
-
-  - name: Upload This Month (GB)
-    unique_id: upload_this_month_gb
-    icon: mdi:arrow-up-bold-box
-    availability: "{{ states('sensor.rbr50_upload_this_month')|int(-1) >= 0 }}"
-    state: >
-      {% if states('sensor.rbr50_upload_this_month')|is_number %}
-        {{ (states("sensor.rbr50_upload_this_month")|float / 1000)|round(4) }}
-      {% else %}
-        this.state
-      {% endif %}
-    unit_of_measurement: "GB"
-    state_class: total_increasing
-
   - name: Next Trash Pickup
     unique_id: waste_trash
-    icon: mdi:delete
     state: >
-        {{ state_attr('calendar.trash_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') }}
-    attributes:
-      proximity: >
-        {{ ((this.state|as_datetime|as_local).date() - now().date()).days }}
-      format: >
-        {% set prox = this.attributes.proximity|int %}
+        {% set pickup = state_attr('calendar.trash_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') %}
+        {% set prox = ((pickup|as_datetime|as_local).date() - now().date()).days %}
         {% if( prox == 0 ) %}
           Today
         {% elif( prox == 1 ) %}
           Tomorrow
         {% else %}
-          {{this.state|as_timestamp|timestamp_custom('%a, %b %-d')}}
+          {{pickup|as_timestamp|timestamp_custom('%a, %-m/%-d')}}
         {% endif %}
+    icon: mdi:delete
   - name: Next Recycling Pickup
     unique_id: waste_recycling
-    icon: mdi:recycling
     state: >
-        {{ state_attr('calendar.recycling_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') }}
-    attributes:
-      proximity: >
-        {{ ((this.state|as_datetime|as_local).date() - now().date()).days }}
-      format: >
-        {% set prox = this.attributes.proximity|int %}
+        {% set pickup = state_attr('calendar.recycling_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') %}
+        {% set prox = ((pickup|as_datetime|as_local).date() - now().date()).days %}
         {% if( prox == 0 ) %}
           Today
         {% elif( prox == 1 ) %}
           Tomorrow
         {% else %}
-          {{this.state|as_timestamp|timestamp_custom('%a, %b %-d')}}
+          {{pickup|as_timestamp|timestamp_custom('%a, %-m/%-d')}}
         {% endif %}
-
+    icon: mdi:recycle
 
   #=== ENVIRONMENTAL SENSORS
 
-  - name: Air Quality Level
-    unique_id: airqualitylevel
+  - name: Air Quality
+    unique_id: airquality
     state: >
       {% if states("sensor.iqair_aqi") != "unavailable" %}
         {% set aqi = states("sensor.iqair_aqi")|int %}
@@ -134,81 +128,36 @@
         {% elif aqi > 50 %} 2
         {% else %} 1
         {% endif %}
-      {% elif states("sensor.openweather_aqi") != "unavailable" %}
-        {{ states("sensor.openweather_aqi")|int }}
       {% else %}
         0
       {% endif %}
     attributes:
-      source: >
-          {% if states("sensor.iqair_aqi") != "unavailable" %}
-            IQAir
-          {% elif states("sensor.openweather_aqi") != "unavailable" %}
-            OpenWeather
-          {% else %}
-            Unavailable
-          {% endif %}
-      updated: >
-        {% if states("sensor.iqair_aqi") != "unavailable" %}
-          {% set dt = state_attr('sensor.iqair_aqi','ts')|as_timestamp %}
-        {% elif states("sensor.openweather_aqi") != "unavailable" %}
-          {% set dt = state_attr('sensor.openweather_aqi','dt') %}
-        {% endif %}
-        {{ dt|timestamp_custom("%Y-%m-%dT%H:%M:%S.%f%z") }}
-
-  - name: Air Quality
-    unique_id: airquality
-    state: >
-      {% set quality = states('sensor.air_quality_level')|int %}
-      {%
-        set conditions = {
-          0: 'Unknown',
-          1: 'Good',
-          2: 'Fair',
-          3: 'Moderate',
-          4: 'Unhealthy',
-          5: 'Hazardous'
-        }
-      %}
-      {{ conditions[quality] }}
-    attributes:
+      condition: >
+        {%
+          set conditions = {
+            0: 'Unknown',
+            1: 'Good',
+            2: 'Fair',
+            3: 'Moderate',
+            4: 'Unhealthy',
+            5: 'Hazardous'
+          }
+        %}
+        {{ conditions[this.state|int] }}
       color: >
-        {% set quality = states('sensor.air_quality_level')|int %}
-        {{ state_attr("input_select.severity_scale", "options")[quality] }}
+        {{ state_attr("input_select.severity_scale", "options")[this.state|int] }}
     icon: >
-      {% set quality = states('sensor.air_quality_level')|int %}
       {%
           set icons = {
             0: 'mdi:help-circle-outline',
             1: 'mdi:emoticon',
-            2: 'mdi:emoticon-neutral-outline',
-            3: 'mdi:emoticon-frown-outline',
+            2: 'mdi:emoticon-neutral',
+            3: 'mdi:emoticon-frown',
             4: 'mdi:alert',
             5: 'mdi:skull'
           }
       %}
-      {{ icons[quality] }}
-
-
-
-  #=== PLEX/TAUTULLI
-
-
-#  - name: Plex Libraries
-#    unique_id: plex_libraries
-#    icon: "mdi:filmstrip-box-multiple"
-#    availability: "{{ is_state('sensor.tautulli_libraries', 'success') }}"
-#    state: true
-#    attributes:
-#      movies: >
-#        {% set lib_id = states("input_number.plex_movie_library_id") | int | string %}
-#        {{ state_attr('sensor.tautulli_libraries', 'response')['data'] | selectattr('section_id', 'eq', lib_id ) | list | map(attribute='count') | list | first | int }}
-#      movies4k: >
-#        {% set lib_id = states("input_number.plex_movie_4k_library_id") | int | string %}
-#        {{ state_attr('sensor.tautulli_libraries', 'response')['data'] | selectattr('section_id', 'eq', lib_id ) | list | map(attribute='count') | list | first | int }}
-#      tv: >
-#        {% set lib_id = states("input_number.plex_tv_library_id") | int | string %}
-#        {{ state_attr('sensor.tautulli_libraries', 'response')['data'] | selectattr('section_id', 'eq', lib_id ) | list | map(attribute='count') | list | first | int }}
+      {{ icons[this.state|int] }}
 
 
 ####################
@@ -219,55 +168,28 @@
 
 - binary_sensor:
 
+
+  - name: Arc Tags
+    unique_id: arc_tags
+    availability: "{{ states('sensor.arc_tags') != 'unavailable' }}"
+    state: >
+        {{ (states('sensor.weekday')|int >= 2 and states('sensor.weekday')|int <=5)|bool }}
+    icon: >
+      mdi:tag{{ "-hidden" if states('sensor.weekday')|int != 5 }}
+    attributes:
+      color_blue: '#1E90FF'
+      color_orange: '#FF8C00'
+      color_pink: '#FF1493'
+      color_white: '#FFFFFF'
+      color_yellow: '#FFFF00'
+
   - name: "Charybdis CPU Busy"
     unique_id: charybdis_cpu_busy
     availability: "{{ states('sensor.charybdis_cpu_load') != 'unavailable' }}"
     state: >
-      {% if(states('sensor.charybdis_cpu_load')|is_number) %}
-        {{states("sensor.charybdis_cpu_load")|float >= 50 }}
-      {% else %}
-        false
-      {% endif %}
-    delay_on: "00:05:00"
-    delay_off: "00:05:00"
-    device_class: running
+      {{states("sensor.charybdis_cpu_load")|float >= 50 }}
+    delay_on: "00:03:00"
+    delay_off: "00:03:00"
 
-  - name: Plex Streaming
-    unique_id: plex_streaming
-    device_class: running
-    icon: "mdi:plex"
-    availability: "{{ states('sensor.plex_activity') != 'unavailable' }}"
-    state: >
-      {% if( states("sensor.plex_activity") | is_number) %}
-        {% set plex = state_attr('sensor.plex_activity','MediaContainer')['Metadata'] %}
-        {% if(plex | count > 0) %}
-          {{ plex|selectattr('type','in','["episode","movie"]') | list | count > 0 }}
-        {% else %}
-          false
-        {% endif %}
-      {% elif( states("sensor.scylla") | is_number )  %}
-        {{ states('sensor.scylla')|int > 0 }}
-      {% else %}
-        false
-      {% endif %}
-
-
-#  - name: Tautulli Streaming
-#    unique_id: tautulli_streaming
-#    device_class: running
-#    state: >
-#        {{ state_attr('sensor.tautulli_stream_data', 'sessions') 
-#          | selectattr('media_type', 'in', ['movie','episode'] ) | list | count > 0 }}
-#    attributes:
-#      local: >
-#        {{ state_attr('sensor.tautulli_stream_data', 'sessions') 
-#          | selectattr('media_type', 'in', ['movie','episode'] ) 
-#          | selectattr('local', 'eq', 1 ) | list 
-#          | map(attribute='session_key') | list | count }}
-#      remote: >
-#        {{ state_attr('sensor.tautulli_stream_data', 'sessions') 
-#          | selectattr('media_type', 'in', ['movie','episode'] ) 
-#          | selectattr('local', 'eq', 0 ) | list 
-#          | map(attribute='session_key') | list | count }}
 
 
