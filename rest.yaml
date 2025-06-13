@@ -1,31 +1,49 @@
+# OHM sensor updated regularly by automation instead
 - resource: !secret charybdis_ohm
-  scan_interval: 60
+  scan_interval: 604800
   sensor:
-    name: Charybdis CPU Load
-    unique_id: charybdis_ohm_cpu_load
-    unit_of_measurement: '%'
-    value_template: >
-      {% set ohm = value_json.Children[0].Children[1] %}
-      {% for C1 in ohm.Children %}
-        {% if(C1.Text == "Load") %}
-          {% for C2 in C1.Children %}
-            {% if(C2.Text == "CPU Total") %}
-              {{ C2.Value | regex_findall_index('\d+.?\d+') | float }}
-            {% endif %}
-          {% endfor  %}
-        {% endif %}
-      {% endfor  %}
+    - name: Charybdis CPU Load
+      unique_id: charybdis_ohm_cpu_load
+      availability: "{{ states('binary_sensor.charybdis_ping') == 'on' }}"
+      unit_of_measurement: '%'
+      value_template: >
+        {% set ohm = value_json.Children[0].Children[0].Children %}
+        {% for C1 in ohm %}
+          {% if(C1.Text == "Load") %}
+            {% for C2 in C1.Children %}
+              {% if(C2.Text == "CPU Total") %}
+                {{ C2.Value | regex_findall_index('\d+.?\d+') | float }}
+              {% endif %}
+            {% endfor  %}
+          {% endif %}
+        {% endfor  %}
+    - name: Charybdis CPU Temperature
+      unique_id: charybdis_ohm_cpu_temp
+      availability: "{{ states('binary_sensor.charybdis_ping') == 'on' }}"
+      unit_of_measurement: '°F'
+      value_template: >
+        {% set ohm = value_json.Children[0].Children[0].Children %}
+        {% for C1 in ohm %}
+          {% if(C1.Text == "Temperatures") %}
+            {% for C2 in C1.Children %}
+              {% if(C2.Text == "CPU Package") %}
+                {{ C2.Value | regex_findall_index('\d+.?\d+') | float }}
+              {% endif %}
+            {% endfor  %}
+          {% endif %}
+        {% endfor  %}
 
 
-- resource: !secret openweather_api
-  scan_interval: 3600
+# scan interval set to 4 weeks
+- resource: 'http://192.168.1.200/arc.php'
+  scan_interval: 2419200
   sensor:
-    - name: OpenWeather AQI
-      unique_id: openweather_aqi
-      value_template: '{{ value_json.list[0].main.aqi }}'
-      json_attributes_path: $.list[0]
+    - name: Arc Tags
+      unique_id: arc_tags
+      icon: mdi:tag
+      value_template: '{{ value_json.week }}'
       json_attributes:
-        - dt
+        - saturday
 
 - resource: !secret iqair_api
   scan_interval: 3600
@@ -46,6 +64,20 @@
 #
 ####################
 
+
+- resource: !secret my_torrents
+  scan_interval: 600
+  params:
+    filter: completed
+  sensor:
+    - name: Completed Torrents
+      unique_id: torrents_completed
+      availability: "{{ states('binary_sensor.torrent_ping') == 'on' }}"
+      value_template: "{{ iif(states('binary_sensor.torrent_ping')=='on', value_json|count, 0) }}"
+      icon: "mdi:download-circle"
+
+
+
 - resource: !secret plex_api_sessions
   headers:
     Content-Type: 'application/json; charset=utf-8'
@@ -56,9 +88,11 @@
   sensor:
     - name: Plex Stream Data
       unique_id: plex_activity
+      availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
       value_template: '{{ value_json.MediaContainer["size"] }}'
       json_attributes:
         - MediaContainer
+
 
 - resource: !secret tautulli_activity
   scan_interval: 60
@@ -68,6 +102,7 @@
   sensor:
     - name: Tautulli Stream Data
       unique_id: tautulli_activity
+      availability: "{{ states('binary_sensor.tautulli_running') == 'on' }}"
       value_template: "{{ value_json.response.data.stream_count|int }}"
       json_attributes_path: "$.response.data"
       json_attributes:
@@ -79,43 +114,3 @@
         - total_bandwidth
         - lan_bandwidth
         - wan_bandwidth
-
-#- resource: !secret tautulli_api
-#  scan_interval: 86400
-#  headers:
-#   Content-Type: application/json
-#  params:
-#    apikey: !secret tautulli_key
-#    cmd: refresh_libraries_list
-#  sensor:
-#    - name: Tautulli Libraries Refresh
-#      unique_id: tautulli_library_refresh
-#      value_template: "{{ value_json.response.result }}"
-#      icon: "mdi:plex"
-
-
-#- resource: !secret tautulli_api
-#  scan_interval: 86400
-#  headers:
-#   Content-Type: application/json
-#  params:
-#    apikey: !secret tautulli_key
-#    cmd: get_libraries
-#  sensor:
-#    - name: Tautulli Libraries
-#      unique_id: tautulli_library_data
-#      value_template: "{{ value_json.response.result }}"
-#      icon: "mdi:plex"
-#      json_attributes:
-#        - response
-
-
-- resource: !secret my_torrents
-  scan_interval: 600
-  params:
-    filter: completed
-  sensor:
-    - name: Torrents Complete
-      unique_id: torrents_complete
-      value_template: "{{ value_json|count }}"
-      icon: "mdi:download"
