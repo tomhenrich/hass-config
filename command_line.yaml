@@ -1,0 +1,84 @@
+
+- sensor:
+    name: Torrents
+    unique_id: torrents_full_list
+    command: >
+         echo "{\"events\":" $(
+         curl 
+         -s 
+         'http://[REDACTED_IP]:8080/api/v2/torrents/info'
+         ) "}" 
+    value_template: > 
+        {{ value_json.events | length }}
+    json_attributes:
+        - events
+    scan_interval: 604800
+
+
+# Charybdis Ping is pinging the OHM integration
+- binary_sensor:
+    name: "Charybdis Ping"
+    unique_id: charybdis_ping
+    command: 'nc -z [REDACTED_IP] 8085 > /dev/null 2>&1 && echo "ON" || echo "OFF"'
+    device_class: connectivity
+    payload_on: "ON"
+    payload_off: "OFF"
+    scan_interval: 120
+
+- binary_sensor:
+    name: "Plex Ping"
+    unique_id: plex_ping
+    command: 'response=$(curl -LIk [REDACTED_IP]:32400/identity -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
+    device_class: running
+    payload_on: "ON"
+    payload_off: "OFF"
+    scan_interval: 300
+
+- binary_sensor:
+    name: Torrent Ping
+    unique_id: torrent_ping
+    command: 'response=$(curl -LIk [REDACTED_IP]:8080 -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
+    device_class: running
+    payload_on: "ON"
+    payload_off: "OFF"
+    scan_interval: 300
+    command_timeout: 240
+
+- binary_sensor:
+    name: Sonarr
+    unique_id: sonarr_ping
+    command: 'response=$(curl -LIk -m 3 http://[REDACTED_IP]:8989/ -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"'
+    device_class: running
+    payload_on: Online
+    payload_off: Offline
+    scan_interval: 300
+
+- binary_sensor:
+    name: Prowlarr
+    unique_id: prowlarr_ping
+    command: 'response=$(curl -LIk -m 3 http://[REDACTED_IP]:9696/ -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"'
+    device_class: running
+    payload_on: Online
+    payload_off: Offline
+    scan_interval: 300
+
+#- binary_sensor:
+#    name: Flaresolverr
+#    unique_id: flaresolverr_ping
+#    command: 'response=$(curl -LIk -m 3 http://homeassistant:8191/ -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"'
+#    device_class: running
+#    payload_on: Online
+#    payload_off: Offline
+#    scan_interval: 300
+
+- binary_sensor:
+    name: Ombi
+    unique_id: ombi_ping
+    command: 'response=$(curl -LIk -m 3 http://[REDACTED_IP]:5000/ -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "Online" || echo "Offline"'
+    device_class: running
+    payload_on: Online
+    payload_off: Offline
+    scan_interval: 300
+
+
+
