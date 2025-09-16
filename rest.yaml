@@ -1,6 +1,5 @@
-# OHM sensor updated regularly by automation instead
 - resource: !secret charybdis_ohm
-  scan_interval: 604800
+  scan_interval: 60
   sensor:
     - name: Charybdis CPU Load
       unique_id: charybdis_ohm_cpu_load
@@ -20,6 +19,7 @@
     - name: Charybdis CPU Temperature
       unique_id: charybdis_ohm_cpu_temp
       availability: "{{ states('binary_sensor.charybdis_ping') == 'on' }}"
+      device_class: temperature
       unit_of_measurement: '°F'
       value_template: >
         {% set ohm = value_json.Children[0].Children[0].Children %}
@@ -34,16 +34,16 @@
         {% endfor  %}
 
 
-# scan interval set to 4 weeks
-- resource: 'http://192.168.1.200/arc.php'
-  scan_interval: 2419200
-  sensor:
-    - name: Arc Tags
-      unique_id: arc_tags
-      icon: mdi:tag
-      value_template: '{{ value_json.week }}'
-      json_attributes:
-        - saturday
+# scan interval set to 4 weeks so sensor can be triggered via automation
+# - resource: !secret arc_tags
+#   scan_interval: 2419200
+#   sensor:
+#     - name: Arc Tags
+#       unique_id: arc_tags
+#       icon: mdi:tag
+#       value_template: '{{ value_json.week }}'
+#       json_attributes:
+#         - saturday
 
 - resource: !secret iqair_api
   scan_interval: 3600
@@ -65,38 +65,11 @@
 ####################
 
 
-- resource: !secret my_torrents
-  scan_interval: 600
+- resource: !secret tautulli_api
   params:
-    filter: completed
-  sensor:
-    - name: Completed Torrents
-      unique_id: torrents_completed
-      availability: "{{ states('binary_sensor.torrent_ping') == 'on' }}"
-      value_template: "{{ iif(states('binary_sensor.torrent_ping')=='on', value_json|count, 0) }}"
-      icon: "mdi:download-circle"
-
-
-
-- resource: !secret plex_api_sessions
-  headers:
-    Content-Type: 'application/json; charset=utf-8'
-    Accept: 'application/json'
-  params:
-    X-Plex-Token: !secret plex_api_token
-  scan_interval: 60
-  sensor:
-    - name: Plex Stream Data
-      unique_id: plex_activity
-      availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
-      value_template: '{{ value_json.MediaContainer["size"] }}'
-      json_attributes:
-        - MediaContainer
-
-
-- resource: !secret tautulli_activity
-  scan_interval: 60
-  method: POST
+    apikey: !secret tautulli_key
+    cmd: get_activity
+  scan_interval: 2592000
   headers:
     Content-Type: application/json
   sensor:
@@ -106,11 +79,34 @@
       value_template: "{{ value_json.response.data.stream_count|int }}"
       json_attributes_path: "$.response.data"
       json_attributes:
-        - stream_count
         - sessions
-        - stream_count_direct_play
-        - stream_count_direct_stream
-        - stream_count_transcode
-        - total_bandwidth
-        - lan_bandwidth
-        - wan_bandwidth
+
+# updated via a time-interval automation
+- resource: !secret my_torrents
+  scan_interval: 2592000
+  params:
+    filter: completed
+  sensor:
+    - name: Completed Torrents
+      unique_id: torrents_completed
+      availability: "{{ states('binary_sensor.torrent_ping') == 'on' }}"
+      value_template: "{{ value_json|count }}"
+      icon: "mdi:download-circle"
+      json_attributes_path: "$[0]"
+
+
+# - resource: !secret plex_sessions
+#   headers:
+#     Content-Type: 'application/json; charset=utf-8'
+#     Accept: 'application/json'
+#   params:
+#     X-Plex-Token: !secret plex_token
+#   scan_interval: 604800
+#   sensor:
+#     - name: Plex Stream Data
+#       unique_id: plex_activity
+#       availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
+#       value_template: '{{ value_json.MediaContainer["size"] }}'
+#       json_attributes:
+#         - MediaContainer
+
