@@ -648,18 +648,25 @@
   mode: single
 - id: '1748092050802'
   alias: Vacation Alerts
-  description: ''
+  description: 'Send notification if a door, window, or the garage opens while in Vacation Mode, unless there are guests present.'
   triggers:
   - trigger: state
     entity_id:
     - binary_sensor.exterior_openings
+    from: "off"
+    to: "on"
   - trigger: state
     entity_id:
     - binary_sensor.garage_door_sensor
+    from: "off"
+    to: "on"
   conditions:
   - condition: state
     entity_id: input_boolean.vacation_mode
     state: 'on'
+  - condition: state
+    entity_id: input_boolean.guest_mode
+    state: "off"
   actions:
   - action: notify.telegram_tom
     metadata: {}
