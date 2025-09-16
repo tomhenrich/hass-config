@@ -27,8 +27,10 @@ device_tracker: !include device_tracker.yaml
 group: !include groups.yaml
 media_player: !include media_player.yaml
 mqtt: !include mqtt.yaml
+multiscrape: !include multiscrape.yaml
 recorder: !include recorder.yaml
 rest: !include rest.yaml
+#scrape: !include scrape.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 switch: !include switches.yaml
@@ -38,27 +40,14 @@ template: !include template.yaml
 frontend:
   themes: !include_dir_merge_named themes
 
+
 # Notifications
-telegram_bot:
-  - platform: polling
-    api_key: !secret telegram_bot_token
-    allowed_chat_ids:
-      - !secret telegram_chatid_tom
 
 notify:
   - name: telegram_tom
     platform: telegram
     chat_id: !secret telegram_chatid_tom
-
-
-rest_command:
-  plex_refresh_movies:
-    url: !secret plex_api_scan_movies
-    method: GET
-  plex_refresh_tv:
-    url: !secret plex_api_scan_tv
-    method: GET
-
+        
 panel_custom:
   - name: zwave-graph-panel
     url_path: zwave-graph
