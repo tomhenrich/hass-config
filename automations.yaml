@@ -12,33 +12,6 @@
   action:
   - scene: scene.good_night
   mode: single
-- id: '1625264068184'
-  alias: Plex Button
-  description: ''
-  trigger:
-  - device_id: c41a7cabdaf68d062d0fa206dfe908cb
-    domain: zha
-    platform: device
-    type: remote_button_short_press
-    subtype: turn_on
-    id: singlepress
-  - platform: event
-    event_type: ios.action_fired
-    id: ios
-    event_data:
-      actionName: Plex Open
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - singlepress
-        - ios
-      sequence:
-      - service: script.plex_on_den_tv
-        data: {}
-  mode: restart
 - id: '1632860503837'
   alias: 'Living Room: Light - Dimmer Button'
   description: ''
@@ -60,115 +33,9 @@
       button_device: 84350b6f41b7cad45266de52c9f7b34b
       light_target:
         entity_id:
-        - light.den_light
+        - light.den_light_2
       light_step: 20
       light_delay_ms: 250
-- id: '1635291888215'
-  alias: Barn Door Protocol
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.exterior_openings
-    to: 'on'
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-    id: doorsopened
-  - platform: state
-    entity_id:
-    - binary_sensor.exterior_openings
-    id: doorsclosed
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
-  - platform: state
-    entity_id:
-    - climate.ecobee3
-    from: 'off'
-    to: heat
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    id: turned_on
-  - platform: state
-    entity_id:
-    - input_boolean.barn_door_protocol
-    from: 'off'
-    to: 'on'
-    id: barndoor_activation
-  - platform: state
-    entity_id:
-    - input_boolean.barn_door_protocol
-    from: 'on'
-    to: 'off'
-    id: barndoor_deactivation
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: doorsopened
-      - condition: state
-        entity_id: climate.ecobee3
-        state: heat
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.barn_door_protocol
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: doorsclosed
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.barn_door_protocol
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: turned_on
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.barn_door_protocol
-    - conditions:
-      - condition: trigger
-        id:
-        - barndoor_activation
-      sequence:
-      - service: climate.set_hvac_mode
-        data:
-          hvac_mode: 'off'
-        target:
-          entity_id: climate.ecobee3
-      - service: notify.telegram_tom
-        data:
-          title: '*Barn Door Protocol Activated*'
-          message: Furnace has been turned off.
-      alias: Barn Door Activating
-    - conditions:
-      - condition: trigger
-        id:
-        - barndoor_deactivation
-      sequence:
-      - service: ecobee.resume_program
-        data:
-          entity_id: climate.ecobee3
-          resume_all: true
-      - service: notify.telegram_tom
-        data:
-          title: '*Barn Door Protocol Deactivated*'
-          message: Furnace has been turned back on.
-      alias: Barn Door Deactivating
-    default: []
-  mode: parallel
-  max: 10
 - id: '1635292786302'
   alias: 'Living Room: Nightlight'
   description: ''
@@ -177,11 +44,12 @@
     - binary_sensor.hallway_motion
     from: 'off'
     to: 'on'
-    id: motion
+    id: motion_sensed
     trigger: state
+    alias: Hallway motion sensors trigger
   - entity_id:
     - binary_sensor.hallway_motion
-    id: nomotion
+    id: motion_cleared
     to: 'off'
     for:
       hours: 0
@@ -189,26 +57,42 @@
       seconds: 0
     from: 'on'
     trigger: state
+    alias: Hallway motion clears
   - entity_id: light.livingroom_light
-    id: lightsout
+    id: turned_off
     from: 'on'
     to: 'off'
     trigger: state
+    alias: Living room light manually turned off
   - trigger: state
     entity_id:
     - light.livingroom_light
     attribute: brightness
-    id: brightness
+    id: brightness_changed
+    alias: Living room light manually changed
   conditions:
-  - condition: state
-    entity_id: input_boolean.vacation_mode
-    state: 'off'
-    enabled: true
+  - condition: or
+    conditions:
+    - alias: Away but have guests
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.vacation_mode
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: 'on'
+    - condition: state
+      entity_id: input_boolean.vacation_mode
+      state: 'off'
+      alias: Home
   actions:
-  - choose:
+  - alias: 'Choose:'
+    choose:
     - conditions:
       - condition: trigger
-        id: motion
+        id:
+        - motion_sensed
       - condition: device
         type: is_off
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
@@ -222,7 +106,7 @@
       - condition: state
         entity_id: input_boolean.livingroom_nightlight
         state: 'on'
-        alias: Within Defined Time Range
+        alias: Within scheduled window
       sequence:
       - type: turn_on
         device_id: 2b32fb5d67808eb1d15a5dabb1ac493b
@@ -236,9 +120,10 @@
         alias: Turn on the status indicator helper
       alias: Motion after dark turns on light
     - conditions:
-      - condition: trigger
-        id: nomotion
-        alias: When motion clears
+      - alias: When motion clears
+        condition: trigger
+        id:
+        - motion_cleared
       - condition: state
         state: 'on'
         entity_id: input_boolean.livingroom_nightlight_status
@@ -265,38 +150,41 @@
         data: {}
         target:
           entity_id: input_boolean.livingroom_nightlight_status
+        alias: Turn off status helper so it doesn't automatically change again
       alias: Disable Night Light status after manual change
     default: []
-    alias: 'Choose:'
   mode: parallel
   max: 10
 - id: '1635383409645'
   alias: 'Master Bathroom: Light Buttons'
   description: ''
-  trigger:
-  - platform: event
-    event_type: zwave_js_value_notification
+  triggers:
+  - event_type: zwave_js_value_notification
     id: low
     event_data:
       node_id: 15
       label: Scene 003
       value: KeyPressed
-  - platform: event
-    event_type: zwave_js_value_notification
+    trigger: event
+    alias: Low Button
+  - event_type: zwave_js_value_notification
     id: medium
     event_data:
       node_id: 15
       label: Scene 002
       value: KeyPressed2x
-  - platform: event
-    event_type: zwave_js_value_notification
+    trigger: event
+    alias: Double Tap Up
+  - event_type: zwave_js_value_notification
     id: high
     event_data:
       node_id: 15
       label: Scene 002
       value: KeyPressed3x
-  condition: []
-  action:
+    trigger: event
+    alias: Triple Tap Up
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -336,12 +224,19 @@
     type: remote_button_short_press
     subtype: button_1
     trigger: device
+    alias: Doorbell Rung
   conditions: []
   actions:
   - data:
       title: Doorbell pressed!
       message: Doorbell has been rung.
     action: notify.telegram_tom
+  - action: button.press
+    metadata: {}
+    data: {}
+    target:
+      entity_id: button.doorbell
+    enabled: true
   mode: single
 - id: '1635605604406'
   alias: 'Notify: Leak Detected'
@@ -465,6 +360,7 @@
     event_data:
       actionName: Bathroom Light
     trigger: event
+    alias: Main Bathroom
   - event_type: ios.action_fired
     id: ios_mutetautulli
     event_data:
@@ -473,6 +369,7 @@
       user_id:
       - 1adcbfbd5637444bacb8239bc794bb4a
     trigger: event
+    alias: Mute Plex Notifications
   conditions: []
   actions:
   - choose:
@@ -493,16 +390,12 @@
         id:
         - ios_mutetautulli
       sequence:
-      - action: timer.start
-        metadata: {}
-        data: {}
-        target:
-          entity_id: timer.mute_plex_notifications
       - action: input_boolean.turn_off
         metadata: {}
         data: {}
         target:
-          entity_id: input_boolean.tautulli_notifications
+          entity_id:
+          - input_boolean.plex_notifications
   mode: single
 - id: '1663689219205'
   alias: 'Plex: Kometa Notifications'
@@ -535,6 +428,8 @@
     trigger: webhook
   conditions: []
   actions:
+  - variables:
+      event: '{{ trigger.json.event }}'
   - choose:
     - conditions:
       - condition: trigger
@@ -542,44 +437,51 @@
         - kometa-error
       sequence:
       - data_template:
-          title: "{% set data = dict(trigger.json)|tojson %} {{ iif(data.critical|bool
-            == true, \"\U0001F7E5\",\"\") }}Kometa Error"
-          message: '{% set data = dict(trigger.json)|tojson %} {% set critical = data.critical|bool
-            %} *Message:* {{ data }}'
+          title: '#Kometa {{ ''Critical '' if trigger.json.critical|bool == true }}Error'
+          message: '{{ trigger.json.error }}'
         action: notify.telegram_tom
+        alias: Send Telegram notification
+      alias: Triggered on Kometa error
     - conditions:
       - condition: trigger
         id:
         - kometa-complete
-      - condition: template
-        value_template: (trigger.json.collections_created|int + trigger.json.collections_modified|int
-          + trigger.json.collections_deleted|int) > 0
+      - alias: Collections were created, deleted, or modified
+        condition: template
+        value_template: '{{ (trigger.json.collections_created|int + trigger.json.collections_modified|int
+          + trigger.json.collections_deleted|int) > 0 }}'
       sequence:
       - data_template:
-          title: Kometa Run Completed
-          message: '{% set data = trigger.json %} {% set changes = data.collections_created|int
-            + data.collections_modified|int + data.collections_deleted|int %}   Kometa
-            completed run at {{ data.end_time }}. {% if changes > 0 %} {{ data.collections_created
-            }} collections created, {{ data.collections_modified }} collections modified,
-            {{ data.collections_deleted }} collections deleted.{% else %}No changes
-            made.{% endif %}'
+          title: '#Kometa run completed'
+          message: '* {{ trigger.json.collections_created }} collections created *
+            {{ trigger.json.collections_modified }} collections modified * {{ trigger.json.collections_deleted
+            }} collections deleted'
         action: notify.telegram_tom
+        alias: Send Telegram notification
+      alias: Triggered on Kometa completion
     - conditions:
       - condition: trigger
         id:
         - kometa-changes
       sequence:
+      - variables:
+          created: '{{ trigger.json.created }}'
+          collection: '{{ trigger.json.collection }}'
+          additions: '{{ trigger.json.additions }}'
+          removals: '{{ trigger.json.removals }}'
       - data_template:
-          title: Kometa Changes
-          message: '{% set data = trigger.json %} "{{ data.collection }}" collection
-            {{ iif(data.created|bool == true, "created","modified") }}
-
-            {% if( data.additions|length > 0 ) %} *Additions* {{ data.additions }}
-            {% endif %}
-
-            {% if( data.removals|length > 0 ) %} *Removals* {{data.removals}} {% endif
-            %}'
+          title: '#Kometa {{ iif(trigger.json.created|bool == true, ''created'', ''updated'')
+            }} _{{ trigger.json.collection }}_ collection'
+          message: "{% if( trigger.json.additions|length > 0 ) %} *-Additions:* {{
+            trigger.json.additions|length }} {% for a in trigger.json.additions %}\n
+            \ - {{ a.title }}{% endfor %}\n{% endif %} {% if( trigger.json.removals|length
+            > 0 ) %} *-Removals:* {{trigger.json.removals|length}} {% for r in trigger.json.removals
+            %}\n  - {{ r.title }}{% endfor %}\n{% endif %}"
         action: notify.telegram_tom
+        alias: Send Telegram notification
+      alias: Triggered by Kometa changes
+  trace:
+    stored_traces: 10
   mode: parallel
   max: 15
 - id: '1669779259047'
@@ -625,105 +527,26 @@
           - switch.den_tablet_outlet_switch_2
         action: switch.turn_off
   mode: single
-- id: '1678293411132'
-  alias: Day Cycle
-  description: ''
-  trigger:
-  - platform: time
-    at: 00:00:00
-  condition: []
-  action:
-  - service: input_boolean.toggle
-    data: {}
-    target:
-      entity_id: input_boolean.day_cycle
-  mode: single
 - id: '1706207124195'
   alias: Charybdis Notification
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.charybdis_cpu_busy
     from: 'on'
     to: 'off'
     for:
       hours: 0
-      minutes: 0
+      minutes: 5
       seconds: 0
-  condition: []
-  action:
-  - service: notify.telegram_tom
-    data:
-      message: Charybdis CPU has returned to low usage
-  mode: single
-- id: '1715745989209'
-  alias: 'Plex: Tautulli Notifications'
-  description: ''
-  triggers:
-  - allowed_methods:
-    - POST
-    - PUT
-    local_only: false
-    webhook_id: tautulli-stream
-    enabled: true
-    alias: Tautulli Streaming Webhook
-    trigger: webhook
-  conditions:
-  - condition: template
-    value_template: '{{ trigger.json.what.type != "clip" }}'
-    alias: Not a "clip" (trailer, etc)
-  actions:
-  - alias: If notifications aren't muted, send a Telegram alert
-    choose:
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.tautulli_notifications
-        state: 'on'
-      sequence:
-      - action: notify.telegram_tom
-        data:
-          title: '{% set data = trigger.json %} {% set action = data.action %} {%
-            set verbs = {"play":"started","pause":"paused","stop":"stopped","resume":"resumed","change":"changed
-            transcoded"} %} *Plex: {{data.who.user}} {{verbs[action]}} stream*
-
-            '
-          message: '{% set data = trigger.json %} {% set action = data.action %} _{{data.what.title}}_
-            ({{data.what.year}})
-
-            {% if(action in [''play'',''resume'']) %}{% set xc = data.transcode %}*Stream:*
-            {{xc.decision}}{% endif %}'
-        enabled: true
-  - action: homeassistant.update_entity
-    metadata: {}
-    data:
-      entity_id:
-      - sensor.tautulli_stream_data
-  mode: single
-- id: '1715996370073'
-  alias: Torrent Monitoring
-  description: ''
-  triggers:
-  - entity_id:
-    - sensor.completed_torrents
-    id: torrents-increased
     trigger: state
-  conditions:
-  - condition: template
-    value_template: '{{ trigger.to_state.state | int > trigger.from_state.state |
-      int }}'
-    alias: If new value is higher than previous value
+  conditions: []
   actions:
-  - data:
-      title: "\U0001F4C8 Torrent Completed"
-      message: '{{trigger.to_state.state}} complete torrent{{ iif(trigger.to_state.state|int
-        > 1, "s","") }} in queue (was {{trigger.from_state.state}})
-
-        '
-    alias: Send Telegram notification
+  - alias: Send Telegram notification
+    data:
+      message: 'Charybdis #CPU has returned to low usage'
     action: notify.telegram_tom
-  mode: queued
-  max: 10
+  mode: single
 - id: '1716003316170'
   alias: Set Default Theme
   description: ''
@@ -738,27 +561,31 @@
       name: Fluent Orange
   mode: single
 - id: '1737656825568'
-  alias: Plex Uptime Notifications
+  alias: 'Plex: Uptime Notifications'
   description: ''
   triggers:
-  - trigger: state
+  - alias: Ping goes offline for 2+ minutes
+    trigger: state
     entity_id:
-    - binary_sensor.plex_server
+    - binary_sensor.plex_ping
     from: 'on'
     for:
       hours: 0
-      minutes: 2
+      minutes: 4
       seconds: 0
     id: plex-down
+    to: 'off'
   - trigger: state
     entity_id:
-    - binary_sensor.plex_server
+    - binary_sensor.plex_ping
     for:
       hours: 0
-      minutes: 1
+      minutes: 0
       seconds: 0
     id: plex-start
     to: 'on'
+    from: 'off'
+    alias: Ping comes online from being offline (not just unavailable)
   conditions: []
   actions:
   - choose:
@@ -781,133 +608,27 @@
         data:
           message: Plex has started
   mode: single
-- id: '1738104523368'
-  alias: Plex Stream Activity
-  description: ''
-  triggers:
-  - trigger: state
-    entity_id:
-    - sensor.scylla
-    id: scylla-playing
-  conditions: []
-  actions:
-  - action: homeassistant.update_entity
-    metadata: {}
-    data:
-      entity_id:
-      - sensor.plex_stream_data
-    alias: Refresh Plex session data from API
-  mode: single
-- id: '1740509787388'
-  alias: Charybdis OHM Updater
-  description: ''
-  triggers:
-  - trigger: time_pattern
-    minutes: /1
-  conditions:
-  - alias: Charybdis is Online
-    condition: state
-    entity_id: binary_sensor.charybdis_ping
-    state: 'on'
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
-  actions:
-  - alias: Update OHM Sensor
-    action: homeassistant.update_entity
-    data:
-      entity_id:
-      - sensor.charybdis_cpu_load
-      - sensor.charybdis_cpu_temperature
-  mode: single
 - id: '1741716414639'
-  alias: Generic Light Toggles
-  description: Generic automations to associate buttons with on/off lights.
+  alias: Credenza Light Toggle
+  description: ''
   triggers:
-  - device_id: 132629fb04b6ce78bd0cb46fac618f43
-    domain: zha
-    type: remote_button_short_press
-    subtype: turn_on
-    trigger: device
-    id: guestlight-button
   - device_id: c41a7cabdaf68d062d0fa206dfe908cb
     domain: zha
     type: remote_button_short_press
     subtype: turn_on
     trigger: device
     id: credenza-button
+    alias: Credenza button pressed
   conditions: []
   actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id:
-        - guestlight-button
-      sequence:
-      - action: homeassistant.toggle
-        metadata: {}
-        data: {}
-        target:
-          entity_id: light.guest_ceiling
-        alias: Toggle Guest Room Ceiling Light
-    - conditions:
-      - condition: trigger
-        id:
-        - credenza-button
-      sequence:
-      - action: homeassistant.toggle
-        metadata: {}
-        data: {}
-        target:
-          entity_id: light.credenza_lights
-        alias: Toggle Credenza Light Group
-  mode: parallel
-  max: 10
-- id: '1742263688213'
-  alias: Arc Tag Update
-  description: ''
-  triggers:
-  - trigger: time
-    at: 02:00:00
-  conditions:
-  - condition: time
-    weekday:
-    - wed
-  actions:
-  - action: homeassistant.update_entity
-    metadata: {}
-    data:
-      entity_id:
-      - sensor.arc_tags
-  mode: single
-- id: '1742313047529'
-  alias: 'Plex: Resume Tautulli Notifications'
-  description: ''
-  triggers:
-  - alias: If Tautulli Notifications have been disabled long enough
-    trigger: state
-    entity_id:
-    - input_boolean.tautulli_notifications
-    to: 'off'
-    from: 'on'
-    for:
-      hours: 2
-      minutes: 0
-      seconds: 0
-  conditions: []
-  actions:
-  - action: input_boolean.turn_on
+  - action: homeassistant.toggle
     metadata: {}
     data: {}
     target:
-      entity_id: input_boolean.tautulli_notifications
-    alias: Turn Notifications Back On
-  - action: notify.telegram_tom
-    metadata: {}
-    data:
-      message: Tautulli Notifications Resuming
-  mode: single
+      entity_id: light.credenza_lights
+    alias: Toggle Credenza Light Group
+  mode: parallel
+  max: 10
 - id: '1742484754804'
   alias: Dogs Heartworm Meds
   description: ''
@@ -925,20 +646,6 @@
     target:
       entity_id: input_boolean.dogs_heartworm_meds
   mode: single
-- id: '1744396504102'
-  alias: Mute Plex Telegram Notifications
-  description: ''
-  use_blueprint:
-    path: marc-romu/telegram-bot--command__action.yaml
-    input:
-      telegram_command: /mute
-      telegram_bot: HenrichBot
-      sequence:
-      - action: input_boolean.turn_off
-        metadata: {}
-        data: {}
-        target:
-          entity_id: input_boolean.tautulli_notifications
 - id: '1748092050802'
   alias: Vacation Alerts
   description: ''
@@ -960,3 +667,517 @@
       message: Unexpected Activity While Away
       title: Vacation Alert
   mode: single
+- id: '1752362032159'
+  alias: Guest Room Light Switch
+  description: ''
+  triggers:
+  - alias: Tap down
+    device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    metadata: {}
+    trigger: device
+    id: singletap_down
+    value: 0
+  - alias: Tap up
+    device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '002'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 002
+    trigger: device
+    id: singletap_up
+    value: 0
+  - device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    trigger: device
+    value: 3
+    id: doubletap_down
+    alias: Double tap down
+  - alias: Double tap up
+    device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '002'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 002
+    trigger: device
+    id: doubletap_up
+    value: 3
+  - device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '001'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 001
+    trigger: device
+    value: 2
+    alias: Hold down
+    id: hold_down
+  - alias: Hold up
+    device_id: fb4b4041843a998d1cbe71f55648fb2f
+    domain: zwave_js
+    type: event.value_notification.central_scene
+    property: scene
+    property_key: '002'
+    endpoint: 0
+    command_class: 91
+    subtype: Endpoint 0 Scene 002
+    trigger: device
+    id: hold_up
+    value: 2
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - singletap_down
+        - singletap_up
+      sequence:
+      - action: light.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.guest_ceiling
+      alias: Toggle Light
+    - conditions:
+      - condition: trigger
+        id:
+        - doubletap_down
+        - doubletap_up
+      sequence:
+      - action: fan.toggle
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.guest_ceiling
+      alias: Toggle Fan
+    - conditions:
+      - condition: trigger
+        id:
+        - hold_down
+      sequence:
+      - action: fan.decrease_speed
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.guest_ceiling
+      alias: Decrease Fan Speed
+    - conditions:
+      - condition: trigger
+        id:
+        - hold_up
+      sequence:
+      - action: fan.increase_speed
+        metadata: {}
+        data: {}
+        target:
+          entity_id: fan.guest_ceiling
+      alias: Increase Fan Speed
+  mode: single
+- id: '1752518252284'
+  alias: 'Plex: Telegram Responses'
+  description: ''
+  triggers:
+  - alias: /mute command received
+    trigger: event
+    event_type: telegram_command
+    event_data:
+      command: /muteplex
+    context: {}
+    id: muteplex
+  - alias: /resume command received
+    trigger: event
+    event_type: telegram_command
+    event_data:
+      command: /resumeplex
+    context: {}
+    id: resumeplex
+  - alias: /muteme command received
+    trigger: event
+    event_type: telegram_command
+    event_data:
+      command: /muteme
+    context: {}
+    id: muteme
+  conditions:
+  - alias: If approved user
+    condition: template
+    value_template: '{{ trigger.event.data.user_id|string == states(''sensor.telegram_tom_s_chat_id'')|string
+      }}'
+    enabled: true
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - muteplex
+      sequence:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.plex_notifications
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          message: Muting Tautulli notifications, reply /resumeplex when ready
+    - conditions:
+      - condition: trigger
+        id:
+        - resumeplex
+      sequence:
+      - action: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.plex_notifications_for_me
+          - input_boolean.plex_notifications
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          message: Notifications active
+    - conditions:
+      - condition: trigger
+        id:
+        - muteme
+      sequence:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.plex_notifications_for_me
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          message: tomhenrich Plex activity muted
+  mode: parallel
+  max: 10
+- id: '1754969023074'
+  alias: Torrent Monitoring
+  description: Periodically refresh torrent data (if client is running), and watch
+    for webhooks to notify on newly completed torrents.
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: torrentcomplete
+    id: webhook-received
+  - trigger: time_pattern
+    minutes: /10
+    id: time-interval
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - webhook-received
+      sequence:
+      - variables:
+          payload: '{{ trigger.json }}'
+      - data_template:
+          title: "\U0001F4C8 **#Torrent Completed:**"
+          message: '{% set data = trigger.json %} {{ data.torrent_name }}
+
+            '
+        action: notify.telegram_tom
+        alias: Send Telegram notification
+    - conditions:
+      - condition: and
+        conditions:
+        - condition: trigger
+          id:
+          - time-interval
+        - condition: state
+          entity_id: binary_sensor.torrent_ping
+          state: 'on'
+      sequence:
+      - action: homeassistant.update_entity
+        metadata: {}
+        data:
+          entity_id:
+          - sensor.torrents
+        alias: Update list of torrents
+  mode: parallel
+  max: 10
+- id: '1756386532634'
+  alias: Wake on LAN from Telegram
+  description: ''
+  triggers:
+  - alias: /wake command received
+    trigger: event
+    event_type: telegram_command
+    event_data:
+      command: /wake
+    context: {}
+    id: wake
+  conditions:
+  - alias: Charybdis Ping is Offline
+    condition: template
+    value_template: '{{states("binary_sensor.charybdis_ping")|bool == false }}'
+    enabled: true
+  actions:
+  - action: button.press
+    metadata: {}
+    data: {}
+    target:
+      entity_id: button.wake_on_lan_e8_d8_d1_4d_cf_4e
+  mode: single
+- id: '1757439729866'
+  alias: Low battery notification
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      threshold: 25
+      exclude:
+        entity_id:
+        - sensor.den_light_dimmer_battery
+        - binary_sensor.fibaro_motion_2_low_battery_level
+        - binary_sensor.garage_door_sensor_low_battery
+        - sensor.my_wall_panel_battery_level
+        - sensor.ups_battery_charge_2
+      actions:
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          message: 'Battery below threshold for: {{sensors}}'
+          title: Low Battery Warning
+- id: '1757450549208'
+  alias: Plex Stream Notifications
+  description: ''
+  triggers:
+  - alias: Tautulli Streaming Webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: false
+    webhook_id: tautulli-stream
+    enabled: true
+    trigger: webhook
+  actions:
+  - alias: Fetch Tautulli Stream Data
+    action: homeassistant.update_entity
+    metadata: {}
+    data:
+      entity_id:
+      - sensor.tautulli_stream_data
+    enabled: true
+  - variables:
+      payload: '{{ trigger.json }}'
+      key: '{{ payload.session_key|int }}'
+      event: '{{ payload.action }}'
+      user: '{{ payload.user }}'
+      me: '{{ user == ''tomhenrich'' }}'
+      title: '{{ payload.title }}'
+      year: '{{ payload.year }}'
+      session: "{% if( event != 'stop' ) %}\n  {% for s in state_attr('sensor.tautulli_stream_data',
+        'sessions') %}\n    {{ s if s.session_key|int == key }}\n  {% endfor %}\n{%
+        else %}\n  0\n{% endif %}\n"
+      d_con: '{{ session.stream_container_decision if session != 0 else None }}'
+      d_vid: '{{ session.stream_video_decision if session != 0 else None }}'
+      d_aud: '{{ session.stream_audio_decision if session != 0 else None }}'
+      d_sub: '{{ session.stream_subtitle_decision if session != 0 else None }}'
+    alias: Define Variables
+  - if:
+    - condition: or
+      conditions:
+      - alias: My activity, and notifications are enabled
+        condition: template
+        value_template: "{{\n  me == true and\n  states('input_boolean.plex_notifications')|bool
+          and\n  states('input_boolean.plex_notifications_for_me')|bool == true\n}}"
+      - alias: User activity, and notifications are enabled
+        condition: template
+        value_template: "{{\n  me == false and\n  states('input_boolean.plex_notifications')|bool
+          == true\n}}"
+      enabled: true
+    - alias: Only continue for certain events
+      condition: template
+      value_template: '{{ event in [''play'',''change''] }}'
+    then:
+    - alias: Send Telegram Notification
+      action: notify.telegram_tom
+      metadata: {}
+      data:
+        message: '_{{ title }}_ ({{ year }})
+
+          {% if( event != ''stop'' and session != ''0'' ) %}
+
+          {% if( session.transcode_decision != ''direct play'') %}
+
+          Transcoded stream:
+
+          -Container: {{ d_con }}{% if( d_vid != ''direct play'') %}
+
+          -Video: {{ "stream" if d_vid == ''copy'' else d_vid }}{% endif %}{% if(
+          d_aud != ''direct play'') %}
+
+          -Audio: {{ "stream" if d_aud == ''copy'' else d_aud }}{% endif %}{% if(
+          d_sub not in ['''',''ignore'']) %}
+
+          -Subs: {{ "stream" if d_sub == ''copy'' else d_sub }}{% endif %}
+
+          {% endif %}
+
+          {% endif %}'
+        title: '{% set verbs = {"play":"started","pause":"paused","stop":"stopped","resume":"resumed","change":"changed
+          transcoded"} %} *#Plex:* {{user}} {{ iif(event in verbs, verbs[event], event)
+          }} {{ session.media_type if session != 0 else ''stream'' }}'
+        data:
+          disable_notification: '{{ iif(event in [''stop''], ''true'', ''false'')
+            }}'
+          message_tag: plex
+      enabled: true
+    enabled: true
+  trace:
+    stored_traces: 20
+  mode: parallel
+  max: 10
+- id: '1757565216838'
+  alias: Plex Webhook
+  description: ''
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: plex-stream-activity
+  conditions: []
+  actions:
+  - variables:
+      payload: '{{ trigger.data["payload"].decode("utf-8") | from_json }}'
+      event: '{{ payload.event }}'
+      domain: '{{ event.split(''.'')[0] }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ domain in [''media'', ''playback''] }}'
+        alias: Media/Playback Event
+        enabled: false
+      - alias: Media/Playback Event
+        condition: template
+        value_template: '{{ event in [''media.stop''] }}'
+      sequence:
+      - action: homeassistant.update_entity
+        metadata: {}
+        data:
+          entity_id:
+          - sensor.tautulli_stream_data
+  mode: parallel
+  max: 10
+- id: '1757946566863'
+  alias: Ombi Request
+  description: ''
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: ombi-request
+  conditions: []
+  actions:
+  - variables:
+      payload: '{{ trigger.json }}'
+      event: '{{ payload.notificationType }}'
+  - choose:
+    - conditions:
+      - alias: New Request
+        condition: template
+        value_template: '{{ event in [''NewRequest''] }}'
+      sequence:
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          title: Ombi Request by {{ payload.requestedUser }}
+          message: '{{ payload.type }}: {{ payload.title }} ({{ payload.year }})
+
+            {{ payload.overview }}'
+  mode: parallel
+  max: 10
+- id: '1758035617209'
+  alias: Sonarr Activity
+  description: ''
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    - PUT
+    local_only: true
+    webhook_id: sonarr-activity
+  conditions: []
+  actions:
+  - variables:
+      payload: '{{ trigger.json }}'
+      event: '{{ payload.eventType|lower }}'
+  - choose:
+    - conditions:
+      - alias: Series Added
+        condition: template
+        value_template: '{{ event == ''seriesadd'' }}'
+      - alias: Notifications for Additions Enabled
+        condition: state
+        entity_id: input_boolean.sonarr_notifications_additions
+        state: 'on'
+      sequence:
+      - action: notify.telegram_tom
+        metadata: {}
+        data:
+          title: '#Sonarr: Series Added'
+          message: "{{ payload.series.title }} ({{ payload.series.year }}) {% if(
+            payload.series.imdbId != null ) %}\n  https://www.imdb.com/title/{{ payload.series.imdbId
+            }}\n{% endif %}"
+        alias: Notify of new series added
+      alias: Series Added
+    - conditions:
+      - alias: Grab
+        condition: template
+        value_template: '{{ event == ''grab'' }}'
+      - condition: state
+        entity_id: input_boolean.sonarr_notifications_grab
+        state: 'on'
+        alias: Sonarr Notifications of Grabs
+      sequence:
+      - alias: Notify of series and episodes grabbed
+        action: notify.telegram_tom
+        metadata: {}
+        data:
+          title: '#Sonarr: Grabbed {{ payload.episodes|count }} episodes'
+          message: '**{{ payload.series.title }}** ({{ payload.series.year }})
+
+            {% for ep in payload.episodes %}- S{{ "{:0>2}".format(ep.seasonNumber)
+            }}E{{ "{:0>2}".format(ep.episodeNumber) }}
+
+            {% endfor %}'
+      alias: Content Grabbed
+    enabled: true
+  trace:
+    stored_traces: 10
+  mode: parallel
+  max: 15
