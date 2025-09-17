@@ -12,13 +12,6 @@ homeassistant:
   time_zone: America/Denver
 
 
-# Text to speech
-tts:
-  - platform: google_translate
-
-cloud:
-
-
 # Outsource configurations to sub-files:
 automation: !include automations.yaml
 binary_sensor: !include binary_sensors.yaml
@@ -47,7 +40,30 @@ notify:
   - name: telegram_tom
     platform: telegram
     chat_id: !secret telegram_chatid_tom
-        
+telegram_bot:
+- platform: polling
+  api_key: !secret telegram_bot_token
+  allowed_chat_ids:
+  - !secret telegram_chatid_tom
+
+
+rest_command:
+  ombi_approve_tv:
+    url: !secret ombi_approve_tv
+    method: post # must be POST for approvals
+    content_type: "application/json"
+    headers:
+        apikey: !secret ombi_apikey
+    payload: '{{ payload_data | tojson }}'
+  ombi_deny_tv:
+    url: !secret ombi_deny_tv
+    method: put # must be PUT for denials
+    content_type: "application/json"
+    headers:
+        apikey: !secret ombi_apikey
+    payload: '{{ payload_data | tojson }}'
+
+
 panel_custom:
   - name: zwave-graph-panel
     url_path: zwave-graph
@@ -76,6 +92,14 @@ ios:
       show_in_watch: false
       use_custom_colors: true
 
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+cloud:
+
+
 zha:
   zigpy_config:
     network:
@@ -97,6 +121,7 @@ logger:
     zigpy_deconz.api: info
     zigpy_xbee.zigbee.application: info
     zigpy_xbee.api: info
+
     zigpy_zigate: info
     zigpy_znp: info
     zhaquirks: info
