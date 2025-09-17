@@ -34,7 +34,7 @@
   sensor:
     - name: "Weekday"
       unique_id: weekday
-      state: "{{ now().strftime('%w')|int }}"
+      state: "{{ now().isoweekday()|int }}"
       icon: "mdi:calendar"
       attributes:
         day: "{{ now().strftime('%A') }}"
@@ -84,11 +84,10 @@
     unique_id: airquality
     state: >
       {% if states("sensor.iqair_aqi") != "unavailable" %}
-        {% set aqi = states("sensor.iqair_aqi")|int %}
-        {% if aqi <= 50 %} 1
-        {% elif aqi <= 100 %} 2
-        {% elif aqi <= 200 %} 3
-        {% elif aqi <= 300 %} 4
+        {% if aqi in range(0,51) %} 1
+        {% elif aqi in range(51,101) %} 2
+        {% elif aqi in range(101,201) %} 3
+        {% elif aqi in range(201,301) %} 4
         {% else %} 5
         {% endif %}
       {% else %}
@@ -97,28 +96,27 @@
     attributes:
       condition: >
         {%
-          set conditions = {
-            0: 'Unknown',
-            1: 'Good',
-            2: 'Moderate',
-            3: 'Unhealthy',
-            4: 'Very Unhealthy',
-            5: 'Hazardous'
-          }
+          set conditions = [
+            'Unknown',
+            'Good',
+            'Moderate',
+            'Unhealthy',
+            'Very Unhealthy',
+            'Hazardous'
+          ]
         %}
         {{ conditions[this.state|int] }}
       color: >
         {{ state_attr("input_select.severity_scale", "options")[this.state|int] }}
     icon: >
-      {%
-          set icons = {
-            0: 'mdi:help-circle-outline',
-            1: 'mdi:emoticon',
-            2: 'mdi:emoticon-neutral',
-            3: 'mdi:emoticon-frown',
-            4: 'mdi:alert',
-            5: 'mdi:skull'
-          }
+      {% set icons = [
+          'mdi:help-circle-outline',
+          'mdi:emoticon',
+          'mdi:emoticon-neutral',
+          'mdi:emoticon-frown',
+          'mdi:alert',
+          'mdi:skull'
+        ]
       %}
       {{ icons[this.state|int] }}
 
@@ -131,18 +129,11 @@
 
 - binary_sensor:
 
-  - name: "Charybdis CPU Busy"
-    unique_id: charybdis_cpu_busy
-    availability: "{{ states('sensor.charybdis_cpu_load') != 'unavailable' }}"
-    state: >
-      {{states("sensor.charybdis_cpu_load")|float >= 50 }}
-
-
 #   - name: Arc Tags
 #     unique_id: arc_tags
 #     availability: "{{ states('sensor.arc_tags') != 'unavailable' }}"
 #     state: >
-#         {{ (states('sensor.weekday')|int >= 2 and states('sensor.weekday')|int <=5)|bool }}
+#         {{ (states('sensor.weekday')|int >= 3 and states('sensor.weekday')|int <=6)|bool }}
 #     icon: >
 #       mdi:tag{{ "-hidden" if states('sensor.weekday')|int != 5 }}
 #     attributes:
@@ -152,6 +143,11 @@
 #       color_white: '#FFFFFF'
 #       color_yellow: '#FFFF00'
 
+  - name: "Charybdis CPU Busy"
+    unique_id: charybdis_cpu_busy
+    availability: "{{ states('sensor.charybdis_cpu_load') != 'unavailable' }}"
+    state: >
+      {{states("sensor.charybdis_cpu_load")|float >= 50 }}
 
 
 
