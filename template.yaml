@@ -4,14 +4,6 @@
 #
 ####################
 
-#- trigger:
-#  - platform: state
-#    entity_id: button.doorbell
-#  binary_sensor:
-#    name: doorbell_delay
-#    state: "{{ trigger.platform == 'state' }}"
-#    auto_off:
-#      seconds: 10
 
 - trigger:
     - platform: time_pattern
@@ -42,42 +34,35 @@
   sensor:
     - name: "Weekday"
       unique_id: weekday
-      state: "{{ now().weekday() }}"
+      state: "{{ now().strftime('%w')|int }}"
       icon: "mdi:calendar"
       attributes:
         day: "{{ now().strftime('%A') }}"
-
-- trigger:
-    - platform: time_pattern
-      minutes: "/15"
-    - platform: homeassistant
-      event: start
-  sensor:
-    - name: "Month Gone"
-      unique_id: month_gone
-      state: >-
+    - name: Days This Month
+      unique_id: days_this_month
+      state: >
         {% set today = now() %}
         {% set days = (today.replace(month=today.month % 12 + 1, day=1) - timedelta(days=1)).day %}
-        {% set totalminutes = days*24*60 %}
-        {% set elapsedminutes = ((today.day-1)*24*60)+(today.hour*60)+(today.minute) %}
-        {{ ((elapsedminutes / totalminutes) * 100)|round(1) }}
-      unit_of_measurement: "%"
-      icon: "mdi:percent"
-      state_class: total_increasing
+        {{ days }}
 
+# - trigger:
+#     - platform: time_pattern
+#       minutes: "/20"
+#     - platform: homeassistant
+#       event: start
+#   sensor:
+#     - name: "Month Gone"
+#       unique_id: month_gone
+#       state: >-
+#         {% set today = now() %}
+#         {% set days = (today.replace(month=today.month % 12 + 1, day=1) - timedelta(days=1)).day %}
+#         {% set totalminutes = days*24*60 %}
+#         {% set elapsedminutes = ((today.day-1)*24*60)+(today.hour*60)+(today.minute) %}
+#         {{ ((elapsedminutes / totalminutes) * 100)|round(1) }}
+#       unit_of_measurement: "%"
+#       icon: "mdi:percent"
+#       state_class: total_increasing
 
-- trigger:
-    - platform: time
-      at: "00:00:00"
-    - platform: homeassistant
-      event: start
-  sensor:
-    name: Days This Month
-    unique_id: days_this_month
-    state: >
-      {% set today = now() %}
-      {% set days = (today.replace(month=today.month % 12 + 1, day=1) - timedelta(days=1)).day %}
-      {{ days }}
 
 
 ####################
@@ -88,32 +73,10 @@
 
 - sensor:
 
-  - name: Next Trash Pickup
-    unique_id: waste_trash
-    state: >
-        {% set pickup = state_attr('calendar.trash_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') %}
-        {% set prox = ((pickup|as_datetime|as_local).date() - now().date()).days %}
-        {% if( prox == 0 ) %}
-          Today
-        {% elif( prox == 1 ) %}
-          Tomorrow
-        {% else %}
-          {{pickup|as_timestamp|timestamp_custom('%a, %-m/%-d')}}
-        {% endif %}
-    icon: mdi:delete
-  - name: Next Recycling Pickup
-    unique_id: waste_recycling
-    state: >
-        {% set pickup = state_attr('calendar.recycling_pickup','start_time')|as_timestamp|timestamp_custom('%Y-%m-%d') %}
-        {% set prox = ((pickup|as_datetime|as_local).date() - now().date()).days %}
-        {% if( prox == 0 ) %}
-          Today
-        {% elif( prox == 1 ) %}
-          Tomorrow
-        {% else %}
-          {{pickup|as_timestamp|timestamp_custom('%a, %-m/%-d')}}
-        {% endif %}
-    icon: mdi:recycle
+  - name: "Telegram: Tom's Chat ID"
+    unique_id: telegram_chatid_tom
+    state: !secret telegram_chatid_tom
+
 
   #=== ENVIRONMENTAL SENSORS
 
@@ -122,11 +85,11 @@
     state: >
       {% if states("sensor.iqair_aqi") != "unavailable" %}
         {% set aqi = states("sensor.iqair_aqi")|int %}
-        {% if aqi > 300 %} 5
-        {% elif aqi > 200 %} 4
-        {% elif aqi > 100 %} 3
-        {% elif aqi > 50 %} 2
-        {% else %} 1
+        {% if aqi <= 50 %} 1
+        {% elif aqi <= 100 %} 2
+        {% elif aqi <= 200 %} 3
+        {% elif aqi <= 300 %} 4
+        {% else %} 5
         {% endif %}
       {% else %}
         0
@@ -137,9 +100,9 @@
           set conditions = {
             0: 'Unknown',
             1: 'Good',
-            2: 'Fair',
-            3: 'Moderate',
-            4: 'Unhealthy',
+            2: 'Moderate',
+            3: 'Unhealthy',
+            4: 'Very Unhealthy',
             5: 'Hazardous'
           }
         %}
@@ -168,28 +131,27 @@
 
 - binary_sensor:
 
-
-  - name: Arc Tags
-    unique_id: arc_tags
-    availability: "{{ states('sensor.arc_tags') != 'unavailable' }}"
-    state: >
-        {{ (states('sensor.weekday')|int >= 2 and states('sensor.weekday')|int <=5)|bool }}
-    icon: >
-      mdi:tag{{ "-hidden" if states('sensor.weekday')|int != 5 }}
-    attributes:
-      color_blue: '#1E90FF'
-      color_orange: '#FF8C00'
-      color_pink: '#FF1493'
-      color_white: '#FFFFFF'
-      color_yellow: '#FFFF00'
-
   - name: "Charybdis CPU Busy"
     unique_id: charybdis_cpu_busy
     availability: "{{ states('sensor.charybdis_cpu_load') != 'unavailable' }}"
     state: >
       {{states("sensor.charybdis_cpu_load")|float >= 50 }}
-    delay_on: "00:03:00"
-    delay_off: "00:03:00"
+
+
+#   - name: Arc Tags
+#     unique_id: arc_tags
+#     availability: "{{ states('sensor.arc_tags') != 'unavailable' }}"
+#     state: >
+#         {{ (states('sensor.weekday')|int >= 2 and states('sensor.weekday')|int <=5)|bool }}
+#     icon: >
+#       mdi:tag{{ "-hidden" if states('sensor.weekday')|int != 5 }}
+#     attributes:
+#       color_blue: '#1E90FF'
+#       color_orange: '#FF8C00'
+#       color_pink: '#FF1493'
+#       color_white: '#FFFFFF'
+#       color_yellow: '#FFFF00'
+
 
 
 
