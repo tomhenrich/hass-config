@@ -64,49 +64,35 @@
 #
 ####################
 
-
-- resource: !secret tautulli_api
-  params:
-    apikey: !secret tautulli_key
-    cmd: get_activity
-  scan_interval: 2592000
+- resource: !secret plex_sessions
   headers:
-    Content-Type: application/json
+    Content-Type: 'application/json; charset=utf-8'
+    Accept: 'application/json'
+    X-Plex-Pms-Api-Version: '1.0'
+    X-Plex-Token: !secret plex_token
+  scan_interval: 604800
   sensor:
-    - name: Tautulli Stream Data
-      unique_id: tautulli_activity
-      availability: "{{ states('binary_sensor.tautulli_running') == 'on' }}"
-      value_template: "{{ value_json.response.data.stream_count|int }}"
-      json_attributes_path: "$.response.data"
+    - name: Plex Stream Data
+      unique_id: plex_streams
+      availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
+      value_template: '{{ value_json.MediaContainer.size }}'
       json_attributes:
-        - sessions
+        - MediaContainer
 
-# updated via a time-interval automation
-- resource: !secret my_torrents
-  scan_interval: 2592000
+- resource_template: http://{{ states('input_text.plex_ip')|string }}/library/sections/1/all
+  headers:
+    Content-Type: 'application/json; charset=utf-8'
+    Accept: 'application/json'
+    X-Plex-Pms-Api-Version: '1.0'
+    X-Plex-Token: !secret plex_token
   params:
-    filter: completed
+    excludeElements: 'Image,Genre,Role,Director,Writer,Country'
+    includeFields: 'size,type,title,year,id,ratingKey,videoCodec,videoResolution,container,contentRating'
+  scan_interval: 604800
   sensor:
-    - name: Completed Torrents
-      unique_id: torrents_completed
-      availability: "{{ states('binary_sensor.torrent_ping') == 'on' }}"
-      value_template: "{{ value_json|count }}"
-      icon: "mdi:download-circle"
-      json_attributes_path: "$[0]"
-
-
-# - resource: !secret plex_sessions
-#   headers:
-#     Content-Type: 'application/json; charset=utf-8'
-#     Accept: 'application/json'
-#   params:
-#     X-Plex-Token: !secret plex_token
-#   scan_interval: 604800
-#   sensor:
-#     - name: Plex Stream Data
-#       unique_id: plex_activity
-#       availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
-#       value_template: '{{ value_json.MediaContainer["size"] }}'
-#       json_attributes:
-#         - MediaContainer
-
+    - name: Plex Movie Library
+      unique_id: plex_library_movies
+      availability: "{{ states('binary_sensor.plex_ping') == 'on' }}"
+      value_template: '{{ value_json.MediaContainer.size }}'
+      json_attributes:
+        - MediaContainer
