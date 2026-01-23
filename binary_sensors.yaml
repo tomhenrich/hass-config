@@ -1,3 +1,55 @@
+- platform: rest
+  name: Open Hardware Monitor Running
+  unique_id: ohm_online
+  device_class: running
+  resource_template: "http://{{ states('input_text.homelab_ip')|string }}:8085/data.json"
+  timeout: 5
+  scan_interval: 86400
+  value_template: "{{ value | length > 0 }}"
+
+- platform: rest
+  name: Plex Running
+  unique_id: plex_running
+  device_class: running
+  icon: mdi:plex
+  resource_template: >
+    http://{{ states('input_text.homelab_ip')|string }}:32400/identity
+  headers:
+    Accept: "application/json"
+  value_template: "{{ value_json.MediaContainer is defined }}"
+  scan_interval: 86400
+
+- platform: rest
+  name: Radarr Running
+  unique_id: radarr_running
+  device_class: running
+  icon: mdi:movie-plus
+  resource_template: "http://{{ states('input_text.homelab_ip') }}:7878"
+  timeout: 5
+  scan_interval: 86400
+  value_template: "{{ value | length > 0 }}"
+
+- platform: rest
+  name: Sonarr Running
+  unique_id: sonarr_running
+  device_class: running
+  icon: mdi:movie-plus-outline
+  resource_template: "http://{{ states('input_text.homelab_ip') }}:8989"
+  timeout: 5
+  scan_interval: 86400
+  value_template: "{{ value | length > 0 }}"
+
+- platform: rest
+  name: Prowlarr Running
+  unique_id: prowlarr_running
+  device_class: running
+  icon: mdi:list-box
+  resource_template: "http://{{ states('input_text.homelab_ip') }}:9696"
+  timeout: 5
+  scan_interval: 86400
+  value_template: "{{ value | length > 0 }}"
+
+
 ##########################################################
 ## Template Sensors
 ##########################################################
@@ -17,4 +69,3 @@
 #        {{ states('sensor.washing_machine_outlet_power')|float > 5 }}
 #      icon_template: >
 #        mdi:washing-machine
-
