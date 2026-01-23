@@ -1,7 +1,7 @@
 
 # Charybdis Ping is pinging the OHM integration
 - binary_sensor:
-    name: "Charybdis Ping"
+    name: Charybdis
     unique_id: charybdis_ping
     command: >
       sh -c "nc -z -w 2 {{ states('input_text.homelab_ip') }} 8085 && echo on || echo off"
@@ -9,75 +9,3 @@
     payload_on: "on"
     payload_off: "off"
     scan_interval: 120
-
-
-# Remainder of the heartbeat sensors are updated periodically by automation so long as Charybdis is online
-- binary_sensor:
-    name: "Plex Ping"
-    unique_id: plex_ping
-    icon: mdi:plex
-    device_class: running
-    command: 'response=$(curl -LIk {{ states("input_text.homelab_ip")|string }}:32400/identity -o /dev/null -w "%{http_code}\n" -s); test "$response" -ge 200 && echo "ON" || echo "OFF"'
-    payload_on: "ON"
-    payload_off: "OFF"
-    scan_interval: 86400
-
-- binary_sensor:
-    name: Torrent Ping
-    unique_id: torrent_ping
-    icon: mdi:cloud-download
-    device_class: running
-    command: >
-      sh -c "curl -s -o /dev/null -w '%{http_code}' http://{{ states('input_text.homelab_ip')|string }}:8080/ || echo fail"
-    command_timeout: 10
-    payload_on: "200"
-    payload_off: "fail"
-    scan_interval: 86400
-
-- binary_sensor:
-    name: Sonarr
-    unique_id: sonarr_ping
-    icon: mdi:download-box
-    device_class: running
-    command: >
-      sh -c "curl -s -o /dev/null -w '%{http_code}' http://{{ states('input_text.homelab_ip')|string }}:8989/ || echo fail"
-    command_timeout: 10
-    payload_on: "200"
-    payload_off: "fail"
-    scan_interval: 86400
-
-- binary_sensor:
-    name: Radarr
-    unique_id: radarr_ping
-    icon: mdi:download-box
-    device_class: running
-    command: >
-      sh -c "curl -s -o /dev/null -w '%{http_code}' http://{{ states('input_text.homelab_ip')|string }}:7878/ || echo fail"
-    command_timeout: 10
-    payload_on: "200"
-    payload_off: "fail"
-    scan_interval: 86400
-
-- binary_sensor:
-    name: Prowlarr
-    unique_id: prowlarr_ping
-    icon: mdi:list-box
-    device_class: running
-    command: >
-      sh -c "curl -s -o /dev/null -w '%{http_code}' http://{{ states('input_text.homelab_ip')|string }}:9696/ || echo fail"
-    command_timeout: 10
-    payload_on: "200"
-    payload_off: "fail"
-    scan_interval: 86400
-
-- binary_sensor:
-    name: Ombi
-    unique_id: ombi_ping
-    icon: mdi:cart-plus
-    device_class: running
-    command: >
-      sh -c "curl -s -o /dev/null -w '%{http_code}' http://{{ states('input_text.homelab_ip')|string }}:5000/ || echo fail"
-    command_timeout: 10
-    payload_on: "200"
-    payload_off: "fail"
-    scan_interval: 86400
