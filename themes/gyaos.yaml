@@ -671,7 +671,6 @@ _____Common Base 5 (Do Not Use):
   modes:
     dark: &fluent-common-dark
       <<: *common-dark
-      ha-card-border-radius: "7px"
       ha-config-card-border-radius: "4px"
       ha-dialog-border-radius: "8px"
       vertical-stack-card-margin: "1px 0px 1px 0px"
@@ -697,8 +696,6 @@ Fluent Orange:
   rgb-primary-color-lighter: "255, 146, 73"
   hue-primary-color: "33deg"
 
-  #accent-color: "#4b93ff"
-  #rgb-accent-color: "75, 147, 255"
   accent-color: "#9fc6ff"
   rgb-accent-color: "159, 198, 255"
   rgb-accent-color-darker: "0, 71, 179"
